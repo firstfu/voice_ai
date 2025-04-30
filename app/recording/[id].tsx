@@ -371,7 +371,7 @@ export default function RecordingDetailScreen() {
 
       {/* 底部工具欄 */}
       <View style={styles.toolbar}>
-        <TouchableOpacity style={styles.toolbarButton}>
+        <TouchableOpacity style={styles.toolbarButton} onPress={() => router.push(`/recording/editor?id=${recordingId}`)}>
           <Ionicons name="create-outline" size={24} color="#3A7BFF" />
           <ThemedText style={styles.toolbarButtonText}>編輯</ThemedText>
         </TouchableOpacity>
@@ -381,9 +381,9 @@ export default function RecordingDetailScreen() {
           <ThemedText style={styles.toolbarButtonText}>分析</ThemedText>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.toolbarButton}>
-          <Ionicons name="share-outline" size={24} color="#3A7BFF" />
-          <ThemedText style={styles.toolbarButtonText}>分享</ThemedText>
+        <TouchableOpacity style={styles.toolbarButton} onPress={() => router.push(`/recording/manage`)}>
+          <Ionicons name="list-outline" size={24} color="#3A7BFF" />
+          <ThemedText style={styles.toolbarButtonText}>管理</ThemedText>
         </TouchableOpacity>
       </View>
     </ThemedView>

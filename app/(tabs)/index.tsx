@@ -132,6 +132,19 @@ export default function HomeScreen() {
           </LinearGradient>
         </AnimatedTouchable>
 
+        {/* 快捷按鈕區 */}
+        <View style={styles.quickActionsContainer}>
+          <TouchableOpacity style={styles.quickActionButton} onPress={() => router.push("/recording/manage")}>
+            <Ionicons name="list-outline" size={22} color="#3A7BFF" />
+            <ThemedText style={styles.quickActionText}>管理錄音</ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.quickActionButton} onPress={() => console.log("Open settings")}>
+            <Ionicons name="settings-outline" size={22} color="#3A7BFF" />
+            <ThemedText style={styles.quickActionText}>設置</ThemedText>
+          </TouchableOpacity>
+        </View>
+
         {/* 最近錄音列表 */}
         <View style={styles.recentRecordingsContainer}>
           <ThemedText type="subtitle" style={styles.sectionHeader}>
@@ -286,5 +299,48 @@ const styles = StyleSheet.create({
   recordingDuration: {
     color: "#718096",
     marginTop: 4,
+  },
+  quickActionsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    marginVertical: 15,
+  },
+  quickActionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  quickActionText: {
+    marginLeft: 8,
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#3A7BFF",
+  },
+  shareButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: "rgba(58, 123, 255, 0.05)",
+    borderRadius: 6,
+    marginLeft: 10,
+  },
+  shareButtonText: {
+    fontSize: 12,
+    color: "#3A7BFF",
+    fontWeight: "500",
   },
 });
