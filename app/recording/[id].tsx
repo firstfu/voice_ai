@@ -43,18 +43,27 @@ const mockRecordings: Record<string, RecordingDetail> = {
         speaker: "說話者 1",
         timestamp: "00:00:15",
         text: "今天我們將討論專案進度和下一步計劃。",
+        originalText: "今天我們將討論專案進度和下一步計劃。",
+        editedText: "今天我們將討論專案進度和下一步計劃。",
+        isEdited: false,
       },
       {
         id: "2",
         speaker: "說話者 2",
         timestamp: "00:01:22",
         text: "上週我們完成了設計階段，主要界面已經定稿。關於開發階段，我認為我們需要先優先實現核心功能。",
+        originalText: "上週我們完成了設計階段，主要界面已經定稿。關於開發階段，我認為我們需要先優先實現核心功能。",
+        editedText: "上週我們完成了設計階段，主要界面已經定稿。關於開發階段，我認為我們需要優先實現核心功能。",
+        isEdited: true,
       },
       {
         id: "3",
         speaker: "說話者 1",
         timestamp: "00:02:45",
         text: "我同意這個觀點，核心功能應該優先實現。根據我們的時間表，我們需要在下個月底前完成主要功能的開發。",
+        originalText: "我同意這個觀點，核心功能應該優先實現。根據我們的時間表，我們需要在下個月底前完成主要功能的開發。",
+        editedText: "我同意這個觀點，核心功能應該優先實現。根據我們的時間表，我們需要在下個月底前完成主要功能的開發。",
+        isEdited: false,
       },
       {
         id: "4",
@@ -358,7 +367,6 @@ export default function RecordingDetailScreen() {
             轉錄文本
           </ThemedText>
 
-          {/* 檢查是否有編輯過的轉錄文本 */}
           {recording.transcription.some(t => t.isEdited) && (
             <View style={styles.switchContainer}>
               <TouchableOpacity style={[styles.switchButton, showOriginal && styles.switchButtonActive]} onPress={() => setShowOriginal(true)}>
@@ -391,7 +399,8 @@ export default function RecordingDetailScreen() {
                     <ThemedText style={styles.timestampText}>{transcript.timestamp}</ThemedText>
                     {!showOriginal && transcript.isEdited && (
                       <View style={styles.editedIndicator}>
-                        <Ionicons name="pencil" size={12} color="#FF3B30" />
+                        <Ionicons name="pencil" size={12} color="#FFFFFF" />
+                        <ThemedText style={styles.editedText}>已編輯</ThemedText>
                       </View>
                     )}
                   </View>
@@ -632,7 +641,9 @@ const styles = StyleSheet.create({
     borderColor: "#3A7BFF",
   },
   editedTranscriptItem: {
-    backgroundColor: "#FFEBF0",
+    backgroundColor: "#FFF8F8",
+    borderLeftWidth: 3,
+    borderLeftColor: "#FF3B30",
   },
   transcriptHeader: {
     flexDirection: "row",
@@ -686,9 +697,16 @@ const styles = StyleSheet.create({
   },
   editedIndicator: {
     marginLeft: 4,
-    padding: 2,
+    padding: 3,
     borderRadius: 4,
     backgroundColor: "#FF3B30",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  editedText: {
+    fontSize: 12,
+    color: "#FFFFFF",
+    fontWeight: "600",
   },
   toolbar: {
     flexDirection: "row",
