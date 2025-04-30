@@ -16,6 +16,9 @@ interface TranscriptItem {
   speaker: string;
   timestamp: string;
   text: string;
+  originalText?: string;
+  editedText?: string;
+  isEdited?: boolean;
 }
 
 // 定義錄音詳情介面
@@ -172,6 +175,7 @@ export default function RecordingDetailScreen() {
   const [duration, setDuration] = useState(recording ? timeStringToSeconds(recording.duration) : 0);
   const [activeTranscriptId, setActiveTranscriptId] = useState<string | null>(null);
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+  const [showOriginal, setShowOriginal] = useState(true);
 
   // 播放動畫
   const playButtonScale = useSharedValue(1);
@@ -207,7 +211,7 @@ export default function RecordingDetailScreen() {
       clearInterval(timer);
       setTimer(null);
     }
-  }, [isPlaying, duration]);
+  }, [isPlaying]);
 
   // 更新當前活動的轉錄項
   const updateActiveTranscript = (currentPosition: number) => {
@@ -262,6 +266,11 @@ export default function RecordingDetailScreen() {
     return speakerColors[speaker] || "#3A7BFF";
   };
 
+  // 前往編輯頁面
+  const goToEditPage = () => {
+    router.push(`/recording/editor?id=${recordingId}`);
+  };
+
   if (!recording) {
     return (
       <ThemedView style={styles.container}>
@@ -288,8 +297,8 @@ export default function RecordingDetailScreen() {
         <ThemedText type="title" style={styles.title} numberOfLines={1}>
           {recording.title}
         </ThemedText>
-        <TouchableOpacity style={styles.moreButton}>
-          <Ionicons name="ellipsis-horizontal" size={24} color="#2C3E50" />
+        <TouchableOpacity style={styles.moreButton} onPress={goToEditPage}>
+          <Ionicons name="pencil" size={22} color="#007AFF" />
         </TouchableOpacity>
       </View>
 
@@ -344,15 +353,33 @@ export default function RecordingDetailScreen() {
 
       {/* 轉錄內容 */}
       <View style={styles.transcriptionContainer}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>
-          轉錄文本
-        </ThemedText>
+        <View style={styles.transcriptionHeader}>
+          <ThemedText type="subtitle" style={styles.sectionTitle}>
+            轉錄文本
+          </ThemedText>
+
+          {/* 檢查是否有編輯過的轉錄文本 */}
+          {recording.transcription.some(t => t.isEdited) && (
+            <View style={styles.switchContainer}>
+              <TouchableOpacity style={[styles.switchButton, showOriginal && styles.switchButtonActive]} onPress={() => setShowOriginal(true)}>
+                <ThemedText style={[styles.switchText, showOriginal && styles.switchTextActive]}>原始</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.switchButton, !showOriginal && styles.switchButtonActive]} onPress={() => setShowOriginal(false)}>
+                <ThemedText style={[styles.switchText, !showOriginal && styles.switchTextActive]}>已編輯</ThemedText>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
 
         <ScrollView ref={scrollViewRef} style={styles.transcriptionScroll} showsVerticalScrollIndicator={false}>
           {recording.transcription.map((transcript, index) => (
             <Animated.View key={transcript.id} entering={FadeIn.delay(index * 50).duration(300)}>
               <TouchableOpacity
-                style={[styles.transcriptItem, activeTranscriptId === transcript.id && styles.activeTranscriptItem]}
+                style={[
+                  styles.transcriptItem,
+                  activeTranscriptId === transcript.id && styles.activeTranscriptItem,
+                  !showOriginal && transcript.isEdited && styles.editedTranscriptItem,
+                ]}
                 onPress={() => handleTranscriptPress(transcript)}
                 activeOpacity={0.7}
               >
@@ -360,9 +387,18 @@ export default function RecordingDetailScreen() {
                   <View style={[styles.speakerBadge, { backgroundColor: getSpeakerColor(transcript.speaker) }]}>
                     <ThemedText style={styles.speakerText}>{transcript.speaker}</ThemedText>
                   </View>
-                  <ThemedText style={styles.timestampText}>{transcript.timestamp}</ThemedText>
+                  <View style={styles.transcriptMetadata}>
+                    <ThemedText style={styles.timestampText}>{transcript.timestamp}</ThemedText>
+                    {!showOriginal && transcript.isEdited && (
+                      <View style={styles.editedIndicator}>
+                        <Ionicons name="pencil" size={12} color="#FF3B30" />
+                      </View>
+                    )}
+                  </View>
                 </View>
-                <ThemedText style={styles.transcriptText}>{transcript.text}</ThemedText>
+                <ThemedText style={styles.transcriptText}>
+                  {showOriginal ? transcript.originalText || transcript.text : transcript.editedText || transcript.text}
+                </ThemedText>
               </TouchableOpacity>
             </Animated.View>
           ))}
@@ -386,6 +422,27 @@ export default function RecordingDetailScreen() {
           <ThemedText style={styles.toolbarButtonText}>管理</ThemedText>
         </TouchableOpacity>
       </View>
+
+      <Stack.Screen
+        options={{
+          title: "",
+          headerShown: true,
+          headerShadowVisible: false,
+          headerStyle: {
+            backgroundColor: "transparent",
+          },
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: 10 }}>
+              <Ionicons name="chevron-back" size={24} color="#007AFF" />
+            </TouchableOpacity>
+          ),
+          headerRight: () => (
+            <TouchableOpacity onPress={goToEditPage} style={{ marginRight: 15 }}>
+              <Ionicons name="pencil" size={22} color="#007AFF" />
+            </TouchableOpacity>
+          ),
+        }}
+      />
     </ThemedView>
   );
 }
@@ -540,10 +597,15 @@ const styles = StyleSheet.create({
     marginTop: 24,
     marginHorizontal: 16,
   },
+  transcriptionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
-    marginBottom: 12,
   },
   transcriptionScroll: {
     flex: 1,
@@ -569,6 +631,9 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#3A7BFF",
   },
+  editedTranscriptItem: {
+    backgroundColor: "#FFEBF0",
+  },
   transcriptHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -593,6 +658,37 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     color: "#2C3E50",
+  },
+  transcriptMetadata: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  switchButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+    backgroundColor: "rgba(58, 123, 255, 0.1)",
+  },
+  switchButtonActive: {
+    backgroundColor: "#3A7BFF",
+  },
+  switchText: {
+    fontSize: 12,
+    color: "#3A7BFF",
+    fontWeight: "600",
+  },
+  switchTextActive: {
+    color: "white",
+  },
+  editedIndicator: {
+    marginLeft: 4,
+    padding: 2,
+    borderRadius: 4,
+    backgroundColor: "#FF3B30",
   },
   toolbar: {
     flexDirection: "row",

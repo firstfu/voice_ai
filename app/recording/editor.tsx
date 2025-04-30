@@ -14,7 +14,9 @@ interface TranscriptItem {
   id: string;
   speaker: string;
   timestamp: string;
-  text: string;
+  originalText: string;
+  editedText: string;
+  isEdited: boolean;
   isEditing: boolean;
 }
 
@@ -39,21 +41,27 @@ const mockRecordings: Record<string, any> = {
         id: "1",
         speaker: "說話者 1",
         timestamp: "00:00:15",
-        text: "今天我們將討論專案進度和下一步計劃。",
+        originalText: "今天我們將討論專案進度和下一步計劃。",
+        editedText: "今天我們將討論專案進度和下一步計劃。",
+        isEdited: false,
         isEditing: false,
       },
       {
         id: "2",
         speaker: "說話者 2",
         timestamp: "00:01:22",
-        text: "上週我們完成了設計階段，主要界面已經定稿。關於開發階段，我認為我們需要先優先實現核心功能。",
+        originalText: "上週我們完成了設計階段，主要界面已經定稿。關於開發階段，我認為我們需要先優先實現核心功能。",
+        editedText: "上週我們完成了設計階段，主要界面已經定稿。關於開發階段，我認為我們需要先優先實現核心功能。",
+        isEdited: false,
         isEditing: false,
       },
       {
         id: "3",
         speaker: "說話者 1",
         timestamp: "00:02:45",
-        text: "我同意這個觀點，核心功能應該優先實現。根據我們的時間表，我們需要在下個月底前完成主要功能的開發。",
+        originalText: "我同意這個觀點，核心功能應該優先實現。根據我們的時間表，我們需要在下個月底前完成主要功能的開發。",
+        editedText: "我同意這個觀點，核心功能應該優先實現。根據我們的時間表，我們需要在下個月底前完成主要功能的開發。",
+        isEdited: false,
         isEditing: false,
       },
     ],
@@ -118,6 +126,7 @@ export default function EditorScreen() {
   const [newMarker, setNewMarker] = useState({ type: "note", text: "", timestamp: "00:00:00" });
   const [showAddMarker, setShowAddMarker] = useState(false);
   const [position, setPosition] = useState(0);
+  const [showOriginal, setShowOriginal] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
 
   // 編輯轉錄文本
@@ -127,7 +136,9 @@ export default function EditorScreen() {
 
   // 保存編輯的轉錄文本
   const handleSaveTranscript = (id: string, newText: string) => {
-    setTranscription(prev => prev.map(item => (item.id === id ? { ...item, text: newText, isEditing: false } : item)));
+    setTranscription(prev =>
+      prev.map(item => (item.id === id ? { ...item, editedText: newText, isEditing: false, isEdited: newText !== item.originalText } : item))
+    );
   };
 
   // 新增標籤
@@ -174,8 +185,10 @@ export default function EditorScreen() {
       markers,
     };
 
+    // 更新模擬數據，以便在返回詳情頁面時能夠看到更改
+    mockRecordings[recordingId] = updatedRecording;
     setRecording(updatedRecording);
-    Alert.alert("成功", "變更已保存");
+    Alert.alert("成功", "變更已保存，請回到詳情頁面查看結果");
   };
 
   return (
@@ -293,18 +306,42 @@ export default function EditorScreen() {
 
           {/* 轉錄文本編輯 */}
           <Animated.View entering={FadeIn.delay(400).duration(400)} style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>轉錄文本</ThemedText>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={styles.sectionTitle}>轉錄文本</ThemedText>
+              <View style={styles.switchContainer}>
+                <TouchableOpacity style={[styles.switchButton, showOriginal && styles.switchButtonActive]} onPress={() => setShowOriginal(true)}>
+                  <ThemedText style={[styles.switchText, showOriginal && styles.switchTextActive]}>原始轉錄</ThemedText>
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.switchButton, !showOriginal && styles.switchButtonActive]} onPress={() => setShowOriginal(false)}>
+                  <ThemedText style={[styles.switchText, !showOriginal && styles.switchTextActive]}>編輯版本</ThemedText>
+                </TouchableOpacity>
+              </View>
+            </View>
             {transcription.map(item => (
-              <View key={item.id} style={[styles.transcriptItem, { borderLeftColor: speakerColors[item.speaker] || "#8E8E93" }]}>
+              <View
+                key={item.id}
+                style={[
+                  styles.transcriptItem,
+                  { borderLeftColor: speakerColors[item.speaker] || "#8E8E93" },
+                  !showOriginal && item.isEdited && styles.editedTranscriptItem,
+                ]}
+              >
                 <View style={styles.transcriptHeader}>
                   <View style={styles.speakerInfo}>
                     <View style={[styles.speakerDot, { backgroundColor: speakerColors[item.speaker] || "#8E8E93" }]} />
                     <ThemedText style={[styles.speakerName, { color: speakerColors[item.speaker] || "#2C3E50" }]}>{item.speaker}</ThemedText>
                     <ThemedText style={styles.timestamp}>{item.timestamp}</ThemedText>
+                    {!showOriginal && item.isEdited && (
+                      <View style={styles.editedBadge}>
+                        <Ionicons name="pencil" size={12} color="#FFFFFF" />
+                      </View>
+                    )}
                   </View>
-                  <TouchableOpacity style={styles.editButton} onPress={() => handleEditTranscript(item.id)}>
-                    <Ionicons name="pencil" size={18} color="#3A7BFF" />
-                  </TouchableOpacity>
+                  {!showOriginal && (
+                    <TouchableOpacity style={styles.editButton} onPress={() => handleEditTranscript(item.id)}>
+                      <Ionicons name="pencil" size={18} color="#3A7BFF" />
+                    </TouchableOpacity>
+                  )}
                 </View>
 
                 {item.isEditing ? (
@@ -312,17 +349,17 @@ export default function EditorScreen() {
                     <TextInput
                       style={styles.textEditInput}
                       multiline
-                      value={item.text}
+                      value={item.editedText}
                       onChangeText={text => {
-                        setTranscription(prev => prev.map(t => (t.id === item.id ? { ...t, text } : t)));
+                        setTranscription(prev => prev.map(t => (t.id === item.id ? { ...t, editedText: text } : t)));
                       }}
                     />
-                    <TouchableOpacity style={styles.saveButton} onPress={() => handleSaveTranscript(item.id, item.text)}>
+                    <TouchableOpacity style={styles.saveButton} onPress={() => handleSaveTranscript(item.id, item.editedText)}>
                       <ThemedText style={styles.saveButtonText}>保存</ThemedText>
                     </TouchableOpacity>
                   </View>
                 ) : (
-                  <ThemedText style={styles.transcriptText}>{item.text}</ThemedText>
+                  <ThemedText style={styles.transcriptText}>{showOriginal ? item.originalText : item.editedText}</ThemedText>
                 )}
               </View>
             ))}
@@ -605,5 +642,33 @@ const styles = StyleSheet.create({
     backgroundColor: "#F0F2F5",
     justifyContent: "center",
     alignItems: "center",
+  },
+  switchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  switchButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: "#F0F2F5",
+  },
+  switchButtonActive: {
+    backgroundColor: "#3A7BFF",
+  },
+  switchText: {
+    color: "#2C3E50",
+    fontWeight: "600",
+  },
+  switchTextActive: {
+    color: "#FFFFFF",
+  },
+  editedTranscriptItem: {
+    backgroundColor: "#FFF0F0",
+  },
+  editedBadge: {
+    backgroundColor: "#FF3B30",
+    borderRadius: 8,
+    padding: 4,
+    marginLeft: 8,
   },
 });
