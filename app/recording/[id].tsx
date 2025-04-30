@@ -405,9 +405,7 @@ export default function RecordingDetailScreen() {
                     )}
                   </View>
                 </View>
-                <ThemedText style={styles.transcriptText}>
-                  {showOriginal ? transcript.originalText || transcript.text : transcript.editedText || transcript.text}
-                </ThemedText>
+                <ThemedText style={styles.transcriptText}>{showOriginal ? transcript.originalText || transcript.text : transcript.editedText || transcript.text}</ThemedText>
               </TouchableOpacity>
             </Animated.View>
           ))}
@@ -434,22 +432,7 @@ export default function RecordingDetailScreen() {
 
       <Stack.Screen
         options={{
-          title: "",
-          headerShown: true,
-          headerShadowVisible: false,
-          headerStyle: {
-            backgroundColor: "transparent",
-          },
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.back()} style={{ marginLeft: 10 }}>
-              <Ionicons name="chevron-back" size={24} color="#007AFF" />
-            </TouchableOpacity>
-          ),
-          headerRight: () => (
-            <TouchableOpacity onPress={goToEditPage} style={{ marginRight: 15 }}>
-              <Ionicons name="pencil" size={22} color="#007AFF" />
-            </TouchableOpacity>
-          ),
+          headerShown: false,
         }}
       />
     </ThemedView>
