@@ -9,8 +9,25 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import useAnalysisService, { AnalysisResult } from "@/hooks/useAnalysisService";
 
+// 定義轉錄項目的類型
+interface TranscriptionItem {
+  id: string;
+  speaker: string;
+  timestamp: string;
+  text: string;
+}
+
+// 定義錄音詳情的類型
+interface RecordingDetail {
+  id: string;
+  title: string;
+  duration: string;
+  date: string;
+  transcription: TranscriptionItem[];
+}
+
 // 模擬的錄音詳情數據
-const mockRecordings = {
+const mockRecordings: { [key: string]: RecordingDetail } = {
   "1": {
     id: "1",
     title: "會議記錄 - 5月12日",
@@ -103,7 +120,7 @@ export default function AnalysisScreen() {
     if (!recording) return;
 
     // 將錄音轉錄信息轉換為所需格式
-    const transcription = recording.transcription.map(item => ({
+    const transcription = recording.transcription.map((item: TranscriptionItem) => ({
       speaker: item.speaker,
       text: item.text,
       timestamp: item.timestamp,
