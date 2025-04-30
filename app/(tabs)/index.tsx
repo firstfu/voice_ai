@@ -1,7 +1,7 @@
-import { StyleSheet, TouchableOpacity, FlatList, View, Platform, StatusBar, Image, ScrollView, Dimensions, TextInput } from "react-native";
+import { StyleSheet, TouchableOpacity, FlatList, View, Platform, StatusBar, Image, ScrollView, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Animated, { FadeIn, FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { useState, useEffect, useRef } from "react";
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
+import { useRef } from "react";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -70,7 +70,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [searchQuery, setSearchQuery] = useState("");
   const recordButtonScale = useSharedValue(1);
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -101,13 +100,6 @@ export default function HomeScreen() {
       params: { id: recordingId },
     });
   };
-
-  const filteredRecordings = recentRecordings.filter(recording => {
-    if (searchQuery.trim() !== "") {
-      return recording.title.toLowerCase().includes(searchQuery.toLowerCase());
-    }
-    return true;
-  });
 
   const renderRecordingItem = ({ item, index }: { item: Recording; index: number }) => (
     <Animated.View entering={FadeInDown.delay(index * 100).duration(300)}>
@@ -168,17 +160,6 @@ export default function HomeScreen() {
               <Image source={require("@/assets/images/profile-avatar.png")} style={styles.profileImage} defaultSource={require("@/assets/images/profile-avatar.png")} />
             </TouchableOpacity>
           </View>
-
-          {/* 搜索框 */}
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color="#A0AEC0" style={styles.searchIcon} />
-            <TextInput style={styles.searchInput} placeholder="搜索錄音..." placeholderTextColor="#A0AEC0" value={searchQuery} onChangeText={setSearchQuery} />
-            {searchQuery.length > 0 && (
-              <TouchableOpacity style={styles.clearButton} onPress={() => setSearchQuery("")}>
-                <Ionicons name="close-circle" size={18} color="#A0AEC0" />
-              </TouchableOpacity>
-            )}
-          </View>
         </View>
 
         {/* 快速錄音按鈕 */}
@@ -199,22 +180,15 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          {filteredRecordings.length > 0 ? (
-            <FlatList
-              data={filteredRecordings}
-              renderItem={renderRecordingItem}
-              keyExtractor={item => item.id}
-              style={styles.recordingsList}
-              showsVerticalScrollIndicator={false}
-              scrollEnabled={false}
-              contentContainerStyle={styles.recordingsListContent}
-            />
-          ) : (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="document-text-outline" size={48} color="#A0AEC0" />
-              <ThemedText style={styles.emptyText}>沒有找到符合條件的錄音</ThemedText>
-            </View>
-          )}
+          <FlatList
+            data={recentRecordings}
+            renderItem={renderRecordingItem}
+            keyExtractor={item => item.id}
+            style={styles.recordingsList}
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={false}
+            contentContainerStyle={styles.recordingsListContent}
+          />
         </View>
       </ScrollView>
     </ThemedView>
@@ -279,26 +253,6 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F1F5F9",
-    borderRadius: 16,
-    paddingHorizontal: 15,
-    height: 50,
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    color: "#2C3E50",
-    height: "100%",
-  },
-  clearButton: {
-    padding: 4,
   },
   startRecordingButtonContainer: {
     marginHorizontal: 20,
