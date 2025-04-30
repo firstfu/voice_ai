@@ -4,6 +4,7 @@ import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, FadeIn, FadeOut } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -17,6 +18,7 @@ export default function NewRecordingScreen() {
   const [isPaused, setIsPaused] = useState(false);
 
   const recordButtonScale = useSharedValue(1);
+  const pauseButtonScale = useSharedValue(1);
   const microphonePulse = useSharedValue(1);
 
   // 錄音動畫效果
@@ -75,18 +77,19 @@ export default function NewRecordingScreen() {
       setIsPaused(false);
       pulseAnimation.stop();
 
-      // 模擬保存錄音
-      setTimeout(() => {
-        router.push({
-          pathname: "/recording/[id]",
-          params: { id: "new" },
-        });
-      }, 1000);
+      // 直接跳轉到錄音庫頁面
+      router.push("/(tabs)/recordings");
     }
   };
 
   // 處理暫停/繼續錄音
   const handlePauseResumePress = () => {
+    pauseButtonScale.value = withSpring(0.9, { damping: 10 });
+
+    setTimeout(() => {
+      pauseButtonScale.value = withSpring(1, { damping: 8 });
+    }, 200);
+
     setIsPaused(!isPaused);
   };
 
@@ -94,6 +97,12 @@ export default function NewRecordingScreen() {
   const recordButtonStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: recordButtonScale.value }],
+    };
+  });
+
+  const pauseButtonStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: pauseButtonScale.value }],
     };
   });
 
@@ -131,6 +140,13 @@ export default function NewRecordingScreen() {
 
       {/* 主內容區 */}
       <View style={styles.content}>
+        {/* 錄音時間 - 移動到狀態指示器上方 */}
+        {isRecording && (
+          <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.timerContainer}>
+            <ThemedText style={styles.timerText}>{formatTime(recordingTime)}</ThemedText>
+          </Animated.View>
+        )}
+
         {/* 錄音狀態文字 */}
         <View style={styles.statusContainer}>
           {isRecording && (
@@ -139,8 +155,6 @@ export default function NewRecordingScreen() {
                 <View style={[styles.recordingIndicator, isPaused && styles.pausedIndicator]} />
                 <ThemedText style={styles.recordingStatusText}>{isPaused ? "已暫停" : "正在錄音"}</ThemedText>
               </View>
-
-              <ThemedText style={styles.timerText}>{formatTime(recordingTime)}</ThemedText>
             </Animated.View>
           )}
 
@@ -175,19 +189,21 @@ export default function NewRecordingScreen() {
 
       {/* 底部控制區 */}
       <View style={styles.controlsContainer}>
-        {/* 錄音按鈕 */}
-        <AnimatedTouchable style={[styles.recordButton, recordButtonStyle]} onPress={handleRecordPress}>
-          <View style={[styles.recordButtonInner, isRecording && styles.stopButton]}>
-            {isRecording ? <Ionicons name="square" size={28} color="#FFFFFF" /> : <Ionicons name="mic" size={32} color="#FFFFFF" />}
-          </View>
-        </AnimatedTouchable>
-
         {/* 暫停/繼續按鈕 (僅在錄音中顯示) */}
         {isRecording && (
-          <TouchableOpacity style={styles.pauseButton} onPress={handlePauseResumePress}>
-            <Ionicons name={isPaused ? "play" : "pause"} size={28} color="#FFFFFF" />
-          </TouchableOpacity>
+          <AnimatedTouchable style={[styles.pauseButton, pauseButtonStyle]} onPress={handlePauseResumePress}>
+            <LinearGradient colors={isPaused ? ["#3A7BFF", "#00C2A8"] : ["#F59E0B", "#FF4A6B"]} style={styles.pauseButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+              <Ionicons name={isPaused ? "play" : "pause"} size={24} color="#FFFFFF" />
+            </LinearGradient>
+          </AnimatedTouchable>
         )}
+
+        {/* 錄音按鈕 */}
+        <AnimatedTouchable style={[styles.recordButton, recordButtonStyle]} onPress={handleRecordPress}>
+          <LinearGradient colors={isRecording ? ["#FF4A6B", "#F59E0B"] : ["#3A7BFF", "#00C2A8"]} style={styles.recordButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+            {isRecording ? <Ionicons name="square" size={28} color="#FFFFFF" /> : <Ionicons name="mic" size={32} color="#FFFFFF" />}
+          </LinearGradient>
+        </AnimatedTouchable>
       </View>
     </ThemedView>
   );
@@ -229,6 +245,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
   },
+  timerContainer: {
+    alignItems: "center",
+    marginBottom: 10,
+  },
   statusContainer: {
     alignItems: "center",
     marginBottom: 40,
@@ -236,7 +256,11 @@ const styles = StyleSheet.create({
   recordingStatus: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 20,
   },
   recordingIndicator: {
     width: 12,
@@ -253,7 +277,7 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   timerText: {
-    fontSize: 48,
+    fontSize: 64,
     fontWeight: "700",
     color: "#FFFFFF",
   },
@@ -269,6 +293,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
+    marginTop: 20,
   },
   waveform: {
     flexDirection: "row",
@@ -287,33 +312,37 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingBottom: Platform.OS === "ios" ? 50 : 30,
+    gap: 20,
   },
   recordButton: {
     width: 80,
     height: 80,
     borderRadius: 40,
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
+    padding: 6,
+  },
+  recordButtonGradient: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 36,
     justifyContent: "center",
     alignItems: "center",
-    marginHorizontal: 20,
-  },
-  recordButtonInner: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "#3A7BFF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  stopButton: {
-    backgroundColor: "#FF4A6B",
-    borderRadius: 8,
   },
   pauseButton: {
     width: 60,
     height: 60,
     borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
+    padding: 5,
+  },
+  pauseButtonGradient: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
   },
