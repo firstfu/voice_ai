@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View, TouchableOpacity, TextInput, FlatList } from "react-native";
+import { StyleSheet, View, TouchableOpacity, TextInput, FlatList, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 
@@ -26,10 +26,10 @@ interface OrganizePanelProps {
 
 // 預設分類
 const defaultCategories: Category[] = [
-  { id: "c1", name: "所有錄音", color: "#007AFF", count: 12 },
+  { id: "c1", name: "所有錄音", color: "#3A7BFF", count: 12 },
   { id: "c2", name: "會議", color: "#FF9500", count: 5 },
   { id: "c3", name: "課程", color: "#5AC8FA", count: 3 },
-  { id: "c4", name: "訪談", color: "#FF2D55", count: 2 },
+  { id: "c4", name: "訪談", color: "#FF6B4A", count: 2 },
   { id: "c5", name: "個人筆記", color: "#30D158", count: 2 },
 ];
 
@@ -87,19 +87,19 @@ export const OrganizePanel: React.FC<OrganizePanelProps> = ({ onCategorySelect, 
     <View style={styles.container}>
       {/* 搜索欄 */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={16} color="#8E8E93" style={styles.searchIcon} />
+        <Ionicons name="search" size={16} color="#718096" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           value={searchQuery}
           onChangeText={setSearchQuery}
           placeholder="搜索錄音"
-          placeholderTextColor="#8E8E93"
+          placeholderTextColor="#718096"
           returnKeyType="search"
           onSubmitEditing={handleSearch}
         />
         {searchQuery.length > 0 && (
           <TouchableOpacity onPress={() => setSearchQuery("")}>
-            <Ionicons name="close-circle" size={16} color="#8E8E93" />
+            <Ionicons name="close-circle" size={16} color="#718096" />
           </TouchableOpacity>
         )}
       </View>
@@ -143,13 +143,13 @@ export const OrganizePanel: React.FC<OrganizePanelProps> = ({ onCategorySelect, 
 
       {/* 新增分類按鈕 */}
       <TouchableOpacity style={styles.addButton}>
-        <Ionicons name="add-circle-outline" size={18} color="#007AFF" />
+        <Ionicons name="add-circle-outline" size={18} color="#3A7BFF" />
         <ThemedText style={styles.addButtonText}>新增分類</ThemedText>
       </TouchableOpacity>
 
       {/* 新增標籤按鈕 */}
       <TouchableOpacity style={styles.addButton}>
-        <Ionicons name="pricetag-outline" size={18} color="#007AFF" />
+        <Ionicons name="pricetag-outline" size={18} color="#3A7BFF" />
         <ThemedText style={styles.addButtonText}>新增標籤</ThemedText>
       </TouchableOpacity>
     </View>
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1C1C1E",
+    backgroundColor: "#F0F2F5",
     borderRadius: 8,
     paddingHorizontal: 10,
     marginBottom: 16,
@@ -175,16 +175,17 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 40,
-    color: "#FFFFFF",
+    color: "#2C3E50",
     fontSize: 14,
   },
   sectionContainer: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: "600",
-    marginBottom: 8,
+    marginBottom: 10,
+    color: "#2C3E50",
   },
   categoriesContainer: {
     gap: 8,
@@ -192,14 +193,14 @@ const styles = StyleSheet.create({
   categoryItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1C1C1E",
+    backgroundColor: "#F8F9FA",
     borderRadius: 8,
     padding: 12,
   },
   selectedCategory: {
-    backgroundColor: "#2C2C2E",
+    backgroundColor: "#E6EFFD",
     borderWidth: 1,
-    borderColor: "#007AFF",
+    borderColor: "#3A7BFF",
   },
   categoryDot: {
     width: 10,
@@ -210,16 +211,28 @@ const styles = StyleSheet.create({
   categoryName: {
     flex: 1,
     fontSize: 14,
+    color: "#2C3E50",
   },
   countBadge: {
-    backgroundColor: "#2C2C2E",
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 2,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 1,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
   },
   countText: {
     fontSize: 12,
-    color: "#8E8E93",
+    color: "#718096",
   },
   tagsContainer: {
     flexDirection: "row",
@@ -229,32 +242,36 @@ const styles = StyleSheet.create({
   tagItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1C1C1E",
-    borderRadius: 15,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 16,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
   selectedTag: {
-    backgroundColor: "#2C2C2E",
+    backgroundColor: "#E6EFFD",
     borderWidth: 1,
-    borderColor: "#007AFF",
+    borderColor: "#3A7BFF",
   },
   tagName: {
     fontSize: 14,
     marginRight: 6,
+    color: "#2C3E50",
   },
   tagCount: {
     fontSize: 12,
-    color: "#8E8E93",
+    color: "#718096",
   },
   addButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 10,
+    backgroundColor: "#F8F9FA",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
   },
   addButtonText: {
+    color: "#3A7BFF",
+    marginLeft: 8,
     fontSize: 14,
-    color: "#007AFF",
-    marginLeft: 6,
   },
 });

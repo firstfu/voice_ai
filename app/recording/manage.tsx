@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { StyleSheet, View, FlatList, TouchableOpacity, Text, Alert } from "react-native";
+import { StyleSheet, View, FlatList, TouchableOpacity, Text, Alert, Platform, ScrollView, TextInput } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedView } from "@/components/ThemedView";
@@ -14,6 +14,20 @@ interface Recording {
   date: string;
   tags: string[];
   isArchived: boolean;
+}
+
+// 添加適當的介面定義
+interface Category {
+  id: string;
+  name: string;
+  color: string;
+  count: number;
+}
+
+interface Tag {
+  id: string;
+  name: string;
+  count: number;
 }
 
 // 模擬錄音數據
@@ -58,6 +72,24 @@ const mockRecordings: Recording[] = [
     tags: ["會議", "產品"],
     isArchived: false,
   },
+];
+
+// 預設分類
+const defaultCategories: Category[] = [
+  { id: "c1", name: "所有錄音", color: "#3A7BFF", count: 12 },
+  { id: "c2", name: "會議", color: "#FF9500", count: 5 },
+  { id: "c3", name: "課程", color: "#5AC8FA", count: 3 },
+  { id: "c4", name: "訪談", color: "#FF6B4A", count: 2 },
+  { id: "c5", name: "個人筆記", color: "#30D158", count: 2 },
+];
+
+// 預設標籤
+const defaultTags: Tag[] = [
+  { id: "t1", name: "重要", count: 4 },
+  { id: "t2", name: "待處理", count: 3 },
+  { id: "t3", name: "專案規劃", count: 2 },
+  { id: "t4", name: "產品開發", count: 2 },
+  { id: "t5", name: "行銷", count: 1 },
 ];
 
 export default function ManageRecordingsScreen() {
@@ -195,7 +227,7 @@ export default function ManageRecordingsScreen() {
 
           <View style={styles.recordingActions}>
             <TouchableOpacity style={styles.actionButton} onPress={() => handleEditRecording(item.id)}>
-              <Ionicons name="pencil" size={18} color="#007AFF" />
+              <Ionicons name="pencil" size={18} color="#3A7BFF" />
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionButton} onPress={() => handleArchiveRecording(item.id)}>
@@ -203,7 +235,7 @@ export default function ManageRecordingsScreen() {
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.actionButton} onPress={() => handleDeleteRecording(item.id)}>
-              <Ionicons name="trash-outline" size={18} color="#FF3B30" />
+              <Ionicons name="trash-outline" size={18} color="#FF6B4A" />
             </TouchableOpacity>
           </View>
         </View>
@@ -231,41 +263,94 @@ export default function ManageRecordingsScreen() {
           title: "錄音管理",
           headerRight: () => (
             <TouchableOpacity style={styles.headerButton} onPress={toggleShowArchived}>
-              <Ionicons name={showArchived ? "archive" : "archive-outline"} size={22} color="#007AFF" />
+              <Ionicons name={showArchived ? "archive" : "archive-outline"} size={22} color="#3A7BFF" />
             </TouchableOpacity>
           ),
         }}
       />
 
       <ThemedView style={styles.container}>
-        <View style={styles.contentContainer}>
-          <View style={styles.organizePanel}>
-            <OrganizePanel onCategorySelect={handleCategorySelect} onTagSelect={handleTagSelect} onSearch={handleSearch} />
-          </View>
-
-          <View style={styles.recordingsList}>
-            <View style={styles.listHeader}>
-              <ThemedText style={styles.listTitle}>
-                {currentCategory}
-                <ThemedText style={styles.recordingCount}>（{filteredRecordings.length}）</ThemedText>
-              </ThemedText>
-
-              <TouchableOpacity style={styles.sortButton}>
-                <Ionicons name="options-outline" size={20} color="#007AFF" />
-                <ThemedText style={styles.sortButtonText}>排序</ThemedText>
+        {/* 搜索欄 */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <Ionicons name="search" size={18} color="#718096" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              value={searchQuery}
+              onChangeText={text => setSearchQuery(text)}
+              placeholder="搜索錄音"
+              placeholderTextColor="#718096"
+              returnKeyType="search"
+              onSubmitEditing={() => handleSearch(searchQuery)}
+            />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                onPress={() => {
+                  setSearchQuery("");
+                  handleSearch("");
+                }}
+              >
+                <Ionicons name="close-circle" size={18} color="#718096" />
               </TouchableOpacity>
-            </View>
-
-            {filteredRecordings.length > 0 ? (
-              <FlatList data={filteredRecordings} renderItem={renderRecordingItem} keyExtractor={item => item.id} contentContainerStyle={styles.listContent} />
-            ) : (
-              <View style={styles.emptyContainer}>
-                <Ionicons name="search" size={50} color="#8E8E93" />
-                <ThemedText style={styles.emptyText}>找不到符合條件的錄音</ThemedText>
-              </View>
             )}
           </View>
+          <TouchableOpacity style={styles.sortButton}>
+            <Ionicons name="options-outline" size={18} color="#3A7BFF" />
+            <ThemedText style={styles.sortButtonText}>排序</ThemedText>
+          </TouchableOpacity>
         </View>
+
+        {/* 分類標籤橫向滾動 */}
+        <View style={styles.filterSection}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoriesScroll} contentContainerStyle={styles.categoriesContent}>
+            {defaultCategories.map(category => (
+              <TouchableOpacity
+                key={category.id}
+                style={[styles.categoryChip, currentCategory === category.name && styles.selectedCategoryChip]}
+                onPress={() => handleCategorySelect(category.name)}
+              >
+                <View style={[styles.categoryDot, { backgroundColor: category.color }]} />
+                <ThemedText style={[styles.categoryChipText, currentCategory === category.name && styles.selectedCategoryChipText]}>{category.name}</ThemedText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tagsScroll} contentContainerStyle={styles.tagsContent}>
+            {defaultTags.map(tag => (
+              <TouchableOpacity
+                key={tag.id}
+                style={[styles.tagChip, selectedTags.includes(tag.name) && styles.selectedTagChip]}
+                onPress={() => handleTagSelect(tag.name)}
+              >
+                <ThemedText style={[styles.tagChipText, selectedTags.includes(tag.name) && styles.selectedTagChipText]}>{tag.name}</ThemedText>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* 錄音列表標題 */}
+        <View style={styles.listHeader}>
+          <ThemedText style={styles.listTitle}>
+            {currentCategory}
+            <ThemedText style={styles.recordingCount}>（{filteredRecordings.length}）</ThemedText>
+          </ThemedText>
+        </View>
+
+        {/* 錄音列表 */}
+        {filteredRecordings.length > 0 ? (
+          <FlatList
+            data={filteredRecordings}
+            renderItem={renderRecordingItem}
+            keyExtractor={item => item.id}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          />
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="search" size={50} color="#718096" />
+            <ThemedText style={styles.emptyText}>找不到符合條件的錄音</ThemedText>
+          </View>
+        )}
       </ThemedView>
     </>
   );
@@ -274,61 +359,166 @@ export default function ManageRecordingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#F8F9FA",
   },
-  contentContainer: {
+  searchContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#FFFFFF",
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+    alignItems: "center",
+  },
+  searchInputContainer: {
     flex: 1,
     flexDirection: "row",
+    backgroundColor: "#F0F2F5",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    height: 40,
+    alignItems: "center",
+    marginRight: 10,
   },
-  organizePanel: {
-    width: "30%",
-    borderRightWidth: 1,
-    borderRightColor: "#2C2C2E",
+  searchIcon: {
+    marginRight: 8,
   },
-  recordingsList: {
+  searchInput: {
     flex: 1,
+    height: 40,
+    color: "#2C3E50",
+    fontSize: 14,
+  },
+  sortButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F5FF",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  sortButtonText: {
+    color: "#3A7BFF",
+    fontSize: 13,
+    marginLeft: 4,
+    fontWeight: "500",
+  },
+  filterSection: {
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+  },
+  categoriesScroll: {
+    marginBottom: 8,
+  },
+  categoriesContent: {
+    paddingHorizontal: 16,
+  },
+  categoryChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F2F5",
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginRight: 8,
+  },
+  selectedCategoryChip: {
+    backgroundColor: "#E6EFFD",
+    borderWidth: 1,
+    borderColor: "#3A7BFF",
+  },
+  categoryDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  categoryChipText: {
+    fontSize: 14,
+    color: "#2C3E50",
+  },
+  selectedCategoryChipText: {
+    color: "#3A7BFF",
+    fontWeight: "500",
+  },
+  tagsScroll: {
+    marginTop: 4,
+  },
+  tagsContent: {
+    paddingHorizontal: 16,
+  },
+  tagChip: {
+    backgroundColor: "#F0F2F5",
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 8,
+  },
+  selectedTagChip: {
+    backgroundColor: "#E6EFFD",
+    borderWidth: 1,
+    borderColor: "#3A7BFF",
+  },
+  tagChipText: {
+    fontSize: 13,
+    color: "#2C3E50",
+  },
+  selectedTagChipText: {
+    color: "#3A7BFF",
+    fontWeight: "500",
   },
   listHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#2C2C2E",
+    backgroundColor: "#F8F9FA",
   },
   listTitle: {
     fontSize: 18,
     fontWeight: "600",
+    color: "#2C3E50",
   },
   recordingCount: {
     fontSize: 16,
-    color: "#8E8E93",
+    color: "#718096",
     fontWeight: "400",
-  },
-  sortButton: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  sortButtonText: {
-    color: "#007AFF",
-    marginLeft: 4,
+    marginLeft: 5,
   },
   listContent: {
     padding: 16,
+    paddingTop: 0,
   },
   recordingItem: {
-    backgroundColor: "#1C1C1E",
-    borderRadius: 8,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
     padding: 16,
     marginBottom: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+    borderLeftWidth: 3,
+    borderLeftColor: "#3A7BFF",
   },
   archivedItem: {
-    opacity: 0.7,
+    opacity: 0.85,
+    borderLeftColor: "#30D158",
   },
   recordingHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   recordingTitleContainer: {
     flex: 1,
@@ -338,67 +528,84 @@ const styles = StyleSheet.create({
   },
   recordingTitle: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "600",
     marginRight: 8,
+    color: "#2C3E50",
   },
   recordingInfo: {
     flexDirection: "row",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   recordingDate: {
     fontSize: 14,
-    color: "#8E8E93",
+    color: "#718096",
     marginRight: 16,
   },
   recordingDuration: {
     fontSize: 14,
-    color: "#8E8E93",
+    color: "#718096",
   },
   tagsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
   },
   tag: {
-    backgroundColor: "#2C2C2E",
-    borderRadius: 12,
-    paddingHorizontal: 8,
+    backgroundColor: "#E6EFFD",
+    borderRadius: 16,
+    paddingHorizontal: 10,
     paddingVertical: 4,
     marginRight: 8,
     marginBottom: 4,
   },
   tagText: {
     fontSize: 12,
+    color: "#3A7BFF",
+    fontWeight: "500",
   },
   recordingActions: {
     flexDirection: "row",
   },
   actionButton: {
-    padding: 6,
-    marginLeft: 4,
+    padding: 8,
+    marginLeft: 6,
+    backgroundColor: "#F0F2F5",
+    borderRadius: 20,
+    width: 36,
+    height: 36,
+    justifyContent: "center",
+    alignItems: "center",
   },
   archivedBadge: {
     backgroundColor: "#30D158",
-    borderRadius: 4,
-    paddingHorizontal: 6,
+    borderRadius: 16,
+    paddingHorizontal: 8,
     paddingVertical: 2,
   },
   archivedText: {
     fontSize: 12,
     color: "#FFFFFF",
+    fontWeight: "500",
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 30,
+    backgroundColor: "#F8F9FA",
   },
   emptyText: {
-    marginTop: 10,
+    marginTop: 16,
     fontSize: 16,
-    color: "#8E8E93",
+    color: "#718096",
     textAlign: "center",
   },
   headerButton: {
     marginRight: 16,
+    backgroundColor: "#F0F2F5",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

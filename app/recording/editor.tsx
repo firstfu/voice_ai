@@ -180,8 +180,8 @@ export default function EditorScreen() {
 
   // 剪輯音頻 (模擬功能)
   const handleTrimAudio = (start: string, end: string) => {
-    Alert.alert("音頻剪輯", `剪輯時間範圍: ${start} - ${end}`);
-    // 實際應用中，這裡應該調用音頻處理API
+    console.log(`裁剪音頻從 ${start} 到 ${end}`);
+    // 實際實現會調用音頻編輯 API
   };
 
   return (
@@ -243,33 +243,35 @@ export default function EditorScreen() {
             <View style={styles.sectionHeader}>
               <ThemedText style={styles.sectionTitle}>標記</ThemedText>
               <TouchableOpacity onPress={() => setShowAddMarker(!showAddMarker)}>
-                <Ionicons name={showAddMarker ? "remove-circle" : "add-circle"} size={24} color="#007AFF" />
+                <Ionicons name={showAddMarker ? "remove-circle" : "add-circle"} size={24} color="#3A7BFF" />
               </TouchableOpacity>
             </View>
 
             {showAddMarker && (
-              <View style={styles.addMarkerContainer}>
-                <View style={styles.markerTypeSelector}>
-                  {Object.keys(markerConfig).map(type => (
+              <View style={styles.addMarkerSection}>
+                <View style={styles.markerTypeContainer}>
+                  {Object.entries(markerConfig).map(([type, config]) => (
                     <TouchableOpacity
                       key={type}
-                      style={[styles.markerTypeButton, newMarker.type === type && { backgroundColor: markerConfig[type].color + "30" }]}
+                      style={[styles.markerTypeButton, newMarker.type === type && { backgroundColor: `${config.color}20` }]}
                       onPress={() => setNewMarker({ ...newMarker, type: type as any })}
                     >
-                      <Ionicons name={markerConfig[type].icon as any} size={20} color={markerConfig[type].color} />
-                      <ThemedText style={styles.markerTypeText}>
+                      <Ionicons name={config.icon as any} size={16} color={config.color} />
+                      <ThemedText style={[styles.markerTypeText, newMarker.type === type && { color: config.color }]}>
                         {type === "note" ? "筆記" : type === "important" ? "重要" : type === "question" ? "問題" : "任務"}
                       </ThemedText>
                     </TouchableOpacity>
                   ))}
                 </View>
+
                 <TextInput
                   style={styles.markerInput}
+                  placeholder="輸入標記內容..."
+                  placeholderTextColor="#8E8E93"
                   value={newMarker.text}
                   onChangeText={text => setNewMarker({ ...newMarker, text })}
-                  placeholder="輸入標記內容"
-                  placeholderTextColor="#8E8E93"
                 />
+
                 <TouchableOpacity style={styles.addMarkerButton} onPress={handleAddMarker}>
                   <ThemedText style={styles.addMarkerButtonText}>新增標記</ThemedText>
                 </TouchableOpacity>
@@ -299,15 +301,15 @@ export default function EditorScreen() {
           <Animated.View entering={FadeIn.delay(400).duration(400)} style={styles.section}>
             <ThemedText style={styles.sectionTitle}>轉錄文本</ThemedText>
             {transcription.map(item => (
-              <View key={item.id} style={styles.transcriptItem}>
+              <View key={item.id} style={[styles.transcriptItem, { borderLeftColor: speakerColors[item.speaker] || "#8E8E93" }]}>
                 <View style={styles.transcriptHeader}>
                   <View style={styles.speakerInfo}>
                     <View style={[styles.speakerDot, { backgroundColor: speakerColors[item.speaker] || "#8E8E93" }]} />
-                    <ThemedText style={styles.speakerName}>{item.speaker}</ThemedText>
+                    <ThemedText style={[styles.speakerName, { color: speakerColors[item.speaker] || "#2C3E50" }]}>{item.speaker}</ThemedText>
                     <ThemedText style={styles.timestamp}>{item.timestamp}</ThemedText>
                   </View>
-                  <TouchableOpacity onPress={() => handleEditTranscript(item.id)}>
-                    <Ionicons name="pencil" size={18} color="#007AFF" />
+                  <TouchableOpacity style={styles.editButton} onPress={() => handleEditTranscript(item.id)}>
+                    <Ionicons name="pencil" size={18} color="#3A7BFF" />
                   </TouchableOpacity>
                 </View>
 
@@ -336,8 +338,10 @@ export default function EditorScreen() {
           <Animated.View entering={FadeIn.delay(500).duration(400)} style={styles.section}>
             <ThemedText style={styles.sectionTitle}>音頻編輯</ThemedText>
             <TouchableOpacity style={styles.audioEditButton} onPress={() => handleTrimAudio("00:00:00", recording.duration)}>
-              <Ionicons name="cut-outline" size={20} color="#FFFFFF" />
-              <ThemedText style={styles.audioEditButtonText}>剪輯音頻</ThemedText>
+              <LinearGradient colors={["#3A7BFF", "#00C2A8"]} style={styles.audioEditButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+                <Ionicons name="cut-outline" size={20} color="#FFFFFF" />
+                <ThemedText style={styles.audioEditButtonText}>剪輯音頻</ThemedText>
+              </LinearGradient>
             </TouchableOpacity>
           </Animated.View>
 
@@ -346,12 +350,16 @@ export default function EditorScreen() {
             <ThemedText style={styles.sectionTitle}>存檔選項</ThemedText>
             <View style={styles.archiveOptions}>
               <TouchableOpacity style={styles.archiveButton}>
-                <Ionicons name="archive-outline" size={20} color="#FFFFFF" />
-                <ThemedText style={styles.archiveButtonText}>存檔</ThemedText>
+                <LinearGradient colors={["#30D158", "#4CD964"]} style={styles.archiveButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+                  <Ionicons name="archive-outline" size={20} color="#FFFFFF" />
+                  <ThemedText style={styles.archiveButtonText}>存檔</ThemedText>
+                </LinearGradient>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.archiveButton, styles.exportButton]}>
-                <Ionicons name="share-outline" size={20} color="#FFFFFF" />
-                <ThemedText style={styles.archiveButtonText}>導出</ThemedText>
+              <TouchableOpacity style={styles.archiveButton}>
+                <LinearGradient colors={["#FF9500", "#FFCC00"]} style={styles.archiveButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+                  <Ionicons name="share-outline" size={20} color="#FFFFFF" />
+                  <ThemedText style={styles.archiveButtonText}>導出</ThemedText>
+                </LinearGradient>
               </TouchableOpacity>
             </View>
           </Animated.View>
@@ -364,76 +372,85 @@ export default function EditorScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#F8F9FA",
   },
   scrollView: {
     flex: 1,
+    padding: 16,
   },
   section: {
+    marginBottom: 24,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 12,
     padding: 16,
-    marginBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#2C2C2E",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   lastSection: {
-    borderBottomWidth: 0,
-    marginBottom: 30,
+    marginBottom: 32,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: "600",
     marginBottom: 12,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 12,
+    color: "#2C3E50",
   },
   titleInput: {
     fontSize: 16,
-    padding: 12,
-    backgroundColor: "#1C1C1E",
+    padding: 14,
+    backgroundColor: "#F0F2F5",
     borderRadius: 8,
-    color: "#FFFFFF",
+    color: "#2C3E50",
   },
   tagsContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    alignItems: "center",
+    marginTop: 8,
   },
   tag: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#2C2C2E",
-    borderRadius: 15,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: "#E6EFFD",
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     marginRight: 8,
     marginBottom: 8,
   },
   tagText: {
+    color: "#3A7BFF",
     fontSize: 14,
-    marginRight: 5,
+    marginRight: 4,
   },
   addTagContainer: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#F0F2F5",
+    borderRadius: 16,
+    paddingHorizontal: 12,
+    paddingVertical: 2,
     marginBottom: 8,
   },
   addTagInput: {
     flex: 1,
+    height: 32,
     fontSize: 14,
-    padding: 8,
-    backgroundColor: "#1C1C1E",
-    borderRadius: 8,
-    color: "#FFFFFF",
-    marginRight: 8,
+    color: "#2C3E50",
   },
   markersList: {
-    marginTop: 10,
+    marginTop: 12,
   },
   markerItem: {
-    backgroundColor: "#1C1C1E",
+    backgroundColor: "#F0F2F5",
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
@@ -442,7 +459,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   markerTypeIndicator: {
     flexDirection: "row",
@@ -450,16 +467,20 @@ const styles = StyleSheet.create({
   },
   markerText: {
     fontSize: 14,
+    color: "#2C3E50",
   },
-  addMarkerContainer: {
-    backgroundColor: "#1C1C1E",
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 16,
+  emptyText: {
+    fontSize: 14,
+    color: "#8E8E93",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginTop: 8,
   },
-  markerTypeSelector: {
+  addMarkerSection: {
+    marginTop: 16,
+  },
+  markerTypeContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
     marginBottom: 12,
   },
   markerTypeButton: {
@@ -467,21 +488,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     padding: 8,
     borderRadius: 8,
+    marginRight: 8,
+    backgroundColor: "#F0F2F5",
   },
   markerTypeText: {
     fontSize: 12,
     marginLeft: 4,
+    color: "#2C3E50",
   },
   markerInput: {
     fontSize: 14,
     padding: 12,
-    backgroundColor: "#2C2C2E",
+    backgroundColor: "#F0F2F5",
     borderRadius: 8,
-    color: "#FFFFFF",
+    color: "#2C3E50",
     marginBottom: 12,
   },
   addMarkerButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#3A7BFF",
     borderRadius: 8,
     padding: 12,
     alignItems: "center",
@@ -491,10 +515,23 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   transcriptItem: {
-    backgroundColor: "#1C1C1E",
+    backgroundColor: "#F8F9FA",
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
+    borderLeftWidth: 3,
+    borderLeftColor: "#3A7BFF",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
   },
   transcriptHeader: {
     flexDirection: "row",
@@ -516,30 +553,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     marginRight: 8,
+    color: "#2C3E50",
   },
   timestamp: {
     fontSize: 12,
-    color: "#8E8E93",
+    color: "#718096",
   },
   transcriptText: {
     fontSize: 14,
     lineHeight: 20,
+    color: "#2C3E50",
   },
   textEditContainer: {
     marginTop: 8,
   },
   textEditInput: {
-    backgroundColor: "#2C2C2E",
+    backgroundColor: "#F0F2F5",
     borderRadius: 8,
     padding: 12,
-    color: "#FFFFFF",
+    color: "#2C3E50",
     fontSize: 14,
     minHeight: 80,
     textAlignVertical: "top",
     marginBottom: 8,
   },
   saveButton: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#3A7BFF",
     borderRadius: 8,
     padding: 10,
     alignItems: "center",
@@ -549,12 +588,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   audioEditButton: {
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  audioEditButtonGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#007AFF",
-    borderRadius: 8,
     padding: 14,
+    borderRadius: 8,
   },
   audioEditButtonText: {
     color: "#FFFFFF",
@@ -567,27 +609,34 @@ const styles = StyleSheet.create({
   },
   archiveButton: {
     flex: 1,
+    marginHorizontal: 4,
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  archiveButtonGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#30D158",
-    borderRadius: 8,
     padding: 14,
-    marginRight: 8,
-  },
-  exportButton: {
-    backgroundColor: "#5AC8FA",
-    marginRight: 0,
-    marginLeft: 8,
+    borderRadius: 8,
   },
   archiveButtonText: {
     color: "#FFFFFF",
     fontWeight: "600",
     marginLeft: 8,
   },
-  emptyText: {
-    textAlign: "center",
-    color: "#8E8E93",
-    padding: 20,
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  editButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F0F2F5",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
