@@ -178,12 +178,6 @@ export default function EditorScreen() {
     Alert.alert("成功", "變更已保存");
   };
 
-  // 剪輯音頻 (模擬功能)
-  const handleTrimAudio = (start: string, end: string) => {
-    console.log(`裁剪音頻從 ${start} 到 ${end}`);
-    // 實際實現會調用音頻編輯 API
-  };
-
   return (
     <>
       <Stack.Screen
@@ -332,17 +326,6 @@ export default function EditorScreen() {
                 )}
               </View>
             ))}
-          </Animated.View>
-
-          {/* 音頻編輯 */}
-          <Animated.View entering={FadeIn.delay(500).duration(400)} style={styles.section}>
-            <ThemedText style={styles.sectionTitle}>音頻編輯</ThemedText>
-            <TouchableOpacity style={styles.audioEditButton} onPress={() => handleTrimAudio("00:00:00", recording.duration)}>
-              <LinearGradient colors={["#3A7BFF", "#00C2A8"]} style={styles.audioEditButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
-                <Ionicons name="cut-outline" size={20} color="#FFFFFF" />
-                <ThemedText style={styles.audioEditButtonText}>剪輯音頻</ThemedText>
-              </LinearGradient>
-            </TouchableOpacity>
           </Animated.View>
 
           {/* 存檔選項 */}
@@ -586,22 +569,6 @@ const styles = StyleSheet.create({
   saveButtonText: {
     color: "#FFFFFF",
     fontWeight: "600",
-  },
-  audioEditButton: {
-    borderRadius: 8,
-    overflow: "hidden",
-  },
-  audioEditButtonGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 14,
-    borderRadius: 8,
-  },
-  audioEditButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    marginLeft: 8,
   },
   archiveOptions: {
     flexDirection: "row",
