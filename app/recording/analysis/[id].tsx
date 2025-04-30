@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { StyleSheet, View, TouchableOpacity, ScrollView, Platform, StatusBar, ActivityIndicator } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
@@ -118,15 +118,17 @@ export default function AnalysisScreen() {
   if (isLoading) {
     return (
       <ThemedView style={styles.container}>
+        <Stack.Screen
+          options={{
+            title: "AI 內容分析",
+            headerShown: true,
+            headerShadowVisible: false,
+            headerStyle: {
+              backgroundColor: "#F8F9FA",
+            },
+          }}
+        />
         <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#2C3E50" />
-          </TouchableOpacity>
-          <ThemedText type="title" style={styles.title} numberOfLines={1}>
-            AI 內容分析
-          </ThemedText>
-        </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#3A7BFF" />
           <ThemedText style={styles.loadingText}>正在分析中，請稍候...</ThemedText>
@@ -138,15 +140,17 @@ export default function AnalysisScreen() {
   if (error) {
     return (
       <ThemedView style={styles.container}>
+        <Stack.Screen
+          options={{
+            title: "AI 內容分析",
+            headerShown: true,
+            headerShadowVisible: false,
+            headerStyle: {
+              backgroundColor: "#F8F9FA",
+            },
+          }}
+        />
         <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#2C3E50" />
-          </TouchableOpacity>
-          <ThemedText type="title" style={styles.title} numberOfLines={1}>
-            AI 內容分析
-          </ThemedText>
-        </View>
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={64} color="#FF6B4A" />
           <ThemedText style={styles.errorText}>{error}</ThemedText>
@@ -161,13 +165,17 @@ export default function AnalysisScreen() {
   if (!analysisResult) {
     return (
       <ThemedView style={styles.container}>
+        <Stack.Screen
+          options={{
+            title: "分析結果不存在",
+            headerShown: true,
+            headerShadowVisible: false,
+            headerStyle: {
+              backgroundColor: "#F8F9FA",
+            },
+          }}
+        />
         <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#2C3E50" />
-          </TouchableOpacity>
-          <ThemedText type="title">分析結果不存在</ThemedText>
-        </View>
         <View style={styles.noDataContainer}>
           <Ionicons name="document-text-outline" size={64} color="#718096" />
           <ThemedText style={styles.noDataText}>沒有找到此錄音的分析結果</ThemedText>
@@ -181,20 +189,17 @@ export default function AnalysisScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <Stack.Screen
+        options={{
+          title: "AI 內容分析",
+          headerShown: true,
+          headerShadowVisible: false,
+          headerStyle: {
+            backgroundColor: "#F8F9FA",
+          },
+        }}
+      />
       <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
-
-      {/* 標題欄 */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="#2C3E50" />
-        </TouchableOpacity>
-        <ThemedText type="title" style={styles.title} numberOfLines={1}>
-          AI 內容分析
-        </ThemedText>
-        <TouchableOpacity style={styles.moreButton}>
-          <Ionicons name="ellipsis-horizontal" size={24} color="#2C3E50" />
-        </TouchableOpacity>
-      </View>
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* 內容容器 */}
@@ -276,8 +281,8 @@ export default function AnalysisScreen() {
                   <View style={[styles.sentimentIndicator, { left: `${analysisResult.sentiment.overall * 100}%` }]} />
                 </View>
                 <ThemedText style={styles.sentimentValue}>
-                  {analysisResult.sentiment.overall < 0.3 ? "負面" : analysisResult.sentiment.overall < 0.7 ? "中性" : "正面"}(
-                  {Math.round(analysisResult.sentiment.overall * 100)}%)
+                  {analysisResult.sentiment.overall < 0.3 ? "負面" : analysisResult.sentiment.overall < 0.7 ? "中性" : "正面"}({Math.round(analysisResult.sentiment.overall * 100)}
+                  %)
                 </ThemedText>
               </View>
             </View>
@@ -295,10 +300,7 @@ export default function AnalysisScreen() {
             </View>
             <View style={styles.card}>
               {analysisResult.questions.map((qa, index) => (
-                <View
-                  key={index}
-                  style={[styles.qaItem, index === analysisResult.questions.length - 1 && { borderBottomWidth: 0, marginBottom: 0, paddingBottom: 0 }]}
-                >
+                <View key={index} style={[styles.qaItem, index === analysisResult.questions.length - 1 && { borderBottomWidth: 0, marginBottom: 0, paddingBottom: 0 }]}>
                   <View style={styles.questionContainer}>
                     <Ionicons name="help-circle" size={20} color="#3A7BFF" />
                     <ThemedText style={styles.questionText}>{qa.question}</ThemedText>
