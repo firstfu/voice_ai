@@ -68,9 +68,8 @@ export default function HomeScreen() {
       recordButtonScale.value = withSpring(1, { damping: 8 });
     }, 200);
 
-    // 導航到錄音頁面或啟動錄音功能
-    console.log("開始錄音");
-    // 在實際應用中: router.push('/recording');
+    // 導航到錄音頁面
+    router.push("/recording/new");
   };
 
   const handleOpenRecording = (recordingId: string) => {
@@ -125,12 +124,7 @@ export default function HomeScreen() {
         </AnimatedTouchable>
 
         {/* 快捷按鈕區 */}
-        <View style={styles.quickActionsContainer}>
-          <TouchableOpacity style={styles.quickActionButton} onPress={() => router.push("/recording/manage")}>
-            <Ionicons name="list-outline" size={22} color="#3A7BFF" />
-            <ThemedText style={styles.quickActionText}>管理錄音</ThemedText>
-          </TouchableOpacity>
-        </View>
+        <View style={styles.quickActionsContainer}>{/* 移除管理錄音按鈕，因為已經有專門的標籤頁 */}</View>
 
         {/* 最近錄音列表 */}
         <View style={styles.recentRecordingsContainer}>
