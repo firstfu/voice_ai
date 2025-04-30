@@ -71,7 +71,6 @@ export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
   const recordButtonScale = useSharedValue(1);
   const scrollViewRef = useRef<ScrollView>(null);
 
@@ -103,23 +102,10 @@ export default function HomeScreen() {
     });
   };
 
-  const handleCategorySelect = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-  };
-
   const filteredRecordings = recentRecordings.filter(recording => {
-    if (selectedCategory !== "all") {
-      const categoryMatch =
-        (selectedCategory === "work" && recording.category === "工作") ||
-        (selectedCategory === "study" && recording.category === "學習") ||
-        (selectedCategory === "personal" && recording.category === "個人");
-      if (!categoryMatch) return false;
-    }
-
     if (searchQuery.trim() !== "") {
       return recording.title.toLowerCase().includes(searchQuery.toLowerCase());
     }
-
     return true;
   });
 
@@ -149,19 +135,6 @@ export default function HomeScreen() {
         </View>
       </TouchableOpacity>
     </Animated.View>
-  );
-
-  const renderCategoryItem = ({ item, index }: { item: (typeof categories)[0]; index: number }) => (
-    <TouchableOpacity
-      style={[styles.categoryItem, selectedCategory === item.id && { backgroundColor: `${item.color}20`, borderColor: item.color }]}
-      onPress={() => handleCategorySelect(item.id)}
-      activeOpacity={0.7}
-    >
-      <View style={[styles.categoryIcon, { backgroundColor: `${item.color}15` }]}>
-        <Ionicons name={item.icon as any} size={18} color={item.color} />
-      </View>
-      <ThemedText style={[styles.categoryName, selectedCategory === item.id && { color: item.color, fontWeight: "600" }]}>{item.name}</ThemedText>
-    </TouchableOpacity>
   );
 
   return (
@@ -206,18 +179,6 @@ export default function HomeScreen() {
               </TouchableOpacity>
             )}
           </View>
-        </View>
-
-        {/* 分類選擇區 */}
-        <View style={styles.categoriesContainer}>
-          <FlatList
-            data={categories}
-            renderItem={renderCategoryItem}
-            keyExtractor={item => item.id}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoriesList}
-          />
         </View>
 
         {/* 快速錄音按鈕 */}
@@ -338,35 +299,6 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: 4,
-  },
-  categoriesContainer: {
-    marginVertical: 15,
-  },
-  categoriesList: {
-    paddingHorizontal: 20,
-  },
-  categoryItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-  },
-  categoryIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 8,
-  },
-  categoryName: {
-    fontSize: 14,
-    color: "#64748B",
   },
   startRecordingButtonContainer: {
     marginHorizontal: 20,
