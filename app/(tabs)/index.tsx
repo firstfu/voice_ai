@@ -85,12 +85,7 @@ export default function HomeScreen() {
   const renderRecordingItem = ({ item, index }: { item: Recording; index: number }) => (
     <Animated.View entering={FadeIn.delay(index * 100).duration(400)}>
       <TouchableOpacity style={styles.recordingItem} onPress={() => handleOpenRecording(item.id)} activeOpacity={0.7}>
-        <LinearGradient
-          colors={["rgba(255, 255, 255, 0.1)", "rgba(255, 255, 255, 0.05)"]}
-          style={styles.recordingItemGradient}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-        >
+        <LinearGradient colors={["rgba(255, 255, 255, 0.1)", "rgba(255, 255, 255, 0.05)"]} style={styles.recordingItemGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
           <View style={styles.recordingIconContainer}>
             <Ionicons name="mic-outline" size={24} color="#3A7BFF" />
           </View>
@@ -115,9 +110,6 @@ export default function HomeScreen() {
             智音坊
           </ThemedText>
         </View>
-        <TouchableOpacity style={styles.settingsButton}>
-          <Ionicons name="settings-outline" size={24} color="#2C3E50" />
-        </TouchableOpacity>
       </View>
 
       {/* 主內容區 */}
@@ -137,11 +129,6 @@ export default function HomeScreen() {
           <TouchableOpacity style={styles.quickActionButton} onPress={() => router.push("/recording/manage")}>
             <Ionicons name="list-outline" size={22} color="#3A7BFF" />
             <ThemedText style={styles.quickActionText}>管理錄音</ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.quickActionButton} onPress={() => console.log("Open settings")}>
-            <Ionicons name="settings-outline" size={22} color="#3A7BFF" />
-            <ThemedText style={styles.quickActionText}>設置</ThemedText>
           </TouchableOpacity>
         </View>
 
@@ -185,25 +172,6 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 28,
     fontWeight: "700",
-  },
-  settingsButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
   },
   mainContent: {
     flex: 1,

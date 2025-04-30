@@ -1,0 +1,361 @@
+import { StyleSheet, TouchableOpacity, SectionList, View, Platform, StatusBar, Switch } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useState, useRef } from "react";
+import { useRouter, Stack } from "expo-router";
+import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SectionListRenderItem } from "react-native";
+
+import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
+
+interface SettingItem {
+  id: string;
+  title: string;
+  icon: string;
+  subtitle?: string;
+  type: "toggle" | "arrow" | "info";
+  value?: boolean;
+  onPress?: () => void;
+}
+
+interface SettingSection {
+  title: string;
+  data: SettingItem[];
+}
+
+export default function SettingsScreen() {
+  const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const [settings, setSettings] = useState({
+    darkMode: false,
+    notifications: true,
+    highQuality: true,
+    autoSave: true,
+    biometricAuth: false,
+    saveOriginal: true,
+  });
+
+  const toggleSetting = (key: string) => {
+    setSettings(prevSettings => ({
+      ...prevSettings,
+      [key]: !prevSettings[key as keyof typeof prevSettings],
+    }));
+  };
+
+  const settingsSections: SettingSection[] = [
+    {
+      title: "個人化",
+      data: [
+        {
+          id: "darkMode",
+          title: "深色模式",
+          subtitle: "調整應用程式的外觀主題",
+          icon: "moon",
+          type: "toggle",
+          value: settings.darkMode,
+          onPress: () => toggleSetting("darkMode"),
+        },
+        {
+          id: "notifications",
+          title: "通知",
+          subtitle: "接收錄音完成和處理提醒",
+          icon: "notifications",
+          type: "toggle",
+          value: settings.notifications,
+          onPress: () => toggleSetting("notifications"),
+        },
+      ],
+    },
+    {
+      title: "錄音與播放",
+      data: [
+        {
+          id: "highQuality",
+          title: "高音質錄音",
+          subtitle: "以更高品質錄製聲音 (使用更多空間)",
+          icon: "disc",
+          type: "toggle",
+          value: settings.highQuality,
+          onPress: () => toggleSetting("highQuality"),
+        },
+        {
+          id: "autoSave",
+          title: "自動儲存",
+          subtitle: "自動保存錄音並進行命名",
+          icon: "save",
+          type: "toggle",
+          value: settings.autoSave,
+          onPress: () => toggleSetting("autoSave"),
+        },
+        {
+          id: "saveOriginal",
+          title: "保留原始檔案",
+          subtitle: "在編輯後保留原始錄音檔案",
+          icon: "document-text",
+          type: "toggle",
+          value: settings.saveOriginal,
+          onPress: () => toggleSetting("saveOriginal"),
+        },
+        {
+          id: "audioSettings",
+          title: "進階音訊設定",
+          subtitle: "編輯採樣率、編碼格式等設定",
+          icon: "options",
+          type: "arrow",
+          onPress: () => console.log("打開進階音訊設定"),
+        },
+      ],
+    },
+    {
+      title: "安全與隱私",
+      data: [
+        {
+          id: "biometricAuth",
+          title: "生物識別驗證",
+          subtitle: "使用指紋或臉部解鎖應用程式",
+          icon: "finger-print",
+          type: "toggle",
+          value: settings.biometricAuth,
+          onPress: () => toggleSetting("biometricAuth"),
+        },
+        {
+          id: "privacy",
+          title: "隱私設定",
+          subtitle: "管理資料分享與收集選項",
+          icon: "lock-closed",
+          type: "arrow",
+          onPress: () => console.log("打開隱私設定"),
+        },
+      ],
+    },
+    {
+      title: "關於與支援",
+      data: [
+        {
+          id: "about",
+          title: "關於智音坊",
+          subtitle: "了解我們的故事與使命",
+          icon: "information-circle",
+          type: "arrow",
+          onPress: () => console.log("關於我們"),
+        },
+        {
+          id: "help",
+          title: "幫助與支援",
+          subtitle: "尋求協助或提供反饋",
+          icon: "help-circle",
+          type: "arrow",
+          onPress: () => console.log("幫助與支援"),
+        },
+        {
+          id: "version",
+          title: "版本",
+          subtitle: "1.0.0 (Build 2402)",
+          icon: "code-slash",
+          type: "info",
+        },
+      ],
+    },
+  ];
+
+  const AnimatedSectionList = Animated.createAnimatedComponent(SectionList<SettingItem, SettingSection>);
+
+  const renderSettingItem: SectionListRenderItem<SettingItem, SettingSection> = ({ item, index }) => (
+    <Animated.View entering={FadeInDown.delay(index * 50).duration(300)} style={styles.settingItemContainer}>
+      <TouchableOpacity style={styles.settingItem} onPress={item.onPress} disabled={item.type === "info"} activeOpacity={0.7}>
+        <View style={styles.settingItemLeft}>
+          <View style={[styles.iconContainer, { backgroundColor: getIconBackground(item.id) }]}>
+            <Ionicons name={item.icon as any} size={20} color="#FFFFFF" />
+          </View>
+          <View style={styles.textContainer}>
+            <ThemedText style={styles.settingTitle}>{item.title}</ThemedText>
+            {item.subtitle && <ThemedText style={styles.settingSubtitle}>{item.subtitle}</ThemedText>}
+          </View>
+        </View>
+
+        <View style={styles.settingItemRight}>
+          {item.type === "toggle" && (
+            <Switch value={item.value} onValueChange={item.onPress} trackColor={{ false: "#E2E8F0", true: "#3A7BFF" }} thumbColor={"#FFFFFF"} ios_backgroundColor="#E2E8F0" />
+          )}
+          {item.type === "arrow" && (
+            <View style={styles.arrowContainer}>
+              <Ionicons name="chevron-forward" size={18} color="#A0AEC0" />
+            </View>
+          )}
+          {item.type === "info" && <ThemedText style={styles.infoText}>{item.subtitle}</ThemedText>}
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+
+  const renderSectionHeader = ({ section }: { section: SettingSection }) => (
+    <Animated.View entering={FadeInUp.duration(300)} style={styles.sectionHeader}>
+      <ThemedText style={styles.sectionTitle}>{section.title}</ThemedText>
+    </Animated.View>
+  );
+
+  // 根據不同設定項目返回不同的圖標背景色
+  const getIconBackground = (id: string) => {
+    const colorMap: { [key: string]: string } = {
+      darkMode: "#6366F1",
+      notifications: "#F59E0B",
+      highQuality: "#10B981",
+      autoSave: "#3B82F6",
+      saveOriginal: "#8B5CF6",
+      audioSettings: "#EC4899",
+      biometricAuth: "#EF4444",
+      privacy: "#64748B",
+      about: "#0EA5E9",
+      help: "#14B8A6",
+      version: "#8B5CF6",
+    };
+
+    return colorMap[id] || "#3A7BFF";
+  };
+
+  return (
+    <ThemedView style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
+
+      {/* 頂部設計元素 */}
+      <LinearGradient
+        colors={["rgba(58, 123, 255, 0.1)", "rgba(58, 123, 255, 0)"]}
+        style={[styles.headerBackground, { paddingTop: insets.top }]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+      />
+
+      {/* 頂部標題區 */}
+      <View style={[styles.headerContainer, { paddingTop: insets.top + 20 }]}>
+        <View style={styles.titleContainer}>
+          <ThemedText type="title" style={styles.titleText}>
+            設置
+          </ThemedText>
+        </View>
+      </View>
+
+      {/* 設置列表 */}
+      <AnimatedSectionList
+        sections={settingsSections}
+        keyExtractor={item => item.id}
+        renderItem={renderSettingItem}
+        renderSectionHeader={renderSectionHeader}
+        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 20 }]}
+        stickySectionHeadersEnabled={false}
+        showsVerticalScrollIndicator={false}
+        initialNumToRender={10}
+      />
+    </ThemedView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#F8F9FA",
+  },
+  headerBackground: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 150,
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingBottom: 20,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  titleText: {
+    fontSize: 32,
+    fontWeight: "700",
+  },
+  listContent: {
+    paddingHorizontal: 18,
+  },
+  sectionHeader: {
+    marginTop: 30,
+    marginBottom: 10,
+    paddingHorizontal: 6,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#3A7BFF",
+    letterSpacing: 0.3,
+  },
+  settingItemContainer: {
+    marginBottom: 8,
+    borderRadius: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 1,
+      },
+    }),
+  },
+  settingItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+  },
+  settingItemLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  settingTitle: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  settingSubtitle: {
+    fontSize: 13,
+    color: "#718096",
+    marginTop: 2,
+  },
+  settingItemRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: 8,
+  },
+  arrowContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(160, 174, 192, 0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  infoText: {
+    fontSize: 14,
+    color: "#A0AEC0",
+  },
+});
