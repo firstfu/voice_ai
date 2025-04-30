@@ -1,8 +1,7 @@
 import { StyleSheet, TouchableOpacity, SectionList, View, Platform, StatusBar, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useRouter, Stack } from "expo-router";
-import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SectionListRenderItem } from "react-native";
@@ -139,7 +138,7 @@ export default function SettingsScreen() {
           subtitle: "了解我們的故事與使命",
           icon: "information-circle",
           type: "arrow",
-          onPress: () => console.log("關於我們"),
+          onPress: () => router.push("/about"),
         },
         {
           id: "help",
@@ -147,7 +146,7 @@ export default function SettingsScreen() {
           subtitle: "尋求協助或提供反饋",
           icon: "help-circle",
           type: "arrow",
-          onPress: () => console.log("幫助與支援"),
+          onPress: () => router.push("/help"),
         },
         {
           id: "version",
@@ -160,10 +159,8 @@ export default function SettingsScreen() {
     },
   ];
 
-  const AnimatedSectionList = Animated.createAnimatedComponent(SectionList<SettingItem, SettingSection>);
-
   const renderSettingItem: SectionListRenderItem<SettingItem, SettingSection> = ({ item, index }) => (
-    <Animated.View entering={FadeInDown.delay(index * 50).duration(300)} style={styles.settingItemContainer}>
+    <View style={styles.settingItemContainer}>
       <TouchableOpacity style={styles.settingItem} onPress={item.onPress} disabled={item.type === "info"} activeOpacity={0.7}>
         <View style={styles.settingItemLeft}>
           <View style={[styles.iconContainer, { backgroundColor: getIconBackground(item.id) }]}>
@@ -187,13 +184,13 @@ export default function SettingsScreen() {
           {item.type === "info" && <ThemedText style={styles.infoText}>{item.subtitle}</ThemedText>}
         </View>
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
 
   const renderSectionHeader = ({ section }: { section: SettingSection }) => (
-    <Animated.View entering={FadeInUp.duration(300)} style={styles.sectionHeader}>
+    <View style={styles.sectionHeader}>
       <ThemedText style={styles.sectionTitle}>{section.title}</ThemedText>
-    </Animated.View>
+    </View>
   );
 
   // 根據不同設定項目返回不同的圖標背景色
@@ -237,7 +234,7 @@ export default function SettingsScreen() {
       </View>
 
       {/* 設置列表 */}
-      <AnimatedSectionList
+      <SectionList
         sections={settingsSections}
         keyExtractor={item => item.id}
         renderItem={renderSettingItem}
