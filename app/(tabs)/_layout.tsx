@@ -1,6 +1,7 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { Platform } from "react-native";
+import { Platform, View, StyleSheet } from "react-native";
+import { BlurView } from "expo-blur";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -14,47 +15,85 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: "#3A7BFF",
+        tabBarInactiveTintColor: "#94A3B8",
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: "absolute",
-          },
-          default: {},
-        }),
+        tabBarStyle: {
+          position: "absolute",
+          height: Platform.OS === "ios" ? 88 : 70,
+          borderTopWidth: 0,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.05,
+          shadowRadius: 8,
+          elevation: 5,
+          backgroundColor: Platform.OS === "ios" ? "transparent" : "rgba(255, 255, 255, 0.95)",
+        },
+        tabBarItemStyle: {
+          paddingVertical: 6,
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "500",
+          marginTop: 4,
+          marginBottom: Platform.OS === "ios" ? 10 : 0,
+        },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "主頁",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIconContainer : null}>
+              <IconSymbol size={24} name={focused ? "house.fill" : "house"} color={color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="recordings"
         options={{
-          title: "管理錄音",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="mic.fill" color={color} />,
+          title: "錄音庫",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIconContainer : null}>
+              <IconSymbol size={24} name={focused ? "mic.fill" : "mic"} color={color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: "Explore",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "探索",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIconContainer : null}>
+              <IconSymbol size={24} name={focused ? "paperplane.fill" : "paperplane"} color={color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: "設置",
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="gearshape.fill" color={color} />,
+          title: "設定",
+          tabBarIcon: ({ color, focused }) => (
+            <View style={focused ? styles.activeIconContainer : null}>
+              <IconSymbol size={24} name={focused ? "gearshape.fill" : "gearshape"} color={color} />
+            </View>
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  activeIconContainer: {
+    backgroundColor: "rgba(58, 123, 255, 0.15)",
+    borderRadius: 12,
+    padding: 6,
+  },
+});
