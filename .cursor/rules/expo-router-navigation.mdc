@@ -1,0 +1,42 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Expo Router 導航欄規則
+
+## 避免重複導航欄
+
+在使用 Expo Router 的應用程式中，特別是在 `app` 目錄下的路由文件中，如果同時使用了自定義導航欄和 Stack.Screen 組件，需要注意避免導航欄重複顯示的問題。
+
+### 問題描述
+
+如果在頁面中同時出現以下兩種導航元素，會導致畫面上出現兩個導航欄：
+
+1. 自定義的標題欄（通常在 JSX 中手動實現的 header 元素）
+2. Expo Router 的 Stack.Screen 自動生成的標題欄
+
+### 解決方案
+
+當在頁面中實現了自定義的標題欄，同時又使用了 Stack.Screen 時，需要將 Stack.Screen 的 headerShown 屬性設置為 false：
+
+```tsx
+// 正確的做法 - 禁用 Stack.Screen 的標題欄
+<Stack.Screen
+  options={{
+    headerShown: false,
+  }}
+/>
+```
+
+### 相關文件示例
+
+以下文件展示了正確的實現方式：
+
+- [app/recording/[id].tsx](mdc:app/recording/[id].tsx) - 在此檔案中展示了如何正確地禁用 Stack.Screen 的標題欄，只使用自定義標題欄
+
+### 注意事項
+
+- 如果頁面只需要基本的導航功能，優先考慮使用 Stack.Screen 的內建標題欄
+- 如果需要高度自定義的標題欄 UI，則使用自定義標題欄，並禁用 Stack.Screen 的標題欄
+- 始終確保在預覽或測試應用時檢查頁面頂部是否存在重複的導航元素
