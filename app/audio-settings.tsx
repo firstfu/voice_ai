@@ -9,12 +9,13 @@
  * - 噪音消除等級
  */
 
-import { StyleSheet, TouchableOpacity, View, StatusBar, Switch, ScrollView, Platform, Text } from "react-native";
+import { StyleSheet, TouchableOpacity, View, StatusBar, Switch, ScrollView, Platform, Text, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, Stack } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ThemedView } from "@/components/ThemedView";
 
@@ -26,6 +27,7 @@ interface AudioSettingsState {
   noiseReduction: boolean;
   audioEnhancement: boolean;
   autoNormalize: boolean;
+  highQuality: boolean;
 }
 
 // 選項定義
@@ -60,6 +62,9 @@ const bitRateOptions = [
   { label: "320 kbps (最高音質)", value: "320" },
 ];
 
+// 儲存設定的鍵名
+const AUDIO_SETTINGS_STORAGE_KEY = "voice_ai_audio_settings";
+
 export default function AudioSettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -73,7 +78,24 @@ export default function AudioSettingsScreen() {
     noiseReduction: true,
     audioEnhancement: false,
     autoNormalize: true,
+    highQuality: true,
   });
+
+  // 載入已儲存的設定
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        const savedSettings = await AsyncStorage.getItem(AUDIO_SETTINGS_STORAGE_KEY);
+        if (savedSettings) {
+          setAudioSettings(JSON.parse(savedSettings));
+        }
+      } catch (error) {
+        console.error("無法載入音訊設定:", error);
+      }
+    };
+
+    loadSettings();
+  }, []);
 
   // 更新設定函數
   const updateSetting = (key: keyof AudioSettingsState, value: string | boolean) => {
@@ -84,10 +106,17 @@ export default function AudioSettingsScreen() {
   };
 
   // 保存設定並返回
-  const saveSettings = () => {
-    // 在實際應用中，這裡會儲存設定到本地儲存
-    console.log("儲存設定:", audioSettings);
-    router.back();
+  const saveSettings = async () => {
+    try {
+      // 將設定保存到本地存儲
+      await AsyncStorage.setItem(AUDIO_SETTINGS_STORAGE_KEY, JSON.stringify(audioSettings));
+
+      // 顯示成功訊息
+      Alert.alert("設定已儲存", "您的進階音訊設定已成功儲存", [{ text: "確定", onPress: () => router.back() }]);
+    } catch (error) {
+      console.error("無法儲存音訊設定:", error);
+      Alert.alert("儲存失敗", "無法儲存音訊設定，請稍後再試");
+    }
   };
 
   // 渲染選項元素
@@ -140,6 +169,31 @@ export default function AudioSettingsScreen() {
       </View>
 
       <ScrollView style={styles.settingsContainer} showsVerticalScrollIndicator={false}>
+        {/* 高音質錄音選項 */}
+        <View style={styles.settingGroup}>
+          <Text style={styles.settingGroupTitle}>錄音質量</Text>
+          <Text style={styles.settingDescription}>調整錄音的品質和儲存設定</Text>
+
+          <View style={styles.toggleItem}>
+            <View style={styles.highQualityContainer}>
+              <View style={[styles.iconContainer, { backgroundColor: "#10B981" }]}>
+                <Ionicons name="disc" size={20} color="#FFFFFF" />
+              </View>
+              <View style={styles.toggleTextContainer}>
+                <Text style={styles.toggleTitle}>高音質錄音</Text>
+                <Text style={styles.toggleDescription}>以更高品質錄製聲音 (使用更多空間)</Text>
+              </View>
+            </View>
+            <Switch
+              value={audioSettings.highQuality}
+              onValueChange={value => updateSetting("highQuality", value)}
+              trackColor={{ false: "#E2E8F0", true: "#3A7BFF" }}
+              thumbColor={"#FFFFFF"}
+              ios_backgroundColor="#E2E8F0"
+            />
+          </View>
+        </View>
+
         {/* 採樣率 */}
         {renderSelectOption("採樣率", "設定錄音的採樣率，較高採樣率提供更高品質但檔案更大", sampleRateOptions, audioSettings.sampleRate, "sampleRate")}
 
@@ -338,5 +392,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     lineHeight: 22,
+  },
+  highQualityContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 14,
   },
 });

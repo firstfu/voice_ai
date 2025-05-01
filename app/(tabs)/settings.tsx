@@ -11,11 +11,12 @@
 
 import { StyleSheet, TouchableOpacity, SectionList, View, Platform, StatusBar, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, Stack } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SectionListRenderItem } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -35,6 +36,10 @@ interface SettingSection {
   data: SettingItem[];
 }
 
+// 設定儲存鍵
+const SETTINGS_STORAGE_KEY = "voice_ai_settings";
+const AUDIO_SETTINGS_STORAGE_KEY = "voice_ai_audio_settings";
+
 export default function SettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -47,11 +52,48 @@ export default function SettingsScreen() {
     saveOriginal: true,
   });
 
-  const toggleSetting = (key: string) => {
+  // 從本地儲存載入設定
+  useEffect(() => {
+    const loadSettings = async () => {
+      try {
+        // 載入一般設定
+        const savedSettings = await AsyncStorage.getItem(SETTINGS_STORAGE_KEY);
+        if (savedSettings) {
+          setSettings(prev => ({ ...prev, ...JSON.parse(savedSettings) }));
+        }
+
+        // 載入音訊設定中的高音質設定
+        const savedAudioSettings = await AsyncStorage.getItem(AUDIO_SETTINGS_STORAGE_KEY);
+        if (savedAudioSettings) {
+          const audioSettings = JSON.parse(savedAudioSettings);
+          if ("highQuality" in audioSettings) {
+            setSettings(prev => ({ ...prev, highQuality: audioSettings.highQuality }));
+          }
+        }
+      } catch (error) {
+        console.error("無法載入設定:", error);
+      }
+    };
+
+    loadSettings();
+  }, []);
+
+  // 儲存設定
+  const toggleSetting = async (key: string) => {
+    const newValue = !settings[key as keyof typeof settings];
+
     setSettings(prevSettings => ({
       ...prevSettings,
-      [key]: !prevSettings[key as keyof typeof prevSettings],
+      [key]: newValue,
     }));
+
+    try {
+      // 儲存更新後的設定
+      const settingsToSave = { ...settings, [key]: newValue };
+      await AsyncStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settingsToSave));
+    } catch (error) {
+      console.error("無法儲存設定:", error);
+    }
   };
 
   const settingsSections: SettingSection[] = [
@@ -82,15 +124,6 @@ export default function SettingsScreen() {
       title: "錄音與播放",
       data: [
         {
-          id: "highQuality",
-          title: "高音質錄音",
-          subtitle: "以更高品質錄製聲音 (使用更多空間)",
-          icon: "disc",
-          type: "toggle",
-          value: settings.highQuality,
-          onPress: () => toggleSetting("highQuality"),
-        },
-        {
           id: "autoSave",
           title: "自動儲存",
           subtitle: "自動保存錄音並進行命名",
@@ -111,7 +144,7 @@ export default function SettingsScreen() {
         {
           id: "audioSettings",
           title: "進階音訊設定",
-          subtitle: "編輯採樣率、編碼格式等設定",
+          subtitle: "音質、採樣率、編碼格式等設定",
           icon: "options",
           type: "arrow",
           onPress: () => router.push("/audio-settings"),
