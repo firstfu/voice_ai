@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { StyleSheet, View, TouchableOpacity, Platform, StatusBar, BackHandler, Animated as RNAnimated } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Platform, StatusBar, BackHandler, Animated as RNAnimated, Text } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -144,6 +144,10 @@ export default function NewRecordingScreen() {
         {isRecording && (
           <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.timerContainer}>
             <ThemedText style={styles.timerText}>{formatTime(recordingTime)}</ThemedText>
+
+            {/* <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
+              <Text style={{ fontSize: 64, fontWeight: "700", color: "#FFFFFF" }}>{formatTime(recordingTime)}</Text>
+            </View> */}
           </Animated.View>
         )}
 
@@ -280,6 +284,7 @@ const styles = StyleSheet.create({
     fontSize: 64,
     fontWeight: "700",
     color: "#FFFFFF",
+    lineHeight: 76,
   },
   instructions: {
     fontSize: 18,
