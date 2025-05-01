@@ -1,3 +1,13 @@
+/**
+ * 標籤頁面佈局設定
+ *
+ * 本文件設定了應用程式的底部標籤導航，包括:
+ * - 四個主要標籤（主頁、錄音庫、探索、設定）
+ * - 標籤欄視覺樣式與動效
+ * - 針對不同平台(iOS/Android)的顯示優化
+ * - 活躍標籤的視覺反饋
+ */
+
 import { Tabs } from "expo-router";
 import React from "react";
 import { Platform, View, StyleSheet } from "react-native";

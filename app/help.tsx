@@ -1,3 +1,13 @@
+/**
+ * 幫助與支援頁面
+ *
+ * 本頁面提供使用者支援資訊，包括:
+ * - 常見問題解答(FAQ)
+ * - 客戶支援聯絡方式
+ * - 使用者反饋提交功能
+ * - 應用程式使用指南
+ */
+
 import { StyleSheet, View, ScrollView, TouchableOpacity, Platform } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";

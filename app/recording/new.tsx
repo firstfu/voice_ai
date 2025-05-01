@@ -1,3 +1,13 @@
+/**
+ * 新錄音頁面
+ *
+ * 本頁面提供錄音創建功能，包括:
+ * - 錄音開始/暫停/繼續/停止控制
+ * - 錄音時間計時與顯示
+ * - 錄音狀態視覺化反饋（波形動畫）
+ * - 錄音完成後的導航處理
+ */
+
 import { useState, useEffect } from "react";
 import { StyleSheet, View, TouchableOpacity, Platform, StatusBar, BackHandler, Animated as RNAnimated, Text } from "react-native";
 import { useRouter, Stack } from "expo-router";

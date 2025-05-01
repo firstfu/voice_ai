@@ -1,3 +1,13 @@
+/**
+ * 圖標符號組件 (非iOS平台)
+ *
+ * 為非iOS平台提供圖標顯示功能，特點：
+ * - 將iOS原生SF Symbols圖標映射到Material Icons
+ * - 確保在Android和Web平台提供一致的視覺體驗
+ * - 支援顏色、大小和樣式自訂
+ * - 作為iOS專用圖標組件的替代實現
+ */
+
 // This file is a fallback for using MaterialIcons on Android and web.
 
 import { StyleProp, TextStyle, View, Platform, OpaqueColorValue } from "react-native";

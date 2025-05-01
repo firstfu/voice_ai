@@ -1,3 +1,15 @@
+/**
+ * 組織面板組件
+ *
+ * 提供檔案分類與組織功能的面板，特點：
+ * - 搜尋功能
+ * - 分類列表與選擇
+ * - 標籤管理系統
+ * - 分類與標籤數量顯示
+ * - 新增分類與標籤功能
+ * - 視覺化強調當前選定項目
+ */
+
 import React, { useState } from "react";
 import { StyleSheet, View, TouchableOpacity, TextInput, FlatList, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -129,11 +141,7 @@ export const OrganizePanel: React.FC<OrganizePanelProps> = ({ onCategorySelect, 
         <ThemedText style={styles.sectionTitle}>標籤</ThemedText>
         <View style={styles.tagsContainer}>
           {defaultTags.map(tag => (
-            <TouchableOpacity
-              key={tag.id}
-              style={[styles.tagItem, selectedTags.includes(tag.id) && styles.selectedTag]}
-              onPress={() => handleTagSelect(tag.id)}
-            >
+            <TouchableOpacity key={tag.id} style={[styles.tagItem, selectedTags.includes(tag.id) && styles.selectedTag]} onPress={() => handleTagSelect(tag.id)}>
               <ThemedText style={styles.tagName}>{tag.name}</ThemedText>
               <ThemedText style={styles.tagCount}>{tag.count}</ThemedText>
             </TouchableOpacity>

@@ -1,3 +1,14 @@
+/**
+ * 主頁畫面
+ *
+ * 本頁面是應用程式的主要入口點，功能包括:
+ * - 快速錄音按鈕（帶有動畫效果）
+ * - 最近錄音列表顯示
+ * - 使用者個人資料入口
+ * - 分類導航選項
+ * - 視覺化佈局與漸變背景
+ */
+
 import { StyleSheet, TouchableOpacity, FlatList, View, Platform, StatusBar, Image, ScrollView, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";

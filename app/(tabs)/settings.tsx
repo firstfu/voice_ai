@@ -1,3 +1,14 @@
+/**
+ * 設定頁面
+ *
+ * 本頁面提供應用程式設定管理功能，包括:
+ * - 個人化設定（深色模式、通知等）
+ * - 錄音與播放參數配置
+ * - 安全與隱私選項
+ * - 應用程式資訊與支援入口
+ * - 使用分組顯示的設定列表
+ */
+
 import { StyleSheet, TouchableOpacity, SectionList, View, Platform, StatusBar, Switch } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";

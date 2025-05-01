@@ -1,3 +1,13 @@
+/**
+ * 主題文字組件
+ *
+ * 提供根據系統主題自動適應的文字組件，功能包括：
+ * - 自動根據淺色/深色主題切換文字顏色
+ * - 支援多種預設文字樣式類型（標題、副標題、連結等）
+ * - 可自訂淺色/深色模式下的文字顏色
+ * - 保留原生Text組件的所有屬性
+ */
+
 import { Text, type TextProps, StyleSheet } from "react-native";
 
 import { useThemeColor } from "@/hooks/useThemeColor";

@@ -1,14 +1,17 @@
-import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withRepeat,
-  withSequence,
-} from 'react-native-reanimated';
+/**
+ * 揮手動畫組件
+ *
+ * 提供一個簡單的揮手動畫表情，功能包括：
+ * - 自動播放揮手旋轉動畫（重複4次）
+ * - 使用React Native Reanimated實現平滑動畫效果
+ * - 適合用於歡迎頁面或友好互動場景
+ */
 
-import { ThemedText } from '@/components/ThemedText';
+import { useEffect } from "react";
+import { StyleSheet } from "react-native";
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, withRepeat, withSequence } from "react-native-reanimated";
+
+import { ThemedText } from "@/components/ThemedText";
 
 export function HelloWave() {
   const rotationAnimation = useSharedValue(0);

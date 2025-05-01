@@ -1,3 +1,14 @@
+/**
+ * 錄音編輯頁面
+ *
+ * 本頁面提供錄音內容的編輯功能，包括:
+ * - 轉錄文本的編輯與修正
+ * - 添加和管理標記點（重要、任務、疑問等）
+ * - 錄音標籤管理
+ * - 原始與編輯內容的切換顯示
+ * - 變更保存與同步
+ */
+
 import { useState, useRef, useEffect } from "react";
 import { StyleSheet, View, ScrollView, TouchableOpacity, TextInput, Platform, Alert } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
@@ -136,9 +147,7 @@ export default function EditorScreen() {
 
   // 保存編輯的轉錄文本
   const handleSaveTranscript = (id: string, newText: string) => {
-    setTranscription(prev =>
-      prev.map(item => (item.id === id ? { ...item, editedText: newText, isEditing: false, isEdited: newText !== item.originalText } : item))
-    );
+    setTranscription(prev => prev.map(item => (item.id === id ? { ...item, editedText: newText, isEditing: false, isEdited: newText !== item.originalText } : item)));
   };
 
   // 新增標籤
@@ -320,11 +329,7 @@ export default function EditorScreen() {
             {transcription.map(item => (
               <View
                 key={item.id}
-                style={[
-                  styles.transcriptItem,
-                  { borderLeftColor: speakerColors[item.speaker] || "#8E8E93" },
-                  !showOriginal && item.isEdited && styles.editedTranscriptItem,
-                ]}
+                style={[styles.transcriptItem, { borderLeftColor: speakerColors[item.speaker] || "#8E8E93" }, !showOriginal && item.isEdited && styles.editedTranscriptItem]}
               >
                 <View style={styles.transcriptHeader}>
                   <View style={styles.speakerInfo}>

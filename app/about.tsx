@@ -1,3 +1,13 @@
+/**
+ * 關於頁面
+ *
+ * 本頁面提供應用程式的詳細資訊，包括:
+ * - 應用程式簡介和版本信息
+ * - 主要功能介紹
+ * - 團隊背景故事
+ * - 聯絡方式和版權信息
+ */
+
 import { StyleSheet, View, ScrollView, Image, TouchableOpacity, Platform } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";

@@ -1,3 +1,15 @@
+/**
+ * 音訊編輯器組件
+ *
+ * 提供音訊檔案編輯與處理功能，特點：
+ * - 音訊波形視覺化顯示
+ * - 音訊剪裁功能（選擇開始/結束時間點）
+ * - 音量標準化處理
+ * - 噪音消除功能
+ * - 均衡器設定（低/中/高音調整）
+ * - 完整的用戶介面與操作反饋
+ */
+
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, TouchableOpacity, ScrollView, Alert } from "react-native";
 import Slider from "@react-native-community/slider";
@@ -28,14 +40,7 @@ function generateMockWaveform() {
   return data;
 }
 
-export const AudioEditor: React.FC<AudioEditorProps> = ({
-  duration,
-  waveform = generateMockWaveform(),
-  onTrim,
-  onNormalize,
-  onNoiseReduction,
-  onEqualizer,
-}) => {
+export const AudioEditor: React.FC<AudioEditorProps> = ({ duration, waveform = generateMockWaveform(), onTrim, onNormalize, onNoiseReduction, onEqualizer }) => {
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState(duration);
   const [isEditingTrim, setIsEditingTrim] = useState(false);

@@ -1,3 +1,14 @@
+/**
+ * 錄音管理頁面
+ *
+ * 本頁面提供錄音列表與管理功能，包括:
+ * - 錄音列表顯示與瀏覽
+ * - 搜尋錄音功能
+ * - 錄音刪除管理
+ * - 進入錄音詳情頁的導航
+ * - 空狀態顯示處理
+ */
+
 import { useState, useRef } from "react";
 import { StyleSheet, View, FlatList, TouchableOpacity, Platform, StatusBar, TextInput, Modal, Alert, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";

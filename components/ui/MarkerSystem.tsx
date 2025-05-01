@@ -1,3 +1,15 @@
+/**
+ * 標記系統組件
+ *
+ * 提供音訊或視頻檔案的時間點標記功能，特點：
+ * - 支援多種標記類型（筆記、重要、問題、任務）
+ * - 時間點選擇與顯示
+ * - 標記新增、編輯、刪除功能
+ * - 跳轉到標記時間點
+ * - 標記內容編輯與類型切換
+ * - 視覺化區分不同類型的標記
+ */
+
 import React, { useState, useEffect } from "react";
 import { StyleSheet, View, TouchableOpacity, TextInput, FlatList, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";

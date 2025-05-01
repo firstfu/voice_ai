@@ -1,3 +1,14 @@
+/**
+ * 錄音詳情頁面
+ *
+ * 本頁面顯示單個錄音的詳細信息，功能包括:
+ * - 錄音播放控制與進度條
+ * - 錄音轉錄文本顯示
+ * - 不同說話者的區分與高亮
+ * - 文本編輯功能入口
+ * - 錄音分析與共享功能
+ */
+
 import { useState, useEffect, useRef } from "react";
 import { StyleSheet, View, TouchableOpacity, ScrollView, Platform, StatusBar } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
