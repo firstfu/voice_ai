@@ -46,7 +46,6 @@ interface Recording {
 export default function RecordingsScreen() {
   const router = useRouter();
   const [recordings, setRecordings] = useState<Recording[]>(mockRecordings);
-  const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -58,15 +57,9 @@ export default function RecordingsScreen() {
     router.push(`/recording/${id}`);
   };
 
-  const toggleSearch = () => {
-    setShowSearch(!showSearch);
+  const clearSearch = () => {
     setSearchQuery("");
-    if (!showSearch) {
-      // 在下一幀聚焦到搜尋框
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
-    }
+    searchInputRef.current?.focus();
   };
 
   const handleMorePress = (id: string) => {
@@ -113,32 +106,27 @@ export default function RecordingsScreen() {
       />
       <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
 
-      <View style={styles.header}>
-        {showSearch ? (
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={20} color="#718096" style={styles.searchIcon} />
-            <TextInput
-              ref={searchInputRef}
-              style={styles.searchInput}
-              placeholder="搜尋錄音..."
-              placeholderTextColor="#A0AEC0"
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-            <TouchableOpacity onPress={toggleSearch}>
+      <View style={styles.headerContainer}>
+        <ThemedText style={styles.headerTitle}>管理錄音</ThemedText>
+
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#718096" style={styles.searchIcon} />
+          <TextInput
+            ref={searchInputRef}
+            style={styles.searchInput}
+            placeholder="搜尋錄音..."
+            placeholderTextColor="#A0AEC0"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={clearSearch}>
               <Ionicons name="close" size={22} color="#718096" />
             </TouchableOpacity>
-          </View>
-        ) : (
-          <>
-            <ThemedText style={styles.headerTitle}>管理錄音</ThemedText>
-            <TouchableOpacity style={styles.searchButton} onPress={toggleSearch}>
-              <Ionicons name="search" size={24} color="#2C3E50" />
-            </TouchableOpacity>
-          </>
-        )}
+          )}
+        </View>
       </View>
 
       <FlatList
@@ -181,39 +169,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F8F9FA",
   },
-  header: {
+  headerContainer: {
     paddingTop: Platform.OS === "ios" ? 60 : 40,
     paddingHorizontal: 16,
     paddingBottom: 16,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: "700",
-  },
-  searchButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
+    marginBottom: 16,
   },
   searchContainer: {
-    flex: 1,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
