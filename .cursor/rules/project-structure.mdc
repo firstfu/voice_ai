@@ -1,0 +1,40 @@
+---
+description:
+globs: *
+alwaysApply: false
+---
+# Voice AI 專案結構指南
+
+## 目錄結構
+
+Voice AI 是一個使用 Expo 和 React Native 開發的音訊處理應用程式，其目錄結構如下：
+
+### 主要目錄
+
+- **app/** - 包含基於 expo-router 的路由和主要頁面
+  - **(tabs)/** - 底部標籤頁面
+  - **recording/** - 錄音相關頁面
+- **components/** - 可重用 UI 組件
+  - **ui/** - 專門用於介面的組件
+- **assets/** - 靜態資源
+  - **fonts/** - 自定義字體
+  - **images/** - 圖片資源
+  - **sounds/** - 音效檔案
+- **constants/** - 常量定義
+- **hooks/** - 自定義 React Hooks
+
+### 關鍵檔案
+
+- [app/_layout.tsx](mdc:app/_layout.tsx) - 主要應用佈局
+- [app/(tabs)/_layout.tsx](mdc:app/(tabs)/_layout.tsx) - 底部標籤導航配置
+- [app/(tabs)/index.tsx](mdc:app/(tabs)/index.tsx) - 首頁
+
+## 項目架構
+
+Voice AI 使用 expo-router 管理導航，並強調組件的重用性。主要設計模式包括：
+
+1. 按功能組織路由和頁面
+2. 使用共享 UI 組件
+3. 分離業務邏輯和 UI 呈現
+
+請在開發時遵循此組織結構，確保代碼保持一致性。

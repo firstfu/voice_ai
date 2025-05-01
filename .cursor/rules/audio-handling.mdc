@@ -1,0 +1,83 @@
+---
+description:
+globs: *
+alwaysApply: false
+---
+# Voice AI 音訊處理指南
+
+## 音訊功能概述
+
+Voice AI 應用程式專注於語音錄音和處理功能。本指南提供關於音訊相關功能的最佳實踐和模式。
+
+### 核心音訊功能
+
+應用程序使用 `expo-av` 套件處理音訊，主要功能包括：
+
+1. **錄音** - 通過 `Audio.Recording` API 實現
+2. **音訊播放** - 使用 `Audio.Sound` API
+3. **音訊編輯** - 通過 [AudioEditor.tsx](mdc:components/ui/AudioEditor.tsx) 組件實現
+
+### 音訊文件管理
+
+錄音相關頁面位於 `app/recording/` 目錄中，包括：
+
+- 錄音列表視圖
+- 單個錄音詳細信息
+- 錄音編輯和分析功能
+
+### 音訊資源
+
+靜態音訊資源存儲在 `assets/sounds/` 目錄中。
+
+## 最佳實踐
+
+### 1. 錄音功能
+
+```tsx
+// 使用 expo-av 進行錄音
+import { Audio } from 'expo-av';
+
+// 初始化錄音對象
+const recording = new Audio.Recording();
+
+// 開始錄音
+await recording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+await recording.startAsync();
+
+// 停止錄音
+await recording.stopAndUnloadAsync();
+const uri = recording.getURI();
+```
+
+### 2. 音訊播放
+
+```tsx
+// 載入和播放音訊
+const sound = new Audio.Sound();
+await sound.loadAsync({ uri: soundFileUri });
+await sound.playAsync();
+
+// 不再需要時釋放資源
+await sound.unloadAsync();
+```
+
+### 3. 錄音文件處理
+
+- 使用一致的文件命名約定（例如，時間戳+標識符）
+- 對長時間錄音進行分段處理
+- 提前卸載不再需要的音訊資源以節省內存
+
+### 4. 音訊會話管理
+
+```tsx
+// 設置音訊會話模式
+await Audio.setAudioModeAsync({
+  allowsRecordingIOS: true,
+  playsInSilentModeIOS: true,
+  staysActiveInBackground: false,
+  interruptionModeIOS: Audio.InterruptionModeIOS.DoNotMix,
+  interruptionModeAndroid: Audio.InterruptionModeAndroid.DoNotMix,
+});
+```
+
+確保在組件卸載時適當釋放音訊資源，避免內存洩漏。

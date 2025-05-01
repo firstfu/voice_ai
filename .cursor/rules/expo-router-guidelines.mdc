@@ -1,0 +1,109 @@
+---
+description:
+globs: *
+alwaysApply: false
+---
+# Expo Router 指南
+
+## 路由結構概述
+
+Voice AI 應用程式使用 Expo Router 管理導航功能，採用基於文件系統的路由方式。
+
+### 路由目錄結構
+
+- **app/** - 所有路由都位於此目錄下
+  - **_layout.tsx** - 根佈局文件
+  - **(tabs)/** - 底部標籤導航
+    - **_layout.tsx** - 標籤導航佈局
+    - **index.tsx** - 首頁
+    - **recordings.tsx** - 錄音列表頁
+    - **settings.tsx** - 設置頁面
+  - **recording/** - 單個錄音相關頁面
+    - **[id].tsx** - 動態路由，顯示特定錄音
+    - **analysis/** - 錄音分析相關頁面
+  - **+not-found.tsx** - 404頁面
+
+## 路由命名規範
+
+1. **靜態路由** - 常規文件名，如 `index.tsx`、`settings.tsx`
+2. **動態路由** - 使用中括號，如 `[id].tsx`
+3. **分組路由** - 使用圓括號，如 `(tabs)`
+4. **特殊路由** - 以 `+` 或 `_` 前綴，如 `+not-found.tsx`、`_layout.tsx`
+
+## 佈局組件
+
+每個目錄都可以有一個 `_layout.tsx` 文件，這些佈局組件決定了路由的導航結構：
+
+```tsx
+// 標籤導航佈局示例
+import { Tabs } from 'expo-router';
+
+export default function TabsLayout() {
+  return (
+    <Tabs>
+      <Tabs.Screen name="index" options={{ title: '首頁' }} />
+      <Tabs.Screen name="recordings" options={{ title: '錄音' }} />
+      <Tabs.Screen name="settings" options={{ title: '設置' }} />
+    </Tabs>
+  );
+}
+```
+
+## 導航最佳實踐
+
+### 1. 頁面間導航
+
+```tsx
+import { Link, useRouter } from 'expo-router';
+
+// 使用 Link 組件
+<Link href="/recording/123">查看錄音</Link>
+
+// 使用路由 hook
+const router = useRouter();
+router.push('/recording/123');
+```
+
+### 2. 參數傳遞
+
+```tsx
+// 動態路由頁面
+import { useLocalSearchParams } from 'expo-router';
+
+export default function RecordingScreen() {
+  // 獲取路由參數
+  const { id } = useLocalSearchParams<{ id: string }>();
+  // ...
+}
+```
+
+### 3. 標籤和堆疊混合使用
+
+在某些嵌套路由（如 `/recording/[id]`）中，可能需要使用 Stack 導航：
+
+```tsx
+import { Stack } from 'expo-router';
+
+export default function RecordingLayout() {
+  return (
+    <Stack>
+      <Stack.Screen
+        name="[id]"
+        options={{
+          headerShown: false, // 使用自定義標題欄時需要禁用
+        }}
+      />
+    </Stack>
+  );
+}
+```
+
+## 路由鉤子
+
+使用 expo-router 提供的各種鉤子進行導航控制：
+
+- `useRouter()` - 程式化導航
+- `useLocalSearchParams()` - 獲取路由參數
+- `useFocusEffect()` - 頁面獲取焦點時執行操作
+
+請遵循這些規範，以確保應用程式導航體驗一致、易於維護。

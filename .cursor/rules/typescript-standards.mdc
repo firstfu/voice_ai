@@ -1,0 +1,136 @@
+---
+description:
+globs: *
+alwaysApply: false
+---
+# TypeScript 規範指南
+
+## TypeScript 使用標準
+
+Voice AI 專案使用 TypeScript 開發，以下是應遵守的類型設計和使用規範。
+
+### 類型定義
+
+#### 1. 組件 Props
+
+所有組件的 props 應使用 `interface` 定義：
+
+```tsx
+interface ButtonProps {
+  title: string;
+  onPress: () => void;
+  variant?: 'primary' | 'secondary';
+  disabled?: boolean;
+}
+
+export default function Button({ title, onPress, variant = 'primary', disabled }: ButtonProps) {
+  // 組件實現
+}
+```
+
+#### 2. 狀態類型
+
+明確定義所有狀態類型：
+
+```tsx
+interface RecordingState {
+  isRecording: boolean;
+  duration: number;
+  fileUri: string | null;
+}
+
+const [recordingState, setRecordingState] = useState<RecordingState>({
+  isRecording: false,
+  duration: 0,
+  fileUri: null,
+});
+```
+
+#### 3. 函數類型
+
+對於重要函數，提供清晰的參數和返回值類型：
+
+```tsx
+function processAudio(
+  audioUri: string,
+  options: { normalize: boolean; trim: boolean }
+): Promise<{ success: boolean; processedUri: string }> {
+  // 函數實現
+}
+```
+
+### 命名約定
+
+- **類型接口**: PascalCase，以描述性名稱結尾，如 `RecordingOptions`、`UserPreferences`
+- **類型別名**: PascalCase，通常以 `Type` 結尾，如 `ColorType`、`SizeType`
+- **枚舉**: PascalCase，單數形式，如 `AudioFormat`、`ThemeMode`
+
+### 使用泛型
+
+適當使用泛型增強代碼重用性：
+
+```tsx
+// 一個通用的數據加載鉤子
+function useDataLoader<T>(
+  fetchFn: () => Promise<T>,
+  initialData: T
+): [T, boolean, Error | null] {
+  const [data, setData] = useState<T>(initialData);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  // 實現省略...
+
+  return [data, loading, error];
+}
+
+// 使用示例
+const [recordings, isLoading, error] = useDataLoader<Recording[]>(
+  fetchRecordings,
+  []
+);
+```
+
+### 類型斷言
+
+只在必要時使用類型斷言，優先使用類型保護：
+
+```tsx
+// 不推薦
+const audioElement = document.getElementById('player') as HTMLAudioElement;
+
+// 推薦
+const element = document.getElementById('player');
+if (element instanceof HTMLAudioElement) {
+  // 在這裡使用 audioElement
+}
+```
+
+### 第三方庫類型
+
+- 優先使用 `@types/*` 包提供的類型定義
+- 對於缺少類型定義的庫，在項目中創建自定義類型定義文件
+
+### 類型擴展
+
+使用擴展已有類型的方式創建新類型：
+
+```tsx
+// 基本錄音類型
+interface Recording {
+  id: string;
+  title: string;
+  duration: number;
+  createdAt: Date;
+}
+
+// 擴展為帶分析功能的錄音類型
+interface AnalyzedRecording extends Recording {
+  analysis: {
+    transcription?: string;
+    sentiment?: 'positive' | 'neutral' | 'negative';
+  };
+}
+```
+
+遵循這些標準有助於保持代碼的一致性和可讀性，同時提高開發效率和代碼質量。

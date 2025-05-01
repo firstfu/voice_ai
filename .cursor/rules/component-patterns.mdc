@@ -1,0 +1,61 @@
+---
+description:
+globs: *
+alwaysApply: false
+---
+# Voice AI 組件模式指南
+
+## 核心組件模式
+
+Voice AI 應用程式中的組件遵循以下設計模式和最佳實踐：
+
+### 組件類型
+
+1. **標準組件** - 位於 `components/` 目錄下
+   - [ThemedText.tsx](mdc:components/ThemedText.tsx) - 主題化文字組件
+   - [ThemedView.tsx](mdc:components/ThemedView.tsx) - 主題化視圖組件
+
+2. **UI 特定組件** - 位於 `components/ui/` 目錄下
+   - [IconSymbol.tsx](mdc:components/ui/IconSymbol.tsx) - 圖標元素
+   - [AudioEditor.tsx](mdc:components/ui/AudioEditor.tsx) - 音訊編輯器
+
+3. **平台特定組件** - 使用平台後綴命名
+   - [IconSymbol.tsx](mdc:components/ui/IconSymbol.tsx) - 跨平台版本
+   - [IconSymbol.ios.tsx](mdc:components/ui/IconSymbol.ios.tsx) - iOS 特定版本
+
+### 組件命名約定
+
+- 使用 PascalCase 命名所有組件
+- 平台特定組件以 `.ios.tsx` 或 `.android.tsx` 後綴命名
+- 動態功能組件使用描述性名稱（如 `AudioEditor`、`OrganizePanel`）
+
+### 組件結構
+
+組件應遵循以下結構：
+
+```tsx
+import { ... } from 'react-native';
+// 必要的導入項
+
+// 類型定義
+interface ComponentProps {
+  // 屬性定義
+}
+
+// 組件本身
+export default function Component({ ...props }: ComponentProps) {
+  // 狀態和邏輯
+
+  // 渲染函數
+  return (
+    // JSX
+  );
+}
+```
+
+## 最佳實踐
+
+1. 組件應盡可能保持獨立性，最小化依賴關係
+2. 使用TypeScript接口明確定義所有組件的屬性
+3. 大型組件應進一步拆分為更小的子組件
+4. 使用主題化組件（如 ThemedText、ThemedView）保持一致的用戶界面
