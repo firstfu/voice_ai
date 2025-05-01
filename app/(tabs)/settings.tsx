@@ -114,7 +114,7 @@ export default function SettingsScreen() {
           subtitle: "編輯採樣率、編碼格式等設定",
           icon: "options",
           type: "arrow",
-          onPress: () => console.log("打開進階音訊設定"),
+          onPress: () => router.push("/audio-settings"),
         },
       ],
     },
