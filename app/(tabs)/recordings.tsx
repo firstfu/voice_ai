@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { StyleSheet, View, FlatList, TouchableOpacity, Platform, StatusBar } from "react-native";
+import { useState, useRef } from "react";
+import { StyleSheet, View, FlatList, TouchableOpacity, Platform, StatusBar, TextInput, Modal, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -46,9 +46,41 @@ interface Recording {
 export default function RecordingsScreen() {
   const router = useRouter();
   const [recordings, setRecordings] = useState<Recording[]>(mockRecordings);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const searchInputRef = useRef<TextInput>(null);
+
+  const filteredRecordings = recordings.filter(recording => recording.title.toLowerCase().includes(searchQuery.toLowerCase()) || recording.date.includes(searchQuery));
 
   const navigateToRecordingDetail = (id: string) => {
     router.push(`/recording/${id}`);
+  };
+
+  const toggleSearch = () => {
+    setShowSearch(!showSearch);
+    setSearchQuery("");
+    if (!showSearch) {
+      // 在下一幀聚焦到搜尋框
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 100);
+    }
+  };
+
+  const handleMorePress = (id: string) => {
+    setSelectedItemId(id);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteRecording = () => {
+    if (selectedItemId) {
+      // 在實際應用中，這裡應該調用API刪除錄音
+      setRecordings(recordings.filter(rec => rec.id !== selectedItemId));
+      setShowDeleteModal(false);
+      setSelectedItemId(null);
+    }
   };
 
   const renderItem = ({ item, index }: { item: Recording; index: number }) => (
@@ -65,7 +97,7 @@ export default function RecordingsScreen() {
             <ThemedText style={styles.recordingDate}>{item.date}</ThemedText>
           </View>
         </View>
-        <TouchableOpacity style={styles.moreButton}>
+        <TouchableOpacity style={styles.moreButton} onPress={() => handleMorePress(item.id)}>
           <Ionicons name="ellipsis-vertical" size={20} color="#718096" />
         </TouchableOpacity>
       </TouchableOpacity>
@@ -82,13 +114,64 @@ export default function RecordingsScreen() {
       <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
 
       <View style={styles.header}>
-        <ThemedText style={styles.headerTitle}>管理錄音</ThemedText>
-        <TouchableOpacity style={styles.searchButton}>
-          <Ionicons name="search" size={24} color="#2C3E50" />
-        </TouchableOpacity>
+        {showSearch ? (
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={20} color="#718096" style={styles.searchIcon} />
+            <TextInput
+              ref={searchInputRef}
+              style={styles.searchInput}
+              placeholder="搜尋錄音..."
+              placeholderTextColor="#A0AEC0"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TouchableOpacity onPress={toggleSearch}>
+              <Ionicons name="close" size={22} color="#718096" />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <ThemedText style={styles.headerTitle}>管理錄音</ThemedText>
+            <TouchableOpacity style={styles.searchButton} onPress={toggleSearch}>
+              <Ionicons name="search" size={24} color="#2C3E50" />
+            </TouchableOpacity>
+          </>
+        )}
       </View>
 
-      <FlatList data={recordings} renderItem={renderItem} keyExtractor={item => item.id} contentContainerStyle={styles.listContent} showsVerticalScrollIndicator={false} />
+      <FlatList
+        data={filteredRecordings}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContent}
+        showsVerticalScrollIndicator={false}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Ionicons name="search-outline" size={48} color="#A0AEC0" />
+            <ThemedText style={styles.emptyText}>{searchQuery ? "找不到匹配的錄音" : "沒有錄音"}</ThemedText>
+          </View>
+        )}
+      />
+
+      {/* 刪除確認Modal */}
+      <Modal transparent={true} visible={showDeleteModal} animationType="fade" onRequestClose={() => setShowDeleteModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <ThemedText style={styles.modalTitle}>刪除錄音</ThemedText>
+            <ThemedText style={styles.modalText}>確定要刪除這個錄音嗎？此操作無法撤銷。</ThemedText>
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setShowDeleteModal(false)}>
+                <ThemedText style={styles.cancelButtonText}>取消</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalButton, styles.deleteButton]} onPress={handleDeleteRecording}>
+                <ThemedText style={styles.deleteButtonText}>刪除</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -129,8 +212,38 @@ const styles = StyleSheet.create({
       },
     }),
   },
+  searchContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: Platform.OS === "ios" ? 12 : 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    color: "#2D3748",
+    paddingVertical: 0,
+  },
   listContent: {
     padding: 16,
+    paddingBottom: 100, // 為底部標籤留出空間
   },
   recordingItem: {
     flexDirection: "row",
@@ -192,5 +305,79 @@ const styles = StyleSheet.create({
     height: 36,
     justifyContent: "center",
     alignItems: "center",
+  },
+  emptyContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 50,
+  },
+  emptyText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: "#A0AEC0",
+    textAlign: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContainer: {
+    width: "85%",
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 24,
+    alignItems: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 12,
+  },
+  modalText: {
+    fontSize: 16,
+    color: "#4A5568",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-between",
+  },
+  modalButton: {
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 8,
+  },
+  cancelButton: {
+    backgroundColor: "#EDF2F7",
+  },
+  cancelButtonText: {
+    color: "#4A5568",
+    fontWeight: "600",
+  },
+  deleteButton: {
+    backgroundColor: "#FC8181",
+  },
+  deleteButtonText: {
+    color: "white",
+    fontWeight: "600",
   },
 });
