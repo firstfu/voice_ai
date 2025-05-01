@@ -28,6 +28,7 @@ interface AudioSettingsState {
   audioEnhancement: boolean;
   autoNormalize: boolean;
   highQuality: boolean;
+  recordingQuality: "standard" | "high" | "custom";
 }
 
 // 選項定義
@@ -62,6 +63,43 @@ const bitRateOptions = [
   { label: "320 kbps (最高音質)", value: "320" },
 ];
 
+const recordingQualityOptions = [
+  {
+    label: "標準品質",
+    value: "standard",
+    description: "適合一般對話錄音，檔案較小",
+    icon: "document-outline" as const,
+    color: "#3A7BFF",
+    settings: {
+      sampleRate: "22050",
+      encodingFormat: "aac",
+      bitRate: "128",
+      channelCount: "mono",
+    },
+  },
+  {
+    label: "高音質",
+    value: "high",
+    description: "以最佳品質錄製聲音，適合音樂與專業用途",
+    icon: "disc-outline" as const,
+    color: "#10B981",
+    settings: {
+      sampleRate: "44100",
+      encodingFormat: "wav",
+      bitRate: "256",
+      channelCount: "stereo",
+    },
+  },
+  {
+    label: "自訂設定",
+    value: "custom",
+    description: "手動調整所有音訊參數",
+    icon: "settings-outline" as const,
+    color: "#EC4899",
+    settings: null,
+  },
+];
+
 // 儲存設定的鍵名
 const AUDIO_SETTINGS_STORAGE_KEY = "voice_ai_audio_settings";
 
@@ -79,6 +117,7 @@ export default function AudioSettingsScreen() {
     audioEnhancement: false,
     autoNormalize: true,
     highQuality: true,
+    recordingQuality: "high",
   });
 
   // 載入已儲存的設定
@@ -99,10 +138,73 @@ export default function AudioSettingsScreen() {
 
   // 更新設定函數
   const updateSetting = (key: keyof AudioSettingsState, value: string | boolean) => {
-    setAudioSettings(prev => ({
-      ...prev,
-      [key]: value,
-    }));
+    // 先創建新的設定物件
+    const newSettings = { ...audioSettings, [key]: value };
+
+    // 處理錄音品質預設值的選擇
+    if (key === "recordingQuality") {
+      const qualityOption = recordingQualityOptions.find(option => option.value === value);
+      if (qualityOption && qualityOption.settings) {
+        // 套用預設參數
+        newSettings.sampleRate = qualityOption.settings.sampleRate;
+        newSettings.encodingFormat = qualityOption.settings.encodingFormat;
+        newSettings.bitRate = qualityOption.settings.bitRate;
+        newSettings.channelCount = qualityOption.settings.channelCount;
+
+        // 更新高音質錄音開關
+        newSettings.highQuality = value === "high";
+      }
+    }
+    // 高音質錄音相關邏輯
+    else if (key === "highQuality") {
+      if (value === true) {
+        // 若開啟高音質錄音，自動設定為高品質參數
+        newSettings.sampleRate = "44100"; // CD音質
+        newSettings.encodingFormat = "wav"; // 無損格式
+        newSettings.bitRate = "256"; // 高比特率
+        newSettings.channelCount = "stereo"; // 立體聲
+        newSettings.noiseReduction = true; // 啟用噪音消除
+        newSettings.recordingQuality = "high"; // 設為高音質預設
+      } else {
+        newSettings.recordingQuality = "custom"; // 設為自訂
+      }
+    }
+    // 當用戶修改任何技術參數時
+    else if (["sampleRate", "encodingFormat", "bitRate", "channelCount"].includes(key as string)) {
+      // 檢查是否與任何預設設定匹配
+      let matchFound = false;
+      for (const option of recordingQualityOptions) {
+        if (
+          option.settings &&
+          option.settings.sampleRate === newSettings.sampleRate &&
+          option.settings.encodingFormat === newSettings.encodingFormat &&
+          option.settings.bitRate === newSettings.bitRate &&
+          option.settings.channelCount === newSettings.channelCount
+        ) {
+          newSettings.recordingQuality = option.value as any;
+          matchFound = true;
+          break;
+        }
+      }
+
+      // 如果沒有匹配的預設，則設為自訂
+      if (!matchFound) {
+        newSettings.recordingQuality = "custom";
+      }
+
+      // 反向邏輯：當用戶手動調低音質設定時，自動關閉高音質模式
+      if (
+        (key === "sampleRate" && parseInt(value as string) < 44100) ||
+        (key === "encodingFormat" && value !== "wav" && value !== "flac") ||
+        (key === "bitRate" && parseInt(value as string) < 192) ||
+        (key === "channelCount" && value === "mono")
+      ) {
+        newSettings.highQuality = false;
+      }
+    }
+
+    // 更新狀態
+    setAudioSettings(newSettings);
   };
 
   // 保存設定並返回
@@ -120,7 +222,14 @@ export default function AudioSettingsScreen() {
   };
 
   // 渲染選項元素
-  const renderSelectOption = (title: string, description: string, options: Array<{ label: string; value: string }>, currentValue: string, settingKey: keyof AudioSettingsState) => {
+  const renderSelectOption = (
+    title: string,
+    description: string,
+    options: Array<{ label: string; value: string }>,
+    currentValue: string,
+    settingKey: keyof AudioSettingsState,
+    disabled: boolean = false
+  ) => {
     return (
       <View style={styles.settingGroup}>
         <Text style={styles.settingGroupTitle}>{title}</Text>
@@ -129,13 +238,17 @@ export default function AudioSettingsScreen() {
           {options.map(option => (
             <TouchableOpacity
               key={option.value}
-              style={[styles.optionButton, audioSettings[settingKey] === option.value && styles.optionButtonSelected]}
-              onPress={() => updateSetting(settingKey, option.value)}
+              style={[styles.optionButton, audioSettings[settingKey] === option.value && styles.optionButtonSelected, disabled && styles.optionButtonDisabled]}
+              onPress={() => !disabled && updateSetting(settingKey, option.value)}
+              disabled={disabled}
             >
-              <Text style={[styles.optionText, audioSettings[settingKey] === option.value && styles.optionTextSelected]}>{option.label}</Text>
+              <Text style={[styles.optionText, audioSettings[settingKey] === option.value && styles.optionTextSelected, disabled && styles.optionTextDisabled]}>
+                {option.label}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
+        {disabled && audioSettings.recordingQuality !== "custom" && <Text style={styles.disabledNote}>使用預設品質時，系統會自動選擇最佳設定</Text>}
       </View>
     );
   };
@@ -169,42 +282,62 @@ export default function AudioSettingsScreen() {
       </View>
 
       <ScrollView style={styles.settingsContainer} showsVerticalScrollIndicator={false}>
-        {/* 高音質錄音選項 */}
+        {/* 錄音質量選項 */}
         <View style={styles.settingGroup}>
           <Text style={styles.settingGroupTitle}>錄音質量</Text>
           <Text style={styles.settingDescription}>調整錄音的品質和儲存設定</Text>
 
-          <View style={styles.toggleItem}>
-            <View style={styles.highQualityContainer}>
-              <View style={[styles.iconContainer, { backgroundColor: "#10B981" }]}>
-                <Ionicons name="disc" size={20} color="#FFFFFF" />
-              </View>
-              <View style={styles.toggleTextContainer}>
-                <Text style={styles.toggleTitle}>高音質錄音</Text>
-                <Text style={styles.toggleDescription}>以更高品質錄製聲音 (使用更多空間)</Text>
+          <View style={styles.qualityOptionsContainer}>
+            {recordingQualityOptions.map(option => (
+              <TouchableOpacity
+                key={option.value}
+                style={[styles.qualityOption, audioSettings.recordingQuality === option.value && styles.qualityOptionSelected, { borderColor: option.color }]}
+                onPress={() => updateSetting("recordingQuality", option.value)}
+              >
+                <View style={[styles.qualityIconContainer, { backgroundColor: option.color }]}>
+                  <Ionicons name={option.icon} size={20} color="#FFFFFF" />
+                </View>
+                <View style={styles.qualityTextContainer}>
+                  <Text style={styles.qualityTitle}>{option.label}</Text>
+                  <Text style={styles.qualityDescription}>{option.description}</Text>
+                </View>
+                <View style={styles.qualityRadioContainer}>
+                  <View
+                    style={[
+                      styles.qualityRadio,
+                      audioSettings.recordingQuality === option.value && styles.qualityRadioSelected,
+                      audioSettings.recordingQuality === option.value && { borderColor: option.color },
+                    ]}
+                  >
+                    {audioSettings.recordingQuality === option.value && <View style={[styles.qualityRadioDot, { backgroundColor: option.color }]} />}
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+          {/* 顯示當前選擇的預設品質參數摘要 */}
+          {audioSettings.recordingQuality !== "custom" && (
+            <View style={styles.presetSummaryContainer}>
+              <Text style={styles.presetSummaryTitle}>預設參數摘要：</Text>
+              <View style={styles.presetSummaryItems}>
+                <Text style={styles.presetSummaryItem}>
+                  採樣率:{" "}
+                  {recordingQualityOptions.find(opt => opt.value === audioSettings.recordingQuality)?.settings?.sampleRate === "44100"
+                    ? "44.1 kHz (CD音質)"
+                    : "22.05 kHz (語音品質)"}
+                </Text>
+                <Text style={styles.presetSummaryItem}>
+                  格式: {recordingQualityOptions.find(opt => opt.value === audioSettings.recordingQuality)?.settings?.encodingFormat.toUpperCase()}
+                </Text>
+                <Text style={styles.presetSummaryItem}>
+                  聲道: {recordingQualityOptions.find(opt => opt.value === audioSettings.recordingQuality)?.settings?.channelCount === "stereo" ? "立體聲" : "單聲道"}
+                </Text>
+                <Text style={styles.presetSummaryItem}>比特率: {recordingQualityOptions.find(opt => opt.value === audioSettings.recordingQuality)?.settings?.bitRate} kbps</Text>
               </View>
             </View>
-            <Switch
-              value={audioSettings.highQuality}
-              onValueChange={value => updateSetting("highQuality", value)}
-              trackColor={{ false: "#E2E8F0", true: "#3A7BFF" }}
-              thumbColor={"#FFFFFF"}
-              ios_backgroundColor="#E2E8F0"
-            />
-          </View>
+          )}
         </View>
-
-        {/* 採樣率 */}
-        {renderSelectOption("採樣率", "設定錄音的採樣率，較高採樣率提供更高品質但檔案更大", sampleRateOptions, audioSettings.sampleRate, "sampleRate")}
-
-        {/* 編碼格式 */}
-        {renderSelectOption("編碼格式", "選擇錄音檔案的編碼格式，不同格式在相容性和品質上有所差異", encodingFormatOptions, audioSettings.encodingFormat, "encodingFormat")}
-
-        {/* 聲道設定 */}
-        {renderSelectOption("聲道設定", "設定錄音的聲道數量", channelCountOptions, audioSettings.channelCount, "channelCount")}
-
-        {/* 比特率設定 */}
-        {renderSelectOption("比特率 (kbps)", "設定錄音的比特率，影響音訊品質和檔案大小", bitRateOptions, audioSettings.bitRate, "bitRate")}
 
         {/* 音訊處理選項 */}
         <View style={styles.settingGroup}>
@@ -253,6 +386,51 @@ export default function AudioSettingsScreen() {
             />
           </View>
         </View>
+
+        {/* 僅在自訂設定模式下顯示詳細參數 */}
+        {audioSettings.recordingQuality === "custom" && (
+          <>
+            {/* 採樣率 */}
+            {renderSelectOption(
+              "採樣率",
+              "設定錄音的採樣率，較高採樣率提供更高品質但檔案更大",
+              sampleRateOptions,
+              audioSettings.sampleRate,
+              "sampleRate",
+              false // 自訂模式下可編輯
+            )}
+
+            {/* 編碼格式 */}
+            {renderSelectOption(
+              "編碼格式",
+              "選擇錄音檔案的編碼格式，不同格式在相容性和品質上有所差異",
+              encodingFormatOptions,
+              audioSettings.encodingFormat,
+              "encodingFormat",
+              false // 自訂模式下可編輯
+            )}
+
+            {/* 聲道設定 */}
+            {renderSelectOption(
+              "聲道設定",
+              "設定錄音的聲道數量",
+              channelCountOptions,
+              audioSettings.channelCount,
+              "channelCount",
+              false // 自訂模式下可編輯
+            )}
+
+            {/* 比特率設定 */}
+            {renderSelectOption(
+              "比特率 (kbps)",
+              "設定錄音的比特率，影響音訊品質和檔案大小",
+              bitRateOptions,
+              audioSettings.bitRate,
+              "bitRate",
+              false // 自訂模式下可編輯
+            )}
+          </>
+        )}
 
         {/* 保存按鈕 */}
         <TouchableOpacity style={styles.saveButton} onPress={saveSettings}>
@@ -345,6 +523,10 @@ const styles = StyleSheet.create({
     borderColor: "#EC4899",
     backgroundColor: "rgba(236, 72, 153, 0.1)",
   },
+  optionButtonDisabled: {
+    backgroundColor: "rgba(236, 240, 250, 0.6)",
+    borderColor: "#D1D5DB",
+  },
   optionText: {
     fontSize: 14,
     color: "#64748B",
@@ -355,6 +537,9 @@ const styles = StyleSheet.create({
   optionTextSelected: {
     color: "#EC4899",
     fontWeight: "500",
+  },
+  optionTextDisabled: {
+    color: "#9CA3AF",
   },
   toggleItem: {
     flexDirection: "row",
@@ -393,17 +578,107 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 22,
   },
-  highQualityContainer: {
+  qualityOptionsContainer: {
+    marginTop: 5,
+  },
+  qualityOption: {
     flexDirection: "row",
     alignItems: "center",
-    flex: 1,
+    padding: 12,
+    marginBottom: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
   },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+  qualityOptionSelected: {
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  qualityIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 14,
+    marginRight: 15,
+  },
+  qualityTextContainer: {
+    flex: 1,
+  },
+  qualityTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000000",
+    marginBottom: 3,
+    lineHeight: 20,
+  },
+  qualityDescription: {
+    fontSize: 13,
+    color: "#64748B",
+    lineHeight: 18,
+  },
+  qualityRadioContainer: {
+    width: 40,
+    alignItems: "center",
+  },
+  qualityRadio: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: "#CBD5E1",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  qualityRadioSelected: {
+    borderColor: "#3A7BFF",
+  },
+  qualityRadioDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "#3A7BFF",
+  },
+  disabledNote: {
+    fontSize: 13,
+    color: "#3A7BFF",
+    fontStyle: "italic",
+    marginTop: 10,
+    lineHeight: 18,
+  },
+  presetSummaryContainer: {
+    marginTop: 16,
+    backgroundColor: "rgba(240, 240, 250, 0.6)",
+    borderRadius: 8,
+    padding: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: "#3A7BFF",
+  },
+  presetSummaryTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#3A7BFF",
+    marginBottom: 6,
+    lineHeight: 20,
+  },
+  presetSummaryItems: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
+  presetSummaryItem: {
+    fontSize: 13,
+    color: "#4B5563",
+    marginRight: 12,
+    marginBottom: 4,
+    lineHeight: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
   },
 });
