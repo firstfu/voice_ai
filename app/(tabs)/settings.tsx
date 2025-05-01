@@ -44,7 +44,6 @@ export default function SettingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [settings, setSettings] = useState({
-    darkMode: false,
     notifications: true,
     highQuality: true,
     autoSave: true,
@@ -100,15 +99,6 @@ export default function SettingsScreen() {
     {
       title: "個人化",
       data: [
-        {
-          id: "darkMode",
-          title: "深色模式",
-          subtitle: "調整應用程式的外觀主題",
-          icon: "moon",
-          type: "toggle",
-          value: settings.darkMode,
-          onPress: () => toggleSetting("darkMode"),
-        },
         {
           id: "notifications",
           title: "通知",
@@ -240,7 +230,6 @@ export default function SettingsScreen() {
   // 根據不同設定項目返回不同的圖標背景色
   const getIconBackground = (id: string) => {
     const colorMap: { [key: string]: string } = {
-      darkMode: "#6366F1",
       notifications: "#F59E0B",
       highQuality: "#10B981",
       autoSave: "#3B82F6",
