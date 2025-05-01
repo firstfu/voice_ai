@@ -1,8 +1,9 @@
 import { useState, useRef } from "react";
-import { StyleSheet, View, FlatList, TouchableOpacity, Platform, StatusBar, TextInput, Modal, Alert } from "react-native";
+import { StyleSheet, View, FlatList, TouchableOpacity, Platform, StatusBar, TextInput, Modal, Alert, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import Animated, { FadeIn } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -45,6 +46,7 @@ interface Recording {
 
 export default function RecordingsScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [recordings, setRecordings] = useState<Recording[]>(mockRecordings);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
@@ -106,8 +108,10 @@ export default function RecordingsScreen() {
       />
       <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
 
-      <View style={styles.headerContainer}>
-        <ThemedText style={styles.headerTitle}>管理錄音</ThemedText>
+      <View style={[styles.headerContainer, { paddingTop: insets.top + 20 }]}>
+        <ThemedText type="title" style={styles.headerTitle}>
+          管理錄音
+        </ThemedText>
 
         <View style={styles.searchContainer}>
           <Ionicons name="search" size={20} color="#718096" style={styles.searchIcon} />
@@ -170,12 +174,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8F9FA",
   },
   headerContainer: {
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
     paddingHorizontal: 16,
     paddingBottom: 16,
   },
   headerTitle: {
-    fontSize: 28,
     fontWeight: "700",
     marginBottom: 16,
   },
