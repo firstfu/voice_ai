@@ -191,6 +191,19 @@ export default function SettingsScreen() {
         },
       ],
     },
+    {
+      title: "開發者工具",
+      data: [
+        {
+          id: "devTools",
+          title: "開發者工具",
+          subtitle: "用於測試與開發的功能",
+          icon: "construct",
+          type: "arrow",
+          onPress: () => router.push("/dev-tools"),
+        },
+      ],
+    },
   ];
 
   const renderSettingItem: SectionListRenderItem<SettingItem, SettingSection> = ({ item, index }) => (
@@ -208,7 +221,13 @@ export default function SettingsScreen() {
 
         <View style={styles.settingItemRight}>
           {item.type === "toggle" && (
-            <Switch value={item.value} onValueChange={item.onPress} trackColor={{ false: "#E2E8F0", true: "#3A7BFF" }} thumbColor={"#FFFFFF"} ios_backgroundColor="#E2E8F0" />
+            <Switch
+              value={item.value}
+              onValueChange={item.onPress}
+              trackColor={{ false: "#E2E8F0", true: "#3A7BFF" }}
+              thumbColor={"#FFFFFF"}
+              ios_backgroundColor="#E2E8F0"
+            />
           )}
           {item.type === "arrow" && (
             <View style={styles.arrowContainer}>
