@@ -1,10 +1,10 @@
-# Voice AI 語音助手 📱🎙️
+# Record AI 錄智通 📱🎙️
 
 這是一個基於 [Expo](https://expo.dev) 和 React Native 開發的專業語音處理應用程式，專注於高品質語音錄製、分析和編輯。
 
 ## 專案概述
 
-Voice AI (智音坊) 是一款功能強大的語音處理工具，專為需要高效處理音訊的專業人士和普通用戶設計，提供以下核心功能：
+Record AI (錄智通) 是一款功能強大的語音處理工具，專為需要高效處理音訊的專業人士和普通用戶設計，提供以下核心功能：
 
 - 🎙️ 專業級語音錄製，支援暫停/繼續功能
 - 🔊 高質量音訊播放與波形可視化
@@ -16,7 +16,7 @@ Voice AI (智音坊) 是一款功能強大的語音處理工具，專為需要�
 
 ## 技術架構
 
-Voice AI 採用現代 React Native 技術棧：
+Record AI 採用現代 React Native 技術棧：
 
 - **框架**: [Expo](https://expo.dev) SDK 52 - 提供跨平台開發能力
 - **語言**: TypeScript - 確保代碼類型安全
@@ -29,7 +29,7 @@ Voice AI 採用現代 React Native 技術棧：
 ## 專案結構
 
 ```
-voice_ai/
+record_ai/
 ├── app/                     # 應用路由和頁面
 │   ├── _layout.tsx          # 根佈局
 │   ├── +not-found.tsx       # 404 頁面
@@ -125,7 +125,7 @@ voice_ai/
 
 ## 音訊處理功能
 
-Voice AI 使用 `expo-av` 套件處理音訊，主要包括：
+Record AI 使用 `expo-av` 套件處理音訊，主要包括：
 
 - **錄音功能**：透過 `Audio.Recording` API 實現高品質錄音
 
@@ -159,7 +159,7 @@ Voice AI 使用 `expo-av` 套件處理音訊，主要包括：
 
 ## 使用的主要套件
 
-Voice AI 使用以下關鍵依賴套件：
+Record AI 使用以下關鍵依賴套件：
 
 - **expo**: v52.0.46 - React Native 應用開發工具
 - **expo-av**: v15.0.2 - 音訊和視訊處理
