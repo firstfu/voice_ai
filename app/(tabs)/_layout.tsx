@@ -74,17 +74,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: "探索",
-          tabBarIcon: ({ color, focused }) => (
-            <View style={focused ? styles.activeIconContainer : null}>
-              <IconSymbol size={24} name={focused ? "paperplane.fill" : "paperplane"} color={color} />
-            </View>
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="settings"
         options={{

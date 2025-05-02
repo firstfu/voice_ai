@@ -298,7 +298,8 @@ export default function AnalysisScreen() {
                   <View style={[styles.sentimentIndicator, { left: `${analysisResult.sentiment.overall * 100}%` }]} />
                 </View>
                 <ThemedText style={styles.sentimentValue}>
-                  {analysisResult.sentiment.overall < 0.3 ? "負面" : analysisResult.sentiment.overall < 0.7 ? "中性" : "正面"}({Math.round(analysisResult.sentiment.overall * 100)}
+                  {analysisResult.sentiment.overall < 0.3 ? "負面" : analysisResult.sentiment.overall < 0.7 ? "中性" : "正面"}(
+                  {Math.round(analysisResult.sentiment.overall * 100)}
                   %)
                 </ThemedText>
               </View>
@@ -317,7 +318,10 @@ export default function AnalysisScreen() {
             </View>
             <View style={styles.card}>
               {analysisResult.questions.map((qa, index) => (
-                <View key={index} style={[styles.qaItem, index === analysisResult.questions.length - 1 && { borderBottomWidth: 0, marginBottom: 0, paddingBottom: 0 }]}>
+                <View
+                  key={index}
+                  style={[styles.qaItem, index === analysisResult.questions.length - 1 && { borderBottomWidth: 0, marginBottom: 0, paddingBottom: 0 }]}
+                >
                   <View style={styles.questionContainer}>
                     <Ionicons name="help-circle" size={20} color="#3A7BFF" />
                     <ThemedText style={styles.questionText}>{qa.question}</ThemedText>
