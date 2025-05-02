@@ -1,7 +1,7 @@
 {
     "expo": {
-        "name": "home_v3",
-        "slug": "home_v3",
+        "name": "voice_ai",
+        "slug": "voice_ai",
         "version": "1.0.0",
         "orientation": "portrait",
         "icon": "./assets/images/icon.png",
@@ -37,19 +37,17 @@
         "experiments": {
             "typedRoutes": true
         },
-        "extra": {
-            "router": {
-                "origin": false
-            },
-            "eas": {
-                "projectId": "299d7835-1d83-4c2a-997b-96a4cbffda73"
-            }
-        },
         "runtimeVersion": {
             "policy": "appVersion"
         },
         "updates": {
-            "url": "https://u.expo.dev/299d7835-1d83-4c2a-997b-96a4cbffda73"
+            "url": "https://u.expo.dev/291042fc-55e1-47c7-8515-40c4b8983913"
+        },
+        "extra": {
+            "router": {},
+            "eas": {
+                "projectId": "291042fc-55e1-47c7-8515-40c4b8983913"
+            }
         }
     }
 }
