@@ -62,7 +62,11 @@ export default function RecordingsScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showActionMenu, setShowActionMenu] = useState(false);
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [newRecordingName, setNewRecordingName] = useState("");
   const searchInputRef = useRef<TextInput>(null);
+  const renameInputRef = useRef<TextInput>(null);
 
   const filteredRecordings = recordings.filter(
     recording => recording.title.toLowerCase().includes(searchQuery.toLowerCase()) || recording.date.includes(searchQuery)
@@ -79,7 +83,7 @@ export default function RecordingsScreen() {
 
   const handleMorePress = (id: string) => {
     setSelectedItemId(id);
-    setShowDeleteModal(true);
+    setShowActionMenu(true);
   };
 
   const handleDeleteRecording = () => {
@@ -88,6 +92,28 @@ export default function RecordingsScreen() {
       setRecordings(recordings.filter(rec => rec.id !== selectedItemId));
       setShowDeleteModal(false);
       setSelectedItemId(null);
+    }
+  };
+
+  const handleRename = () => {
+    setShowActionMenu(false);
+    const recording = recordings.find(rec => rec.id === selectedItemId);
+    if (recording) {
+      setNewRecordingName(recording.title);
+      setShowRenameModal(true);
+      // 在下一個渲染週期後聚焦到輸入框
+      setTimeout(() => {
+        renameInputRef.current?.focus();
+      }, 100);
+    }
+  };
+
+  const confirmRename = () => {
+    if (selectedItemId && newRecordingName.trim()) {
+      // 在實際應用中，這裡應該調用API更新錄音名稱
+      setRecordings(recordings.map(rec => (rec.id === selectedItemId ? { ...rec, title: newRecordingName.trim() } : rec)));
+      setShowRenameModal(false);
+      setNewRecordingName("");
     }
   };
 
@@ -172,6 +198,60 @@ export default function RecordingsScreen() {
               </TouchableOpacity>
               <TouchableOpacity style={[styles.modalButton, styles.deleteButton]} onPress={handleDeleteRecording}>
                 <ThemedText style={styles.deleteButtonText}>刪除</ThemedText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 操作選單Modal */}
+      <Modal transparent={true} visible={showActionMenu} animationType="fade" onRequestClose={() => setShowActionMenu(false)}>
+        <TouchableOpacity style={styles.modalOverlay} activeOpacity={1} onPress={() => setShowActionMenu(false)}>
+          <View style={styles.actionMenuContainer}>
+            <TouchableOpacity style={styles.actionMenuItem} onPress={handleRename}>
+              <Ionicons name="pencil-outline" size={22} color="#3A7BFF" />
+              <ThemedText style={styles.actionMenuText}>變更名稱</ThemedText>
+            </TouchableOpacity>
+
+            <View style={styles.actionMenuDivider} />
+
+            <TouchableOpacity
+              style={styles.actionMenuItem}
+              onPress={() => {
+                setShowActionMenu(false);
+                setShowDeleteModal(true);
+              }}
+            >
+              <Ionicons name="trash-outline" size={22} color="#F56565" />
+              <ThemedText style={[styles.actionMenuText, { color: "#F56565" }]}>刪除記錄</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* 重命名Modal */}
+      <Modal transparent={true} visible={showRenameModal} animationType="fade" onRequestClose={() => setShowRenameModal(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <ThemedText style={styles.modalTitle}>變更名稱</ThemedText>
+
+            <TextInput
+              ref={renameInputRef}
+              style={styles.renameInput}
+              value={newRecordingName}
+              onChangeText={setNewRecordingName}
+              placeholder="輸入新名稱"
+              placeholderTextColor="#A0AEC0"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={[styles.modalButton, styles.cancelButton]} onPress={() => setShowRenameModal(false)}>
+                <ThemedText style={styles.cancelButtonText}>取消</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.modalButton, styles.confirmButton]} onPress={confirmRename}>
+                <ThemedText style={styles.confirmButtonText}>確認</ThemedText>
               </TouchableOpacity>
             </View>
           </View>
@@ -360,5 +440,60 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: "white",
     fontWeight: "600",
+  },
+  actionMenuContainer: {
+    position: "absolute",
+    right: 20,
+    top: "30%",
+    backgroundColor: "white",
+    borderRadius: 14,
+    overflow: "hidden",
+    width: 180,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
+  },
+  actionMenuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+  },
+  actionMenuText: {
+    fontSize: 16,
+    fontWeight: "500",
+    marginLeft: 12,
+    color: "#2D3748",
+  },
+  actionMenuDivider: {
+    height: 1,
+    backgroundColor: "#F0F0F0",
+    width: "100%",
+  },
+  renameInput: {
+    width: "100%",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 16,
+    color: "#2D3748",
+    backgroundColor: "#F8FAFC",
+    marginBottom: 24,
+  },
+  confirmButton: {
+    backgroundColor: "#3A7BFF",
+  },
+  confirmButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "white",
   },
 });

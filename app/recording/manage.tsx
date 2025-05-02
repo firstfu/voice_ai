@@ -318,7 +318,11 @@ export default function ManageRecordingsScreen() {
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tagsScroll} contentContainerStyle={styles.tagsContent}>
             {defaultTags.map(tag => (
-              <TouchableOpacity key={tag.id} style={[styles.tagChip, selectedTags.includes(tag.name) && styles.selectedTagChip]} onPress={() => handleTagSelect(tag.name)}>
+              <TouchableOpacity
+                key={tag.id}
+                style={[styles.tagChip, selectedTags.includes(tag.name) && styles.selectedTagChip]}
+                onPress={() => handleTagSelect(tag.name)}
+              >
                 <ThemedText style={[styles.tagChipText, selectedTags.includes(tag.name) && styles.selectedTagChipText]}>{tag.name}</ThemedText>
               </TouchableOpacity>
             ))}

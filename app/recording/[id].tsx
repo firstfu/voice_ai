@@ -416,7 +416,9 @@ export default function RecordingDetailScreen() {
                     )}
                   </View>
                 </View>
-                <ThemedText style={styles.transcriptText}>{showOriginal ? transcript.originalText || transcript.text : transcript.editedText || transcript.text}</ThemedText>
+                <ThemedText style={styles.transcriptText}>
+                  {showOriginal ? transcript.originalText || transcript.text : transcript.editedText || transcript.text}
+                </ThemedText>
               </TouchableOpacity>
             </Animated.View>
           ))}
