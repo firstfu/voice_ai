@@ -106,6 +106,22 @@ export default function AnalysisScreen() {
   useEffect(() => {
     // 頁面加載時獲取分析結果
     loadAnalysisResult();
+
+    // 添加事件監聽器來處理來自 _layout.tsx 的重新分析請求
+    const handleRefreshEvent = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail && customEvent.detail.id === recordingId) {
+        handleRefreshAnalysis();
+      }
+    };
+
+    // 添加事件監聽器
+    document.addEventListener("refreshAnalysis", handleRefreshEvent);
+
+    // 清理事件監聽器
+    return () => {
+      document.removeEventListener("refreshAnalysis", handleRefreshEvent);
+    };
   }, [recordingId]);
 
   const loadAnalysisResult = async () => {
@@ -336,24 +352,6 @@ export default function AnalysisScreen() {
           </Animated.View>
         </View>
       </ScrollView>
-
-      {/* 底部工具欄 */}
-      <View style={styles.toolbar}>
-        <TouchableOpacity style={styles.toolbarButton} onPress={handleRefreshAnalysis}>
-          <Ionicons name="refresh-outline" size={24} color="#3A7BFF" />
-          <ThemedText style={styles.toolbarButtonText}>重新分析</ThemedText>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.toolbarButton}>
-          <Ionicons name="save-outline" size={24} color="#3A7BFF" />
-          <ThemedText style={styles.toolbarButtonText}>匯出報告</ThemedText>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.toolbarButton}>
-          <Ionicons name="share-social-outline" size={24} color="#3A7BFF" />
-          <ThemedText style={styles.toolbarButtonText}>分享</ThemedText>
-        </TouchableOpacity>
-      </View>
     </ThemedView>
   );
 }
@@ -631,24 +629,5 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     color: "#2C3E50",
-  },
-  toolbar: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: "white",
-    borderTopWidth: 1,
-    borderTopColor: "#F0F2F5",
-  },
-  toolbarButton: {
-    alignItems: "center",
-    paddingHorizontal: 12,
-  },
-  toolbarButtonText: {
-    fontSize: 12,
-    marginTop: 4,
-    color: "#3A7BFF",
   },
 });
