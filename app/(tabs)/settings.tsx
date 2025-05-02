@@ -291,7 +291,7 @@ export default function SettingsScreen() {
         keyExtractor={item => item.id}
         renderItem={renderSettingItem}
         renderSectionHeader={renderSectionHeader}
-        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 20 }]}
+        contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 80 }]}
         stickySectionHeadersEnabled={false}
         showsVerticalScrollIndicator={false}
         initialNumToRender={10}
