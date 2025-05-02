@@ -64,7 +64,9 @@ export default function RecordingsScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const searchInputRef = useRef<TextInput>(null);
 
-  const filteredRecordings = recordings.filter(recording => recording.title.toLowerCase().includes(searchQuery.toLowerCase()) || recording.date.includes(searchQuery));
+  const filteredRecordings = recordings.filter(
+    recording => recording.title.toLowerCase().includes(searchQuery.toLowerCase()) || recording.date.includes(searchQuery)
+  );
 
   const navigateToRecordingDetail = (id: string) => {
     router.push(`/recording/${id}`);

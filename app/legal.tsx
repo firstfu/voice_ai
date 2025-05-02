@@ -7,7 +7,7 @@
  * - 資料處理聲明
  */
 
-import { StyleSheet, ScrollView, View, TouchableOpacity, Dimensions, Animated } from "react-native";
+import { StyleSheet, ScrollView, View, TouchableOpacity, Animated } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,43 +17,28 @@ import { useState, useRef } from "react";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 
-const TabBar = ({ activeTab, setActiveTab }: { activeTab: number; setActiveTab: (index: number) => void }) => {
-  const tabs = ["隱私權政策", "服務條款"];
-  const translateX = useRef(new Animated.Value(0)).current;
-  const tabWidth = Dimensions.get("window").width / tabs.length;
-
-  const handleTabPress = (index: number) => {
-    Animated.spring(translateX, {
-      toValue: index * tabWidth,
-      useNativeDriver: true,
-    }).start();
-    setActiveTab(index);
-  };
-
-  return (
-    <View style={styles.tabContainer}>
-      {tabs.map((tab, index) => (
-        <TouchableOpacity key={index} style={[styles.tab, { width: tabWidth }]} onPress={() => handleTabPress(index)} activeOpacity={0.7}>
-          <ThemedText style={[styles.tabText, activeTab === index && styles.activeTabText]}>{tab}</ThemedText>
-        </TouchableOpacity>
-      ))}
-      <Animated.View
-        style={[
-          styles.tabIndicator,
-          {
-            width: tabWidth,
-            transform: [{ translateX }],
-          },
-        ]}
-      />
-    </View>
-  );
-};
-
 export default function LegalScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [activeTab, setActiveTab] = useState(0);
+
+  // 標籤頁控制
+  const [activeTab, setActiveTab] = useState<number>(0);
+  const slideAnimation = useRef(new Animated.Value(0)).current;
+
+  // 切換標籤頁
+  const switchTab = (index: number) => {
+    setActiveTab(index);
+    Animated.timing(slideAnimation, {
+      toValue: index,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const translateX = slideAnimation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 136],
+  });
 
   return (
     <ThemedView style={styles.container}>
@@ -76,15 +61,33 @@ export default function LegalScreen() {
         <View style={{ width: 40 }} />
       </View>
 
-      {/* 標籤欄 */}
-      <TabBar activeTab={activeTab} setActiveTab={setActiveTab} />
+      {/* 標籤頁控制器 */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity style={styles.tabButton} onPress={() => switchTab(0)} activeOpacity={0.7}>
+          <ThemedText style={[styles.tabText, activeTab === 0 && styles.activeTabText]}>隱私權政策</ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.tabButton} onPress={() => switchTab(1)} activeOpacity={0.7}>
+          <ThemedText style={[styles.tabText, activeTab === 1 && styles.activeTabText]}>服務條款</ThemedText>
+        </TouchableOpacity>
+
+        {/* 標籤指示器 */}
+        <Animated.View
+          style={[
+            styles.tabIndicator,
+            {
+              transform: [{ translateX }],
+            },
+          ]}
+        />
+      </View>
 
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
         showsVerticalScrollIndicator={false}
       >
-        {/* 隱私權政策部分 */}
+        {/* 隱私權政策標籤頁 */}
         {activeTab === 0 && (
           <View style={styles.section}>
             <ThemedText style={styles.paragraph}>最後更新日期：2023年12月15日</ThemedText>
@@ -123,14 +126,14 @@ export default function LegalScreen() {
             <ThemedText style={styles.subTitle}>隱私權變更</ThemedText>
             <ThemedText style={styles.paragraph}>我們可能會不時更新本隱私權政策。我們會在應用程式內通知您重要變更。</ThemedText>
 
-            {/* 聯絡資訊 */}
+            {/* 聯絡資訊 - 兩個標籤頁都顯示 */}
             <ThemedText style={styles.subTitle}>聯絡我們</ThemedText>
             <ThemedText style={styles.paragraph}>如果您對我們的隱私權政策有任何疑問，請透過以下方式聯絡我們：</ThemedText>
             <ThemedText style={styles.paragraph}>電子郵件：support@voiceaiapp.com</ThemedText>
           </View>
         )}
 
-        {/* 服務條款部分 */}
+        {/* 服務條款標籤頁 */}
         {activeTab === 1 && (
           <View style={styles.section}>
             <ThemedText style={styles.paragraph}>最後更新日期：2023年12月15日</ThemedText>
@@ -154,7 +157,7 @@ export default function LegalScreen() {
             <ThemedText style={styles.subTitle}>準據法</ThemedText>
             <ThemedText style={styles.paragraph}>這些條款受台灣法律管轄，並依據台灣法律解釋。</ThemedText>
 
-            {/* 聯絡資訊 */}
+            {/* 聯絡資訊 - 兩個標籤頁都顯示 */}
             <ThemedText style={styles.subTitle}>聯絡我們</ThemedText>
             <ThemedText style={styles.paragraph}>如果您對我們的服務條款有任何疑問，請透過以下方式聯絡我們：</ThemedText>
             <ThemedText style={styles.paragraph}>電子郵件：support@voiceaiapp.com</ThemedText>
@@ -199,32 +202,46 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: "row",
-    backgroundColor: "#3A7BFF",
-    height: 48,
+    marginHorizontal: 20,
+    marginVertical: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 12,
     position: "relative",
+    height: 46,
+    padding: 4,
+    zIndex: 5,
   },
-  tab: {
+  tabButton: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    height: "100%",
+    height: 38,
+    borderRadius: 8,
+    zIndex: 1,
   },
   tabText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "500",
-    color: "rgba(255, 255, 255, 0.7)",
-    textTransform: "uppercase",
+    color: "#718096",
   },
   activeTabText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
+    color: "#3A7BFF",
+    fontWeight: "600",
   },
   tabIndicator: {
     position: "absolute",
-    height: 3,
-    bottom: 0,
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 3,
-    borderTopRightRadius: 3,
+    height: 38,
+    width: "48%",
+    backgroundColor: "white",
+    borderRadius: 8,
+    top: 4,
+    left: 4,
+    zIndex: 0,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   scrollView: {
     flex: 1,
@@ -233,14 +250,19 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: 30,
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 15,
+    color: "#3A7BFF",
   },
   subTitle: {
     fontSize: 18,
     fontWeight: "600",
     marginTop: 20,
     marginBottom: 8,
-    color: "#3A7BFF",
   },
   paragraph: {
     fontSize: 16,
