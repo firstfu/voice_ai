@@ -132,8 +132,9 @@ export default function PremiumScreen() {
           headerShown: true,
           headerBackTitle: "返回",
           headerShadowVisible: false,
+          headerTintColor: "#3A7BFF",
           headerStyle: {
-            backgroundColor: "rgba(58, 123, 255, 0.05)",
+            backgroundColor: "#FFFFFF",
           },
         }}
       />
