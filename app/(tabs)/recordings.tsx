@@ -56,42 +56,6 @@ interface Recording {
   date: string;
 }
 
-// 定義訂閱計劃類型
-interface SubscriptionPlan {
-  id: string;
-  name: string;
-  price: string;
-  period: string;
-  features: string[];
-  recommended?: boolean;
-}
-
-// 定義進階功能訂閱計劃
-const subscriptionPlans: SubscriptionPlan[] = [
-  {
-    id: "free",
-    name: "免費版",
-    price: "0",
-    period: "",
-    features: ["基本錄音功能", "最多5個錄音檔案", "最長15分鐘錄音時間", "標準音質(128kbps)"],
-  },
-  {
-    id: "pro",
-    name: "專業版",
-    price: "69",
-    period: "月",
-    features: ["無限錄音數量", "錄音時間無上限", "高音質錄音(320kbps)", "音訊編輯工具", "背景噪音消除", "雲端儲存備份"],
-    recommended: true,
-  },
-  {
-    id: "premium",
-    name: "頂級版",
-    price: "199",
-    period: "月",
-    features: ["專業版全部功能", "AI語音轉文字", "自動生成會議記錄", "多人協作編輯", "關鍵字搜尋", "優先技術支援"],
-  },
-];
-
 export default function RecordingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -102,7 +66,6 @@ export default function RecordingsScreen() {
   const [showActionMenu, setShowActionMenu] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [newRecordingName, setNewRecordingName] = useState("");
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const searchInputRef = useRef<TextInput>(null);
   const renameInputRef = useRef<TextInput>(null);
 
@@ -212,23 +175,9 @@ export default function RecordingsScreen() {
   const handleScroll = () => {};
   const handleScrollEnd = () => {};
 
-  // 處理進階功能訂閱
-  const handleSubscribe = (planId: string) => {
-    // 實際應用中，這裡應該調用支付API或導航到支付頁面
-    Alert.alert("訂閱確認", `確定要訂閱${subscriptionPlans.find(plan => plan.id === planId)?.name}嗎？`, [
-      {
-        text: "取消",
-        style: "cancel",
-      },
-      {
-        text: "確認",
-        onPress: () => {
-          setShowSubscriptionModal(false);
-          // TODO: 實現實際的訂閱流程
-          Alert.alert("訂閱成功", "感謝您的支持！");
-        },
-      },
-    ]);
+  // 導航至付費升級頁面
+  const navigateToSubscription = () => {
+    router.push("/premium");
   };
 
   return (
@@ -286,7 +235,7 @@ export default function RecordingsScreen() {
           </View>
         )}
         ListHeaderComponent={() => (
-          <TouchableOpacity style={styles.upgradeContainer} onPress={() => setShowSubscriptionModal(true)} activeOpacity={0.85}>
+          <TouchableOpacity style={styles.upgradeContainer} onPress={navigateToSubscription} activeOpacity={0.85}>
             <View style={styles.upgradeContent}>
               <Ionicons name="star" size={20} color="#FFD700" />
               <ThemedText style={styles.upgradeText}>升級至專業版，享受更多進階功能</ThemedText>
@@ -376,59 +325,6 @@ export default function RecordingsScreen() {
                 <ThemedText style={styles.confirmButtonText}>確認</ThemedText>
               </TouchableOpacity>
             </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* 訂閱計劃Modal */}
-      <Modal transparent={true} visible={showSubscriptionModal} animationType="fade" onRequestClose={() => setShowSubscriptionModal(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContainer, styles.subscriptionModalContainer]}>
-            <ThemedText style={styles.modalTitle}>升級您的錄音體驗</ThemedText>
-            <ThemedText style={styles.modalSubtitle}>選擇最適合您的訂閱計劃</ThemedText>
-
-            <FlatList
-              data={subscriptionPlans}
-              keyExtractor={item => item.id}
-              horizontal={false}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={styles.plansList}
-              renderItem={({ item }) => (
-                <View style={[styles.planCard, item.recommended && styles.recommendedPlan]}>
-                  {item.recommended && (
-                    <View style={styles.recommendedBadge}>
-                      <ThemedText style={styles.recommendedText}>推薦</ThemedText>
-                    </View>
-                  )}
-                  <ThemedText style={styles.planName}>{item.name}</ThemedText>
-                  <View style={styles.priceContainer}>
-                    <ThemedText style={styles.currency}>NT$</ThemedText>
-                    <ThemedText style={styles.priceText}>{item.price}</ThemedText>
-                    {item.period && <ThemedText style={styles.periodText}>/{item.period}</ThemedText>}
-                  </View>
-                  <View style={styles.featuresContainer}>
-                    {item.features.map((feature, index) => (
-                      <View key={index} style={styles.featureItem}>
-                        <Ionicons name="checkmark-circle" size={18} color="#3A7BFF" />
-                        <ThemedText style={styles.featureText}>{feature}</ThemedText>
-                      </View>
-                    ))}
-                  </View>
-                  <TouchableOpacity
-                    style={[styles.selectPlanButton, item.id === "free" ? styles.currentPlanButton : styles.upgradePlanButton]}
-                    onPress={() => item.id !== "free" && handleSubscribe(item.id)}
-                  >
-                    <ThemedText style={[styles.selectPlanText, item.id === "free" ? styles.currentPlanText : styles.upgradePlanText]}>
-                      {item.id === "free" ? "目前方案" : "選擇此方案"}
-                    </ThemedText>
-                  </TouchableOpacity>
-                </View>
-              )}
-            />
-
-            <TouchableOpacity style={styles.closeModalButton} onPress={() => setShowSubscriptionModal(false)}>
-              <ThemedText style={styles.closeButtonText}>關閉</ThemedText>
-            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -771,140 +667,5 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     color: "#3A7BFF",
     marginHorizontal: 12,
-  },
-  subscriptionModalContainer: {
-    width: "92%",
-    maxHeight: "80%",
-    padding: 20,
-  },
-  modalSubtitle: {
-    fontSize: 15,
-    color: "#718096",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  plansList: {
-    paddingVertical: 10,
-  },
-  planCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 4,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  recommendedPlan: {
-    borderColor: "#3A7BFF",
-    borderWidth: 2,
-  },
-  recommendedBadge: {
-    position: "absolute",
-    top: -12,
-    right: 20,
-    backgroundColor: "#3A7BFF",
-    borderRadius: 20,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    ...Platform.select({
-      ios: {
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-      },
-      android: {
-        elevation: 3,
-      },
-    }),
-  },
-  recommendedText: {
-    color: "white",
-    fontWeight: "600",
-    fontSize: 12,
-  },
-  planName: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 10,
-  },
-  priceContainer: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    marginBottom: 16,
-  },
-  currency: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#4A5568",
-  },
-  priceText: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: "#2D3748",
-    marginHorizontal: 2,
-  },
-  periodText: {
-    fontSize: 14,
-    color: "#718096",
-  },
-  featuresContainer: {
-    marginBottom: 20,
-  },
-  featureItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  featureText: {
-    marginLeft: 10,
-    fontSize: 14,
-    color: "#4A5568",
-  },
-  selectPlanButton: {
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  currentPlanButton: {
-    backgroundColor: "#EDF2F7",
-  },
-  upgradePlanButton: {
-    backgroundColor: "#3A7BFF",
-  },
-  selectPlanText: {
-    fontWeight: "600",
-    fontSize: 16,
-  },
-  currentPlanText: {
-    color: "#4A5568",
-  },
-  upgradePlanText: {
-    color: "white",
-  },
-  closeModalButton: {
-    marginTop: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    backgroundColor: "#EDF2F7",
-  },
-  closeButtonText: {
-    color: "#4A5568",
-    fontWeight: "600",
-    fontSize: 16,
   },
 });
