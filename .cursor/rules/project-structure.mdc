@@ -12,29 +12,45 @@ Voice AI 是一個使用 Expo 和 React Native 開發的音訊處理應用程式
 ### 主要目錄
 
 - **app/** - 包含基於 expo-router 的路由和主要頁面
-  - **(tabs)/** - 底部標籤頁面
-  - **recording/** - 錄音相關頁面
+  - **(tabs)/** - 底部標籤頁面（主頁、錄音庫、設定）
+  - **recording/** - 錄音相關頁面（詳情、編輯、分析）
+  - **analysis/** - 音訊分析功能頁面
 - **components/** - 可重用 UI 組件
-  - **ui/** - 專門用於介面的組件
+  - **ui/** - 專門用於介面的組件（如 AudioEditor、IconSymbol）
+  - **__tests__/** - 組件單元測試
 - **assets/** - 靜態資源
   - **fonts/** - 自定義字體
   - **images/** - 圖片資源
   - **sounds/** - 音效檔案
-- **constants/** - 常量定義
+- **constants/** - 常量定義（如 Colors）
 - **hooks/** - 自定義 React Hooks
+- **services/** - 服務層（如 NotificationService）
+- **scripts/** - 構建和工具腳本
 
 ### 關鍵檔案
 
 - [app/_layout.tsx](mdc:app/_layout.tsx) - 主要應用佈局
 - [app/(tabs)/_layout.tsx](mdc:app/(tabs)/_layout.tsx) - 底部標籤導航配置
 - [app/(tabs)/index.tsx](mdc:app/(tabs)/index.tsx) - 首頁
+- [app/recording/[id].tsx](mdc:app/recording/[id].tsx) - 錄音詳情頁面
+- [app/audio-settings.tsx](mdc:app/audio-settings.tsx) - 音訊設定頁面
 
-## 項目架構
+### 重要頁面功能分佈
+
+- **首頁** - 快速錄音入口、最近錄音、使用統計
+- **錄音庫** - 所有錄音的列表視圖和管理功能
+- **設定** - 應用程式偏好設定、通知、帳戶管理
+- **錄音詳情** - 播放、轉錄、編輯、分析功能入口
+- **錄音編輯器** - 音訊剪輯、分段標記功能
+
+## 專案架構特點
 
 Voice AI 使用 expo-router 管理導航，並強調組件的重用性。主要設計模式包括：
 
 1. 按功能組織路由和頁面
-2. 使用共享 UI 組件
+2. 使用共享 UI 組件提高一致性
 3. 分離業務邏輯和 UI 呈現
+4. 平台特定組件使用平台後綴（.ios/.android）
+5. 採用 TypeScript 強類型定義保證代碼質量
 
-請在開發時遵循此組織結構，確保代碼保持一致性。
+請在開發時遵循此組織結構，確保代碼保持一致性和可維護性。

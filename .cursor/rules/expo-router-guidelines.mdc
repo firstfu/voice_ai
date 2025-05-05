@@ -20,7 +20,11 @@ Voice AI 應用程式使用 Expo Router 管理導航功能，採用基於文件�
     - **settings.tsx** - 設置頁面
   - **recording/** - 單個錄音相關頁面
     - **[id].tsx** - 動態路由，顯示特定錄音
+    - **new.tsx** - 建立新錄音
+    - **editor.tsx** - 錄音編輯頁面
+    - **manage.tsx** - 錄音管理功能
     - **analysis/** - 錄音分析相關頁面
+  - **help.tsx**, **about.tsx**, **premium.tsx** - 獨立頁面
   - **+not-found.tsx** - 404頁面
 
 ## 路由命名規範
@@ -35,12 +39,17 @@ Voice AI 應用程式使用 Expo Router 管理導航功能，採用基於文件�
 每個目錄都可以有一個 `_layout.tsx` 文件，這些佈局組件決定了路由的導航結構：
 
 ```tsx
-// 標籤導航佈局示例
+// 標籤導航佈局示例 - app/(tabs)/_layout.tsx
 import { Tabs } from 'expo-router';
 
 export default function TabsLayout() {
   return (
-    <Tabs>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: "#3A7BFF",
+        headerShown: false,
+      }}
+    >
       <Tabs.Screen name="index" options={{ title: '首頁' }} />
       <Tabs.Screen name="recordings" options={{ title: '錄音' }} />
       <Tabs.Screen name="settings" options={{ title: '設置' }} />
@@ -56,10 +65,10 @@ export default function TabsLayout() {
 ```tsx
 import { Link, useRouter } from 'expo-router';
 
-// 使用 Link 組件
+// 使用 Link 組件 (宣告式導航)
 <Link href="/recording/123">查看錄音</Link>
 
-// 使用路由 hook
+// 使用路由 hook (命令式導航)
 const router = useRouter();
 router.push('/recording/123');
 ```
@@ -77,33 +86,85 @@ export default function RecordingScreen() {
 }
 ```
 
-### 3. 標籤和堆疊混合使用
+### 3. 混合使用標籤和堆疊導航
 
-在某些嵌套路由（如 `/recording/[id]`）中，可能需要使用 Stack 導航：
+在深層嵌套路由（如 `/recording/[id]`）中，可能需要使用 Stack 導航：
 
 ```tsx
+// app/recording/_layout.tsx
 import { Stack } from 'expo-router';
 
 export default function RecordingLayout() {
   return (
     <Stack>
+      <Stack.Screen name="index" options={{ title: '所有錄音' }} />
       <Stack.Screen
         name="[id]"
-        options={{
-          headerShown: false, // 使用自定義標題欄時需要禁用
-        }}
+        options={({ route }) => ({
+          title: `錄音 ${route.params.id}`,
+          // 使用自定義標題欄時，禁用內建標題欄
+          headerShown: false,
+        })}
       />
+      <Stack.Screen name="editor" options={{ title: '編輯錄音' }} />
     </Stack>
   );
 }
 ```
 
+### 4. 返回行為管理
+
+```tsx
+// 處理自定義返回行為
+const handleGoBack = () => {
+  if (hasUnsavedChanges) {
+    // 顯示確認對話框
+    Alert.alert(
+      "未保存的變更",
+      "您有未保存的變更。確定要離開嗎？",
+      [
+        { text: "留在頁面", style: "cancel" },
+        { text: "放棄變更", onPress: () => router.back() }
+      ]
+    );
+  } else {
+    router.back();
+  }
+};
+```
+
 ## 路由鉤子
 
-使用 expo-router 提供的各種鉤子進行導航控制：
+Expo Router 提供的導航控制鉤子：
 
-- `useRouter()` - 程式化導航
+- `useRouter()` - 程式化導航控制
 - `useLocalSearchParams()` - 獲取路由參數
+- `useSegments()` - 獲取當前路由段
 - `useFocusEffect()` - 頁面獲取焦點時執行操作
 
-請遵循這些規範，以確保應用程式導航體驗一致、易於維護。
+## 自定義標題欄與導航欄處理
+
+當需要自定義標題欄時，請設置 `headerShown: false` 避免重複顯示：
+
+```tsx
+<Stack.Screen
+  options={{
+    headerShown: false, // 使用自定義標題欄時必須禁用
+  }}
+/>
+
+// 自定義標題欄範例
+const CustomHeader = () => (
+  <View style={styles.header}>
+    <TouchableOpacity onPress={() => router.back()}>
+      <Ionicons name="arrow-back" size={24} color="#000" />
+    </TouchableOpacity>
+    <ThemedText style={styles.title}>錄音詳情</ThemedText>
+    <TouchableOpacity onPress={handleShare}>
+      <Ionicons name="share-outline" size={24} color="#3A7BFF" />
+    </TouchableOpacity>
+  </View>
+);
+```
+
+請遵循這些規範，確保應用程式導航體驗一致且易於維護。

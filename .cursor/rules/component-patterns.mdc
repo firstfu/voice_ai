@@ -11,51 +11,147 @@ Voice AI 應用程式中的組件遵循以下設計模式和最佳實踐：
 
 ### 組件類型
 
-1. **標準組件** - 位於 `components/` 目錄下
+1. **通用基礎組件** - 位於 `components/` 目錄下
    - [ThemedText.tsx](mdc:components/ThemedText.tsx) - 主題化文字組件
    - [ThemedView.tsx](mdc:components/ThemedView.tsx) - 主題化視圖組件
+   - [Collapsible.tsx](mdc:components/Collapsible.tsx) - 可摺疊內容組件
+   - [ExternalLink.tsx](mdc:components/ExternalLink.tsx) - 外部鏈接組件
 
-2. **UI 特定組件** - 位於 `components/ui/` 目錄下
+2. **功能性 UI 組件** - 位於 `components/ui/` 目錄下
    - [IconSymbol.tsx](mdc:components/ui/IconSymbol.tsx) - 圖標元素
    - [AudioEditor.tsx](mdc:components/ui/AudioEditor.tsx) - 音訊編輯器
+   - [MarkerSystem.tsx](mdc:components/ui/MarkerSystem.tsx) - 標記系統
+   - [OrganizePanel.tsx](mdc:components/ui/OrganizePanel.tsx) - 組織面板
 
 3. **平台特定組件** - 使用平台後綴命名
    - [IconSymbol.tsx](mdc:components/ui/IconSymbol.tsx) - 跨平台版本
    - [IconSymbol.ios.tsx](mdc:components/ui/IconSymbol.ios.tsx) - iOS 特定版本
+   - [TabBarBackground.tsx](mdc:components/ui/TabBarBackground.tsx) - 跨平台版本
+   - [TabBarBackground.ios.tsx](mdc:components/ui/TabBarBackground.ios.tsx) - iOS 特定版本
 
 ### 組件命名約定
 
-- 使用 PascalCase 命名所有組件
+- 使用 PascalCase 命名所有組件（如 `AudioEditor`、`ThemedText`）
 - 平台特定組件以 `.ios.tsx` 或 `.android.tsx` 後綴命名
-- 動態功能組件使用描述性名稱（如 `AudioEditor`、`OrganizePanel`）
+- 動態功能組件使用描述性名稱（如 `MarkerSystem`、`OrganizePanel`）
+- 單一職責組件使用其功能命名（如 `ExternalLink`、`HapticTab`）
 
 ### 組件結構
 
 組件應遵循以下結構：
 
 ```tsx
-import { ... } from 'react-native';
-// 必要的導入項
+import { StyleSheet, View, ... } from 'react-native';
+// 其他必要的導入項
 
 // 類型定義
 interface ComponentProps {
   // 屬性定義
+  title: string;
+  onPress?: () => void;
+  variant?: 'primary' | 'secondary';
 }
 
 // 組件本身
-export default function Component({ ...props }: ComponentProps) {
+export default function Component({ title, onPress, variant = 'primary' }: ComponentProps) {
   // 狀態和邏輯
+  const [isActive, setIsActive] = useState(false);
+
+  // 內部處理函數
+  const handlePress = () => {
+    setIsActive(!isActive);
+    onPress?.();
+  };
 
   // 渲染函數
   return (
-    // JSX
+    <View style={[styles.container, variant === 'secondary' && styles.secondaryContainer]}>
+      {/* JSX 內容 */}
+    </View>
   );
 }
+
+// 樣式定義
+const styles = StyleSheet.create({
+  container: {
+    // 樣式屬性
+  },
+  secondaryContainer: {
+    // 次要樣式
+  }
+});
+```
+
+## 主題組件
+
+使用 `ThemedText` 和 `ThemedView` 等主題組件，以支持暗/亮模式：
+
+```tsx
+// 使用 ThemedText 代替 Text
+import { ThemedText } from '@/components/ThemedText';
+
+<ThemedText
+  style={styles.title}
+  variant="heading"
+  colorName="text"
+>
+  標題文字
+</ThemedText>
+
+// 使用 ThemedView 代替 View
+import { ThemedView } from '@/components/ThemedView';
+
+<ThemedView
+  style={styles.container}
+  colorName="background"
+>
+  {/* 內容 */}
+</ThemedView>
+```
+
+## 可測試性
+
+組件應設計為便於測試：
+
+- 提供有意義的 `testID` 屬性
+- 單一職責原則
+- 邏輯與 UI 適當分離
+
+```tsx
+<TouchableOpacity
+  testID="record-button"
+  accessibilityLabel="開始錄音"
+  onPress={handleRecord}
+>
+  {/* 按鈕內容 */}
+</TouchableOpacity>
 ```
 
 ## 最佳實踐
 
-1. 組件應盡可能保持獨立性，最小化依賴關係
-2. 使用TypeScript接口明確定義所有組件的屬性
-3. 大型組件應進一步拆分為更小的子組件
-4. 使用主題化組件（如 ThemedText、ThemedView）保持一致的用戶界面
+1. **組件獨立性** - 最小化外部依賴，組件應能獨立工作
+2. **屬性定義** - 使用 TypeScript 接口明確定義所有組件的屬性
+3. **組件分解** - 大型組件應進一步拆分為更小的子組件
+4. **可訪問性** - 使用 `accessibilityLabel` 和其他輔助功能屬性
+5. **主題一致性** - 使用主題化組件保持 UI 一致性
+6. **按需渲染** - 使用 React.memo 或類似方法優化渲染效能
+
+### 組件文檔示例
+
+每個組件應包含清晰的文檔註釋：
+
+```tsx
+/**
+ * AudioWaveform 組件
+ *
+ * 顯示音訊的波形視覺化效果，支持互動和選取功能。
+ *
+ * @param audioUri - 音訊文件的URI
+ * @param duration - 音訊長度（秒）
+ * @param onPositionChange - 當用戶改變播放位置時的回調
+ * @param markerPosition - 當前標記位置（秒）
+ * @param height - 波形高度（可選，預設 80px）
+ */
+```
+
+請遵循這些模式，確保組件設計一致、易於維護和擴展。

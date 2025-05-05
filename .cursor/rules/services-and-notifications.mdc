@@ -1,0 +1,127 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# 服務與通知系統指南
+
+## 服務架構概述
+
+Voice AI 應用程式中的服務層位於 `services/` 目錄下，主要負責處理與 UI 層分離的業務邏輯和系統交互。
+
+### 核心服務
+
+1. **通知服務** - [NotificationService.ts](mdc:services/NotificationService.ts)
+   - 處理本地通知和提醒功能
+   - 管理通知權限和設置
+   - 提供通知排程和取消 API
+
+### 通知服務功能
+
+`NotificationService` 提供以下功能：
+
+```tsx
+// 初始化通知系統
+await NotificationService.initialize();
+
+// 註冊通知處理器
+NotificationService.registerNotificationHandler(
+  (notification) => {
+    // 處理通知響應
+  }
+);
+
+// 請求通知權限
+const { granted } = await NotificationService.requestPermissions();
+
+// 排程通知
+const notificationId = await NotificationService.scheduleNotification({
+  title: '錄音完成',
+  body: '您的錄音已處理完成',
+  data: { recordingId: '123' },
+  trigger: { seconds: 5 } // 5秒後發送
+});
+
+// 取消通知
+await NotificationService.cancelNotification(notificationId);
+```
+
+## 最佳實踐
+
+### 1. 通知管理
+
+- 使用不同的通知類別（如 'recording', 'reminder', 'update'）
+- 限制通知頻率，避免打擾用戶
+- 始終提供清晰的通知操作選項
+
+```tsx
+// 良好的通知模式
+await NotificationService.scheduleNotification({
+  title: '錄音提醒',
+  body: '您安排的會議錄音將在 10 分鐘後開始',
+  data: { type: 'reminder', meetingId: '456' },
+  categoryId: 'reminder',
+  trigger: { date: meetingTime }
+});
+```
+
+### 2. 錯誤處理
+
+服務中的錯誤處理應遵循以下模式：
+
+```tsx
+try {
+  await NotificationService.scheduleNotification({
+    // 通知配置
+  });
+} catch (error) {
+  // 區分不同錯誤類型
+  if (error.code === 'permission_denied') {
+    // 處理權限問題
+    showPermissionSettings();
+  } else {
+    // 處理其他錯誤
+    logError('通知錯誤', error);
+  }
+}
+```
+
+### 3. 權限管理
+
+```tsx
+// 檢查和請求權限
+const checkNotificationPermissions = async () => {
+  const status = await NotificationService.getPermissionsStatus();
+
+  if (status !== 'granted') {
+    // 用戶友好提示
+    Alert.alert(
+      "啟用通知",
+      "為了讓您不錯過重要提醒，請允許應用發送通知",
+      [
+        { text: "以後再說", style: "cancel" },
+        { text: "設置", onPress: () => NotificationService.openSettings() }
+      ]
+    );
+  }
+};
+```
+
+## 服務設計原則
+
+1. **單一職責** - 每個服務應專注於特定功能領域
+2. **可測試性** - 服務應易於模擬和測試
+3. **狀態管理** - 明確定義服務的狀態和生命週期
+4. **依賴注入** - 設計服務時考慮依賴注入模式
+5. **錯誤處理** - 統一的錯誤處理和日誌記錄
+
+## 未來服務擴展
+
+計劃中的服務擴展包括：
+
+- **AnalyticsService** - 用戶行為和應用使用分析
+- **StorageService** - 錄音和文件存儲管理
+- **SyncService** - 雲端同步和備份功能
+- **AudioProcessingService** - 音訊處理和轉換功能
+
+新服務的實現應遵循本指南中的設計原則和最佳實踐。

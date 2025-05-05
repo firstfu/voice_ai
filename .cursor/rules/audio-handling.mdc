@@ -16,20 +16,23 @@ Voice AI 應用程式專注於語音錄音和處理功能。本指南提供關�
 1. **錄音** - 通過 `Audio.Recording` API 實現
 2. **音訊播放** - 使用 `Audio.Sound` API
 3. **音訊編輯** - 通過 [AudioEditor.tsx](mdc:components/ui/AudioEditor.tsx) 組件實現
+4. **標記系統** - 使用 [MarkerSystem.tsx](mdc:components/ui/MarkerSystem.tsx) 添加時間點標記
 
 ### 音訊文件管理
 
 錄音相關頁面位於 `app/recording/` 目錄中，包括：
 
-- 錄音列表視圖
-- 單個錄音詳細信息
-- 錄音編輯和分析功能
+- **[id].tsx** - 錄音詳細信息和播放頁面
+- **new.tsx** - 創建新錄音頁面
+- **editor.tsx** - 錄音編輯頁面
+- **manage.tsx** - 錄音管理頁面
+- **analysis/** - 錄音分析相關功能
 
 ### 音訊資源
 
 靜態音訊資源存儲在 `assets/sounds/` 目錄中。
 
-## 最佳實踐
+## 音訊處理最佳實踐
 
 ### 1. 錄音功能
 
@@ -38,46 +41,224 @@ Voice AI 應用程式專注於語音錄音和處理功能。本指南提供關�
 import { Audio } from 'expo-av';
 
 // 初始化錄音對象
-const recording = new Audio.Recording();
+const startRecording = async () => {
+  try {
+    // 請求音訊錄製權限
+    const { granted } = await Audio.requestPermissionsAsync();
+    if (!granted) return;
 
-// 開始錄音
-await recording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
-await recording.startAsync();
+    // 設置音訊模式
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      interruptionModeIOS: Audio.InterruptionModeIOS.DoNotMix,
+      interruptionModeAndroid: Audio.InterruptionModeAndroid.DoNotMix,
+    });
+
+    // 創建新的錄音對象
+    const recording = new Audio.Recording();
+
+    // 配置並開始錄音
+    await recording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+    await recording.startAsync();
+
+    // 保存錄音對象的引用
+    setRecordingInstance(recording);
+    setIsRecording(true);
+  } catch (error) {
+    console.error('無法開始錄音', error);
+  }
+};
 
 // 停止錄音
-await recording.stopAndUnloadAsync();
-const uri = recording.getURI();
+const stopRecording = async () => {
+  try {
+    if (!recordingInstance) return;
+
+    // 停止並卸載錄音
+    await recordingInstance.stopAndUnloadAsync();
+
+    // 獲取錄音文件 URI
+    const uri = recordingInstance.getURI();
+
+    // 重設應用音訊模式
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+      playsInSilentModeIOS: true,
+    });
+
+    setIsRecording(false);
+    return uri;
+  } catch (error) {
+    console.error('停止錄音失敗', error);
+  }
+};
 ```
 
 ### 2. 音訊播放
 
 ```tsx
 // 載入和播放音訊
-const sound = new Audio.Sound();
-await sound.loadAsync({ uri: soundFileUri });
-await sound.playAsync();
+const playAudio = async (audioUri) => {
+  try {
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: audioUri },
+      { shouldPlay: true },
+      onPlaybackStatusUpdate
+    );
 
-// 不再需要時釋放資源
-await sound.unloadAsync();
+    setSoundInstance(sound);
+
+    // 播放完成後的回調
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.didJustFinish) {
+        // 處理播放完成事件
+      }
+    });
+
+    await sound.playAsync();
+  } catch (error) {
+    console.error('播放音訊失敗', error);
+  }
+};
+
+// 音訊播放狀態更新處理
+const onPlaybackStatusUpdate = (status) => {
+  if (status.isLoaded) {
+    setPosition(status.positionMillis / 1000);
+    setIsPlaying(status.isPlaying);
+    setDuration(status.durationMillis / 1000);
+  }
+};
+
+// 暫停播放
+const pauseAudio = async () => {
+  if (soundInstance) {
+    await soundInstance.pauseAsync();
+  }
+};
+
+// 尋找特定位置
+const seekAudio = async (position) => {
+  if (soundInstance) {
+    await soundInstance.setPositionAsync(position * 1000);
+  }
+};
+
+// 卸載音訊資源
+const unloadAudio = async () => {
+  if (soundInstance) {
+    await soundInstance.unloadAsync();
+    setSoundInstance(null);
+  }
+};
 ```
 
-### 3. 錄音文件處理
+### 3. 音訊編輯功能
 
-- 使用一致的文件命名約定（例如，時間戳+標識符）
-- 對長時間錄音進行分段處理
-- 提前卸載不再需要的音訊資源以節省內存
+以下是使用 AudioEditor 組件的示例：
+
+```tsx
+import { AudioEditor } from '@/components/ui/AudioEditor';
+
+// 在頁面中使用
+<AudioEditor
+  audioUri={recordingUri}
+  duration={duration}
+  onSave={handleSaveEdit}
+  markers={markers}
+  onMarkersChange={setMarkers}
+  waveformData={waveformData}
+/>
+```
 
 ### 4. 音訊會話管理
 
 ```tsx
-// 設置音訊會話模式
+// 設置音訊會話模式 (播放模式)
+const configureAudioSession = async () => {
+  await Audio.setAudioModeAsync({
+    allowsRecordingIOS: false,
+    playsInSilentModeIOS: true,
+    staysActiveInBackground: true,
+    interruptionModeIOS: Audio.InterruptionModeIOS.DoNotMix,
+    interruptionModeAndroid: Audio.InterruptionModeAndroid.DoNotMix,
+    shouldDuckAndroid: true,
+  });
+};
+```
+
+### 5. 資源清理和記憶體管理
+
+```tsx
+// 在組件卸載時清理資源
+useEffect(() => {
+  return () => {
+    // 清理錄音資源
+    if (recordingInstance) {
+      recordingInstance.stopAndUnloadAsync();
+    }
+
+    // 清理音訊播放資源
+    if (soundInstance) {
+      soundInstance.unloadAsync();
+    }
+  };
+}, [recordingInstance, soundInstance]);
+```
+
+## 效能優化提示
+
+1. **適當的錄音質量設置** - 根據需求選擇合適的錄音質量預設
+2. **批量處理音訊操作** - 避免頻繁創建/銷毀音訊實例
+3. **延遲加載** - 大型音訊文件使用延遲加載技術
+4. **音訊緩存** - 實現音訊文件緩存機制避免重複加載
+5. **使用原生模塊** - 對於複雜的音訊處理，考慮使用原生模塊
+
+## 常見問題處理
+
+### iOS 靜音模式下的播放問題
+
+確保設置了 `playsInSilentModeIOS: true` 並檢查音量級別：
+
+```tsx
+// 啟用在靜音模式下播放
 await Audio.setAudioModeAsync({
-  allowsRecordingIOS: true,
   playsInSilentModeIOS: true,
-  staysActiveInBackground: false,
-  interruptionModeIOS: Audio.InterruptionModeIOS.DoNotMix,
-  interruptionModeAndroid: Audio.InterruptionModeAndroid.DoNotMix,
 });
 ```
 
-確保在組件卸載時適當釋放音訊資源，避免內存洩漏。
+### 音訊權限處理
+
+```tsx
+// 完整的音訊權限檢查和請求流程
+const checkAndRequestAudioPermissions = async () => {
+  // 檢查已有權限
+  const { status } = await Audio.getPermissionsAsync();
+
+  if (status === 'granted') {
+    return true;
+  }
+
+  // 請求權限
+  const { status: newStatus } = await Audio.requestPermissionsAsync();
+
+  if (newStatus !== 'granted') {
+    // 顯示自定義提示
+    Alert.alert(
+      '需要麥克風權限',
+      '此功能需要麥克風權限才能正常工作。請在設置中允許訪問麥克風。',
+      [
+        { text: '取消', style: 'cancel' },
+        { text: '前往設置', onPress: () => Linking.openSettings() }
+      ]
+    );
+    return false;
+  }
+
+  return true;
+};
+```
+
+始終遵循這些最佳實踐，以確保您的音訊功能高效、可靠且用戶友好。
