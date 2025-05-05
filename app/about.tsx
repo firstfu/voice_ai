@@ -45,27 +45,31 @@ export default function AboutScreen() {
           <Ionicons name="arrow-back" size={24} color="#3A7BFF" />
         </TouchableOpacity>
         <ThemedText type="title" style={styles.headerTitle}>
-          關於智音坊
+          關於錄智通
         </ThemedText>
         <View style={styles.headerRight} />
       </View>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* 應用程式 Logo */}
         <View style={styles.logoContainer}>
           <Image source={require("../assets/images/icon.png")} style={styles.logoImage} resizeMode="contain" />
-          <ThemedText style={styles.appName}>智音坊</ThemedText>
-          <ThemedText style={styles.versionText}>版本 1.0.0 (Build 2402)</ThemedText>
+          <ThemedText style={styles.appName}>錄智通</ThemedText>
+          <ThemedText style={styles.versionText}>版本 1.0.0 (Build 2)</ThemedText>
         </View>
 
         {/* 應用程式介紹 */}
         <View style={styles.sectionContainer}>
           <ThemedText style={styles.sectionTitle}>我們的故事</ThemedText>
           <ThemedText style={styles.descriptionText}>
-            智音坊誕生於2024年，是由一群熱愛音訊技術的專家共同打造的專業錄音應用。我們的使命是為用戶提供簡單易用且功能強大的錄音工具，讓錄音和音訊處理變得輕鬆愉快。
+            錄智通誕生於2025年，是由一群熱愛音訊技術的專家共同打造的專業錄音應用。我們的使命是為用戶提供簡單易用且功能強大的錄音工具，讓錄音和音訊處理變得輕鬆愉快。
           </ThemedText>
           <ThemedText style={styles.descriptionText}>
-            無論是會議記錄、課堂筆記、採訪或音樂創作，智音坊都能滿足您的需求。我們致力於通過持續的產品更新和功能優化，為用戶帶來最佳的錄音體驗。
+            無論是會議記錄、課堂筆記、採訪或音樂創作，錄智通都能滿足您的需求。我們致力於通過持續的產品更新和功能優化，為用戶帶來最佳的錄音體驗。
           </ThemedText>
         </View>
 
@@ -126,7 +130,7 @@ export default function AboutScreen() {
 
         {/* 版權信息 */}
         <View style={styles.copyrightContainer}>
-          <ThemedText style={styles.copyrightText}>© 2024 智音坊. 保留所有權利。</ThemedText>
+          <ThemedText style={styles.copyrightText}>© 2024 錄智通. 保留所有權利。</ThemedText>
         </View>
       </ScrollView>
     </ThemedView>

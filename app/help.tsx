@@ -39,32 +39,37 @@ export default function HelpScreen() {
     {
       id: "2",
       question: "如何編輯我的錄音？",
-      answer: "在錄音列表中選擇您想編輯的錄音，點擊進入詳情頁面。在詳情頁面中，您可以找到編輯選項，包括裁剪、分割、合併等功能。編輯完成後，可以選擇保存為新文件或覆蓋原文件。",
+      answer:
+        "在錄音列表中選擇您想編輯的錄音，點擊進入詳情頁面。在詳情頁面中，您可以找到編輯選項，包括裁剪、分割、合併等功能。編輯完成後，可以選擇保存為新文件或覆蓋原文件。",
     },
     {
       id: "3",
       question: "如何調整錄音質量？",
-      answer: "在設置頁面中，您可以找到「錄音與播放」設置選項。在此可以調整錄音格式、採樣率和比特率等參數。選擇高品質錄音選項可獲得更好的音質，但會占用更多存儲空間。",
+      answer:
+        "在設置頁面中，您可以找到「錄音與播放」設置選項。在此可以調整錄音格式、採樣率和比特率等參數。選擇高品質錄音選項可獲得更好的音質，但會占用更多存儲空間。",
     },
     {
       id: "4",
       question: "如何將錄音轉換為文字？",
-      answer: "在錄音詳情頁面，點擊「轉錄」按鈕即可開始將錄音轉換為文字。轉錄過程可能需要一些時間，具體取決於錄音長度和網絡連接情況。轉錄完成後，您可以編輯、複製或分享文本內容。",
+      answer:
+        "在錄音詳情頁面，點擊「轉錄」按鈕即可開始將錄音轉換為文字。轉錄過程可能需要一些時間，具體取決於錄音長度和網絡連接情況。轉錄完成後，您可以編輯、複製或分享文本內容。",
     },
     {
       id: "5",
       question: "如何分享我的錄音？",
-      answer: "在錄音詳情頁面，點擊分享圖標可以通過多種方式分享您的錄音，包括發送電子郵件、簡訊或通過其他應用程式分享。您可以選擇分享原始文件或轉換為其他常見格式後分享。",
+      answer:
+        "在錄音詳情頁面，點擊分享圖標可以通過多種方式分享您的錄音，包括發送電子郵件、簡訊或通過其他應用程式分享。您可以選擇分享原始文件或轉換為其他常見格式後分享。",
     },
     {
       id: "6",
       question: "如何備份我的錄音？",
-      answer: "在設置頁面中，您可以開啟「雲端同步」功能，自動將您的錄音備份到雲端存儲。您也可以在錄音管理頁面批量選擇錄音，然後使用導出功能將錄音保存到其他位置。",
+      answer:
+        "在設置頁面中，您可以開啟「雲端同步」功能，自動將您的錄音備份到雲端存儲。您也可以在錄音管理頁面批量選擇錄音，然後使用導出功能將錄音保存到其他位置。",
     },
     {
       id: "7",
       question: "應用程式支援哪些錄音格式？",
-      answer: "智音坊支援多種常見的音訊格式，包括但不限於MP3、WAV、AAC、FLAC等。在進階音訊設定中，您可以選擇不同的編碼格式和質量等級。",
+      answer: "錄智通支援多種常見的音訊格式，包括但不限於MP3、WAV、AAC、FLAC等。在進階音訊設定中，您可以選擇不同的編碼格式和質量等級。",
     },
     {
       id: "8",
@@ -110,10 +115,16 @@ export default function HelpScreen() {
         <View style={styles.headerRight} />
       </View>
 
-      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
+        showsVerticalScrollIndicator={false}
+      >
         {/* 介紹部分 */}
         <View style={styles.introContainer}>
-          <ThemedText style={styles.introText}>我們希望為您提供最好的使用體驗。如果您有任何問題或需要協助，請查看以下常見問題或聯絡我們的客戶支援團隊。</ThemedText>
+          <ThemedText style={styles.introText}>
+            我們希望為您提供最好的使用體驗。如果您有任何問題或需要協助，請查看以下常見問題或聯絡我們的客戶支援團隊。
+          </ThemedText>
         </View>
 
         {/* 常見問題 */}

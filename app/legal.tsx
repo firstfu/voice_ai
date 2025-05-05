@@ -93,7 +93,7 @@ export default function LegalScreen() {
             <ThemedText style={styles.paragraph}>最後更新日期：2023年12月15日</ThemedText>
 
             <ThemedText style={styles.paragraph}>
-              智音坊（以下簡稱「我們」）重視您的隱私。本隱私權政策說明我們在您使用智音坊應用程式時如何收集、使用和保護您的個人資料。
+              錄智通（以下簡稱「我們」）重視您的隱私。本隱私權政策說明我們在您使用錄智通應用程式時如何收集、使用和保護您的個人資料。
             </ThemedText>
 
             <ThemedText style={styles.subTitle}>資料收集</ThemedText>
@@ -138,14 +138,14 @@ export default function LegalScreen() {
           <View style={styles.section}>
             <ThemedText style={styles.paragraph}>最後更新日期：2023年12月15日</ThemedText>
 
-            <ThemedText style={styles.paragraph}>歡迎使用智音坊。使用我們的應用程式，即表示您同意遵守以下條款。</ThemedText>
+            <ThemedText style={styles.paragraph}>歡迎使用錄智通。使用我們的應用程式，即表示您同意遵守以下條款。</ThemedText>
 
             <ThemedText style={styles.subTitle}>使用限制</ThemedText>
             <ThemedText style={styles.paragraph}>您同意不以任何可能破壞、禁用或損害應用程式功能的方式使用本應用程式。</ThemedText>
 
             <ThemedText style={styles.subTitle}>知識產權</ThemedText>
             <ThemedText style={styles.paragraph}>
-              智音坊及其內容（包括但不限於軟體、設計、文字和圖形）的所有權利均為我們所有。您不得複製、修改、分發或銷售應用程式的任何部分。
+              錄智通及其內容（包括但不限於軟體、設計、文字和圖形）的所有權利均為我們所有。您不得複製、修改、分發或銷售應用程式的任何部分。
             </ThemedText>
 
             <ThemedText style={styles.subTitle}>免責聲明</ThemedText>
