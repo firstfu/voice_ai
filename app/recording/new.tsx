@@ -8,18 +8,42 @@
  * - 錄音完成後的導航處理
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { StyleSheet, View, TouchableOpacity, Platform, StatusBar, BackHandler, Animated as RNAnimated, Text } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, FadeIn, FadeOut } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, FadeIn, FadeOut, withTiming, withRepeat, withSequence, Easing } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
+
+// 預先生成波形數據，避免重繪時隨機生成
+const generateWaveformData = (length: number) => {
+  // 創建一個具有韻律感的波形數據陣列
+  const centerIndex = Math.floor(length / 2);
+  const maxDistance = Math.max(centerIndex, length - centerIndex - 1);
+
+  return Array.from({ length }).map((_, index) => {
+    // 計算與中心的距離比例 (0 到 1 之間)
+    const distanceFromCenter = Math.abs(index - centerIndex) / maxDistance;
+    // 中心高度大，兩邊逐漸降低
+    const baseHeightFactor = 1 - Math.pow(distanceFromCenter, 2) * 0.6;
+
+    return {
+      baseHeight: 15 + baseHeightFactor * 45, // 基礎高度 (中間高，兩邊低)
+      animationOffset: index * 100, // 有規律的偏移量，創造波浪效果
+      frequency: 600 + Math.random() * 400, // 頻率變化
+      phase: index * (Math.PI / 6), // 相位差異，使波形有節奏感
+    };
+  });
+};
+
+// 生成30個波形柱狀數據
+const waveformData = generateWaveformData(30);
 
 export default function NewRecordingScreen() {
   const router = useRouter();
@@ -30,6 +54,77 @@ export default function NewRecordingScreen() {
   const recordButtonScale = useSharedValue(1);
   const pauseButtonScale = useSharedValue(1);
   const microphonePulse = useSharedValue(1);
+  // 全局動畫計時器
+  const animationTime = useSharedValue(0);
+
+  // 為每個波形柱創建動畫值
+  const waveformAnimatedValues = useRef(waveformData.map(() => useSharedValue(0))).current;
+
+  // 提前為每個波形柱創建動畫樣式，避免在循環渲染中使用hooks
+  const barStyles = useRef(
+    waveformAnimatedValues.map((animValue, index) =>
+      useAnimatedStyle(() => {
+        const { baseHeight, phase } = waveformData[index];
+
+        // 使用正弦函數創建平滑的韻律波動
+        const rhythmicFactor = isPaused ? 0.3 : 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(animationTime.value / 500 + phase)) * animValue.value;
+
+        return {
+          height: baseHeight * rhythmicFactor,
+          opacity: 0.5 + rhythmicFactor * 0.5,
+        };
+      })
+    )
+  ).current;
+
+  // 啟動波形動畫
+  useEffect(() => {
+    let animationFrame: number;
+    let startTime: number;
+
+    if (isRecording && !isPaused) {
+      // 啟動全局動畫計時器
+      const animateFrame = (timestamp: number) => {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+
+        // 更新全局動畫時間
+        animationTime.value = elapsed;
+
+        // 使用正弦波和變化頻率為每個波形柱創建自然的波動
+        waveformAnimatedValues.forEach((animValue, index) => {
+          const { frequency, phase } = waveformData[index];
+
+          // 正弦波的組合創建更複雜的波形
+          const value =
+            0.6 +
+            0.2 * Math.sin(elapsed / frequency + phase) +
+            0.1 * Math.sin(elapsed / (frequency / 2) + phase * 2) +
+            0.1 * Math.sin(elapsed / (frequency / 3) + phase / 2);
+
+          animValue.value = withTiming(value, { duration: 100 });
+        });
+
+        // 請求下一幀
+        animationFrame = requestAnimationFrame(animateFrame);
+      };
+
+      // 開始動畫循環
+      animationFrame = requestAnimationFrame(animateFrame);
+
+      // 清理函數
+      return () => {
+        if (animationFrame) {
+          cancelAnimationFrame(animationFrame);
+        }
+      };
+    } else {
+      // 暫停時將波形設為靜止低振幅
+      waveformAnimatedValues.forEach(animValue => {
+        animValue.value = withTiming(0.2, { duration: 300 });
+      });
+    }
+  }, [isRecording, isPaused, waveformAnimatedValues, animationTime]);
 
   // 錄音動畫效果
   const pulseAnimation = RNAnimated.loop(
@@ -58,7 +153,7 @@ export default function NewRecordingScreen() {
 
   // 模擬錄音計時器
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isRecording && !isPaused) {
       interval = setInterval(() => {
@@ -154,10 +249,6 @@ export default function NewRecordingScreen() {
         {isRecording && (
           <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.timerContainer}>
             <ThemedText style={styles.timerText}>{formatTime(recordingTime)}</ThemedText>
-
-            {/* <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-              <Text style={{ fontSize: 64, fontWeight: "700", color: "#FFFFFF" }}>{formatTime(recordingTime)}</Text>
-            </View> */}
           </Animated.View>
         )}
 
@@ -179,22 +270,13 @@ export default function NewRecordingScreen() {
           )}
         </View>
 
-        {/* 波形動畫 (模擬) */}
+        {/* 波形動畫 (優化版) */}
         <View style={styles.waveformContainer}>
-          {isRecording && !isPaused && (
+          {isRecording && (
             <Animated.View style={styles.waveform} entering={FadeIn}>
-              {/* 簡單模擬音頻波形 */}
-              {Array.from({ length: 30 }).map((_, index) => (
-                <View
-                  key={index}
-                  style={[
-                    styles.waveformBar,
-                    {
-                      height: 10 + Math.random() * 60,
-                      opacity: Math.random() * 0.5 + 0.5,
-                    },
-                  ]}
-                />
+              {/* 使用預先生成的動畫樣式 */}
+              {waveformData.map((_, index) => (
+                <Animated.View key={index} style={[styles.waveformBar, barStyles[index]]} />
               ))}
             </Animated.View>
           )}
@@ -206,7 +288,12 @@ export default function NewRecordingScreen() {
         {/* 暫停/繼續按鈕 (僅在錄音中顯示) */}
         {isRecording && (
           <AnimatedTouchable style={[styles.pauseButton, pauseButtonStyle]} onPress={handlePauseResumePress}>
-            <LinearGradient colors={isPaused ? ["#3A7BFF", "#00C2A8"] : ["#F59E0B", "#FF4A6B"]} style={styles.pauseButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+            <LinearGradient
+              colors={isPaused ? ["#3A7BFF", "#00C2A8"] : ["#F59E0B", "#FF4A6B"]}
+              style={styles.pauseButtonGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
               <Ionicons name={isPaused ? "play" : "pause"} size={24} color="#FFFFFF" />
             </LinearGradient>
           </AnimatedTouchable>
@@ -214,7 +301,12 @@ export default function NewRecordingScreen() {
 
         {/* 錄音按鈕 */}
         <AnimatedTouchable style={[styles.recordButton, recordButtonStyle]} onPress={handleRecordPress}>
-          <LinearGradient colors={isRecording ? ["#FF4A6B", "#F59E0B"] : ["#3A7BFF", "#00C2A8"]} style={styles.recordButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+          <LinearGradient
+            colors={isRecording ? ["#FF4A6B", "#F59E0B"] : ["#3A7BFF", "#00C2A8"]}
+            style={styles.recordButtonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
             {isRecording ? <Ionicons name="square" size={28} color="#FFFFFF" /> : <Ionicons name="mic" size={32} color="#FFFFFF" />}
           </LinearGradient>
         </AnimatedTouchable>
