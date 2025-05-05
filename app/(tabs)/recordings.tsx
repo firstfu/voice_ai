@@ -14,9 +14,8 @@ import { useState, useRef, useEffect } from "react";
 import { StyleSheet, View, FlatList, TouchableOpacity, Platform, StatusBar, TextInput, Modal, Alert, Text } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Stack, useRouter } from "expo-router";
-import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withSpring, withRepeat, withTiming, withSequence, Easing } from "react-native-reanimated";
+import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withSpring, withTiming, withRepeat, Easing } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -70,65 +69,27 @@ export default function RecordingsScreen() {
   const searchInputRef = useRef<TextInput>(null);
   const renameInputRef = useRef<TextInput>(null);
 
-  // 添加按鈕動畫效果
+  // 簡化按鈕動畫效果
   const buttonScale = useSharedValue(1);
-  const rippleScale = useSharedValue(1);
-  const rippleOpacity = useSharedValue(0);
-  // 添加多層波紋效果
-  const secondRippleScale = useSharedValue(1);
-  const secondRippleOpacity = useSharedValue(0);
-  // 添加按鈕旋轉效果
-  const buttonRotate = useSharedValue(0);
-  // 添加脈搏光暈效果
-  const pulseScale = useSharedValue(1);
-  const pulseOpacity = useSharedValue(0);
 
-  // 添加按鈕文字顯示控制
-  const [showButtonLabel, setShowButtonLabel] = useState(true);
-  const labelOpacity = useSharedValue(1);
+  // 簡化按鈕動畫
+  const recordButtonAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: buttonScale.value }],
+    };
+  });
 
-  // 波紋動畫
-  useEffect(() => {
-    // 主波紋效果
-    rippleScale.value = withRepeat(withTiming(1.5, { duration: 2000, easing: Easing.out(Easing.ease) }), -1, false);
+  // 處理按鈕點擊
+  const handleRecordButtonPress = () => {
+    // 按下反饋
+    buttonScale.value = withSpring(0.95, { damping: 10 });
 
-    rippleOpacity.value = withRepeat(
-      withTiming(0, { duration: 2000, easing: Easing.out(Easing.ease) }, () => {
-        rippleOpacity.value = 0.6;
-      }),
-      -1,
-      false
-    );
-
-    // 添加第二層波紋效果，延遲開始
+    // 釋放時恢復並導航
     setTimeout(() => {
-      secondRippleScale.value = withRepeat(withTiming(1.6, { duration: 2500, easing: Easing.out(Easing.ease) }), -1, false);
-
-      secondRippleOpacity.value = withRepeat(
-        withTiming(0, { duration: 2500, easing: Easing.out(Easing.ease) }, () => {
-          secondRippleOpacity.value = 0.4;
-        }),
-        -1,
-        false
-      );
-
-      // 初始設置不透明度
-      secondRippleOpacity.value = 0.4;
-    }, 800);
-
-    // 按鈕輕微旋轉動畫
-    buttonRotate.value = withRepeat(
-      withSequence(
-        withTiming(-0.05, { duration: 1500, easing: Easing.inOut(Easing.ease) }),
-        withTiming(0.05, { duration: 1500, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      true
-    );
-
-    // 初始設置不透明度
-    rippleOpacity.value = 0.6;
-  }, []);
+      buttonScale.value = withSpring(1, { damping: 8 });
+      navigateToNewRecording();
+    }, 100);
+  };
 
   const filteredRecordings = recordings.filter(
     recording => recording.title.toLowerCase().includes(searchQuery.toLowerCase()) || recording.date.includes(searchQuery)
@@ -183,82 +144,6 @@ export default function RecordingsScreen() {
     }
   };
 
-  // 定義按鈕動畫樣式
-  const recordButtonAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: buttonScale.value }, { rotate: `${buttonRotate.value}rad` }],
-    };
-  });
-
-  // 波紋動畫樣式
-  const rippleAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: rippleScale.value }],
-      opacity: rippleOpacity.value,
-    };
-  });
-
-  // 第二層波紋動畫樣式
-  const secondRippleAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: secondRippleScale.value }],
-      opacity: secondRippleOpacity.value,
-    };
-  });
-
-  // 脈搏動畫樣式
-  const pulseAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: pulseScale.value }],
-      opacity: pulseOpacity.value,
-    };
-  });
-
-  const handleRecordButtonPress = () => {
-    // 按下時的動畫組合效果
-    buttonScale.value = withSpring(0.9, { damping: 12 });
-    // 添加旋轉效果
-    buttonRotate.value = withSequence(withTiming(-0.2, { duration: 120 }), withTiming(0.2, { duration: 120 }), withTiming(0, { duration: 150 }));
-
-    // 添加脈搏效果
-    pulseScale.value = 1;
-    pulseOpacity.value = 0.7;
-    pulseScale.value = withTiming(1.8, { duration: 400, easing: Easing.out(Easing.ease) });
-    pulseOpacity.value = withTiming(0, { duration: 400 });
-
-    // 釋放時恢復並導航
-    setTimeout(() => {
-      buttonScale.value = withSpring(1, { damping: 8 });
-      navigateToNewRecording();
-    }, 180);
-  };
-
-  // 在滾動時隱藏按鈕文字
-  const handleScroll = () => {
-    if (showButtonLabel) {
-      setShowButtonLabel(false);
-      labelOpacity.value = withTiming(0, { duration: 200 });
-    }
-  };
-
-  // 當滾動停止一段時間後顯示文字
-  const handleScrollEnd = () => {
-    setTimeout(() => {
-      setShowButtonLabel(true);
-      labelOpacity.value = withTiming(1, { duration: 200 });
-    }, 1500);
-  };
-
-  // 文字標籤動畫樣式
-  const labelAnimatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: labelOpacity.value,
-    };
-  });
-
-  // 計算按鈕底部位置，考慮底部安全區域
-  const buttonBottomPosition = Platform.OS === "ios" ? insets.bottom + 20 : 20;
-
   const renderItem = ({ item, index }: { item: Recording; index: number }) => (
     <Animated.View entering={FadeIn.delay(index * 100).duration(300)}>
       <TouchableOpacity style={styles.recordingItem} onPress={() => navigateToRecordingDetail(item.id)}>
@@ -279,6 +164,16 @@ export default function RecordingsScreen() {
       </TouchableOpacity>
     </Animated.View>
   );
+
+  // 計算按鈕底部位置，考慮底部安全區域和 tabbar 高度，並進一步調高位置
+  const buttonBottomPosition =
+    Platform.OS === "ios"
+      ? insets.bottom + 100 // 進一步增加底部間距
+      : 100; // 同樣為 Android 增加間距
+
+  // 空的滾動處理函數，保持介面一致性
+  const handleScroll = () => {};
+  const handleScrollEnd = () => {};
 
   return (
     <ThemedView style={styles.container}>
@@ -320,51 +215,32 @@ export default function RecordingsScreen() {
         keyExtractor={item => item.id}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
-        onScroll={handleScroll}
-        onScrollEndDrag={handleScrollEnd}
-        onMomentumScrollEnd={handleScrollEnd}
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
             <Ionicons name="search-outline" size={48} color="#A0AEC0" />
             <ThemedText style={styles.emptyText}>{searchQuery ? "找不到匹配的錄音" : "沒有錄音"}</ThemedText>
             {!searchQuery && (
               <TouchableOpacity style={styles.startRecordingButton} onPress={navigateToNewRecording} activeOpacity={0.85}>
-                <LinearGradient colors={["#4F81FF", "#3A7BFF", "#1E5CF8"]} style={styles.startRecordingGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+                <View style={styles.startRecordingGradient}>
                   <Ionicons name="mic" size={18} color="#FFF" style={styles.startRecordingIcon} />
                   <ThemedText style={styles.startRecordingText}>開始錄音</ThemedText>
-                </LinearGradient>
+                </View>
               </TouchableOpacity>
             )}
           </View>
         )}
       />
 
-      {/* 浮動錄音按鈕 - 加入波紋動畫與提示文字 */}
+      {/* 浮動錄音按鈕 - 添加光暈效果 */}
       <View style={[styles.recordButtonContainer, { bottom: buttonBottomPosition }]}>
-        <Animated.View style={[styles.ripple, rippleAnimatedStyle]} />
-        <Animated.View style={[styles.ripple, styles.secondRipple, secondRippleAnimatedStyle]} />
-        <Animated.View style={[styles.pulse, pulseAnimatedStyle]} />
+        <View style={styles.buttonGlow} />
         <Animated.View style={[styles.recordButton, recordButtonAnimatedStyle]}>
-          <TouchableOpacity style={styles.recordButtonTouchable} onPress={handleRecordButtonPress} activeOpacity={0.9}>
-            <LinearGradient colors={["#4F81FF", "#3A7BFF", "#1E5CF8"]} style={styles.recordButtonInner} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-              <View style={styles.iconWrapper}>
-                <Ionicons name="mic" size={24} color="#FFF" />
-              </View>
-            </LinearGradient>
+          <TouchableOpacity style={styles.recordButtonTouchable} onPress={handleRecordButtonPress} activeOpacity={0.8}>
+            <View style={styles.recordButtonInner}>
+              <Ionicons name="mic" size={24} color="#FFF" />
+            </View>
           </TouchableOpacity>
         </Animated.View>
-        {showButtonLabel && (
-          <Animated.View style={[styles.buttonLabelContainer, labelAnimatedStyle]}>
-            <LinearGradient
-              colors={["rgba(30, 30, 30, 0.9)", "rgba(10, 10, 10, 0.95)"]}
-              style={styles.buttonLabelGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <ThemedText style={styles.buttonLabelText}>開始錄音</ThemedText>
-            </LinearGradient>
-          </Animated.View>
-        )}
       </View>
 
       {/* 刪除確認Modal */}
@@ -485,7 +361,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-    paddingBottom: 100, // 為底部標籤留出空間
+    paddingBottom: 180, // 進一步增加底部內邊距，適應按鈕新位置
   },
   recordingItem: {
     flexDirection: "row",
@@ -680,107 +556,83 @@ const styles = StyleSheet.create({
   recordButtonContainer: {
     position: "absolute",
     right: 20,
-    width: 68,
-    height: 68,
+    width: 72,
+    height: 72,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 100,
   },
-  ripple: {
+  buttonGlow: {
     position: "absolute",
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: "rgba(58, 123, 255, 0.25)",
-  },
-  secondRipple: {
-    backgroundColor: "rgba(79, 129, 255, 0.2)",
-  },
-  pulse: {
-    position: "absolute",
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: "rgba(30, 92, 248, 0.3)",
+    width: 76,
+    height: 76,
+    borderRadius: 38,
+    backgroundColor: "transparent",
+    // 模糊效果在各平台實現方式不同
+    ...Platform.select({
+      ios: {
+        shadowColor: "#3A7BFF",
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.6,
+        shadowRadius: 12,
+      },
+      android: {
+        // Android上使用背景色+透明度來模擬光暈效果
+        backgroundColor: "rgba(58, 123, 255, 0.18)",
+        elevation: 1,
+      },
+    }),
   },
   recordButton: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    shadowColor: "#1E5CF8",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 10,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 4,
   },
   recordButtonTouchable: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     overflow: "hidden",
   },
   recordButtonInner: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#3A7BFF",
     justifyContent: "center",
     alignItems: "center",
-  },
-  iconWrapper: {
-    width: 30,
-    height: 30,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-  },
-  buttonLabelContainer: {
-    position: "absolute",
-    top: -45,
-    paddingHorizontal: 0,
-    paddingVertical: 0,
-    borderRadius: 20,
-    overflow: "hidden",
-  },
-  buttonLabelGradient: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  buttonLabelText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "600",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
   startRecordingButton: {
     marginTop: 24,
-    borderRadius: 24,
-    overflow: "hidden",
-    elevation: 5,
-    shadowColor: "#1E5CF8",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    borderRadius: 20,
+    backgroundColor: "#3A7BFF",
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   startRecordingGradient: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 14,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
   },
   startRecordingIcon: {
     marginRight: 8,
   },
   startRecordingText: {
     color: "#FFFFFF",
-    fontSize: 17,
-    fontWeight: "700",
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 1,
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
