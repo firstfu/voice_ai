@@ -88,6 +88,7 @@ export default function RootLayout() {
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="audio-settings" />
+        <Stack.Screen name="premium" />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="dark" />

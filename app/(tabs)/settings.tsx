@@ -111,6 +111,19 @@ export default function SettingsScreen() {
       ],
     },
     {
+      title: "進階功能",
+      data: [
+        {
+          id: "premium",
+          title: "進階功能訂閱",
+          subtitle: "解鎖全部進階功能與更多服務",
+          icon: "star",
+          type: "arrow",
+          onPress: () => router.push("/premium"),
+        },
+      ],
+    },
+    {
       title: "錄音與播放",
       data: [
         {
@@ -241,6 +254,7 @@ export default function SettingsScreen() {
   const getIconBackground = (id: string) => {
     const colorMap: { [key: string]: string } = {
       notifications: "#F59E0B",
+      premium: "#EC4899",
       highQuality: "#10B981",
       autoSave: "#3B82F6",
       saveOriginal: "#8B5CF6",
