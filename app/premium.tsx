@@ -27,6 +27,8 @@ interface SubscriptionPlan {
   originalPrice?: string;
   popular?: boolean;
   savingsPercent?: number;
+  credits: string;
+  features: string;
 }
 
 // 功能優勢項目類型
@@ -46,62 +48,68 @@ export default function PremiumScreen() {
   // 模擬的訂閱計劃數據
   const subscriptionPlans: SubscriptionPlan[] = [
     {
-      id: "monthly",
-      title: "月度訂閱",
-      duration: "1個月",
-      price: "NT$99",
-      originalPrice: "NT$129",
+      id: "basic",
+      title: "基礎方案",
+      duration: "月費",
+      price: "NT$79",
+      originalPrice: "NT$99",
+      credits: "30 AI 積分/月",
+      features: "基礎語音分析",
     },
     {
-      id: "yearly",
-      title: "年度訂閱",
-      duration: "12個月",
-      price: "NT$799",
-      originalPrice: "NT$1,188",
+      id: "pro",
+      title: "專業方案",
+      duration: "月費",
+      price: "NT$199",
+      originalPrice: "NT$249",
       popular: true,
-      savingsPercent: 33,
+      credits: "100 AI 積分/月",
+      features: "進階語音分析與主題識別",
+      savingsPercent: 20,
     },
     {
-      id: "lifetime",
-      title: "終身會員",
-      duration: "一次性付費",
-      price: "NT$1,999",
-      originalPrice: "NT$2,999",
-      savingsPercent: 33,
+      id: "unlimited",
+      title: "無限方案",
+      duration: "月費",
+      price: "NT$399",
+      originalPrice: "NT$499",
+      credits: "無限 AI 積分",
+      features: "完整 AI 功能與優先處理",
+      savingsPercent: 20,
     },
   ];
 
   // 模擬的功能優勢數據
   const features: FeatureItem[] = [
     {
-      id: "unlimited",
-      title: "不限時長錄音",
-      description: "突破免費版限制，無論多長內容都能輕鬆錄製",
-      icon: "infinite",
+      id: "ai-transcription",
+      title: "AI 語音轉文字",
+      description: "使用先進的 AI 模型處理語音識別，每分鐘錄音消耗 1 AI 積分",
+      icon: "document-text",
     },
     {
-      id: "transcription",
-      title: "智能語音轉文字",
-      description: "專業級語音識別技術，快速生成高精度文字稿",
-      icon: "document-text",
+      id: "ai-analysis",
+      title: "智能內容分析",
+      description: "AI 驅動的關鍵詞提取、摘要生成和主題分類，每次分析消耗 2-5 積分",
+      icon: "analytics",
     },
     {
       id: "export",
       title: "多格式導出",
-      description: "支援多種音訊和文件格式導出，滿足不同場景需求",
+      description: "支援多種音訊和文字格式導出，包含 AI 分析結果",
       icon: "share",
     },
     {
-      id: "cloud",
-      title: "雲端儲存",
-      description: "自動雲端備份，永不丟失重要錄音內容",
-      icon: "cloud-upload",
+      id: "credits",
+      title: "彈性 AI 積分制",
+      description: "根據實際使用需求購買積分，未使用積分可保留至下個月",
+      icon: "wallet",
     },
     {
-      id: "noise",
-      title: "降噪增強",
-      description: "先進的降噪算法，提供清晰的錄音效果",
-      icon: "options",
+      id: "priority",
+      title: "優先處理",
+      description: "高級方案用戶享有 AI 處理優先權，峰值時段也能快速完成",
+      icon: "flash",
     },
   ];
 
@@ -178,6 +186,9 @@ export default function PremiumScreen() {
                     {plan.originalPrice && <ThemedText style={styles.originalPrice}>{plan.originalPrice}</ThemedText>}
                   </View>
 
+                  <ThemedText style={styles.planCredits}>{plan.credits}</ThemedText>
+                  {plan.features && <ThemedText style={styles.planFeatures}>{plan.features}</ThemedText>}
+
                   {plan.savingsPercent && (
                     <View style={styles.savingsBadge}>
                       <Text style={styles.savingsBadgeText}>省 {plan.savingsPercent}%</Text>
@@ -225,7 +236,7 @@ export default function PremiumScreen() {
               {" "}
               隱私政策
             </Text>
-            。訂閱會自動續約，可隨時在 App Store 帳戶設定中取消。
+            。訂閱會自動續約，可隨時在 App Store 帳戶設定中取消。未使用的 AI 積分最多可保留至下個月底。
           </ThemedText>
         </View>
       </ScrollView>
@@ -234,7 +245,7 @@ export default function PremiumScreen() {
       <View style={[styles.subscribeContainer, { paddingBottom: insets.bottom + 16 }]}>
         <LinearGradient colors={["#3A7BFF", "#6C3AFF"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.subscribeButton}>
           <TouchableOpacity style={styles.subscribeButtonTouch} onPress={handleSubscribe} disabled={!selectedPlan || isLoading} activeOpacity={0.9}>
-            {isLoading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.subscribeButtonText}>{selectedPlan ? "訂閱" : "選擇方案"}</Text>}
+            {isLoading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.subscribeButtonText}>{selectedPlan ? "開始訂閱" : "選擇方案"}</Text>}
           </TouchableOpacity>
         </LinearGradient>
       </View>
@@ -461,5 +472,16 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 18,
     fontWeight: "600",
+  },
+  planCredits: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#3A7BFF",
+    marginTop: 4,
+  },
+  planFeatures: {
+    fontSize: 13,
+    color: "#4B5563",
+    marginTop: 2,
   },
 });
