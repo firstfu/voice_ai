@@ -432,15 +432,15 @@ export default function NewRecordingScreen() {
 
       {/* 預覽模式 */}
       {isPreviewing && recordingUri ? (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
-          <ThemedText style={{ fontSize: 22, fontWeight: "700", marginBottom: 16, color: "#fff" }}>預覽錄音</ThemedText>
+        <View style={styles.previewContainer}>
+          <ThemedText style={styles.previewTitle}>預覽錄音</ThemedText>
           {/* 播放控制 */}
-          <TouchableOpacity onPress={handlePlayPause} style={{ marginBottom: 16 }}>
+          <TouchableOpacity onPress={handlePlayPause} style={styles.playButton}>
             <Ionicons name={isPlaying ? "pause" : "play"} size={48} color="#fff" />
           </TouchableOpacity>
           {/* 進度條 */}
-          <View style={{ width: "90%", marginBottom: 16 }}>
-            <Text style={{ color: "#fff", marginBottom: 4 }}>{`${Math.floor(playbackPosition / 1000)} / ${Math.floor(playbackDuration / 1000)} 秒`}</Text>
+          <View style={styles.sliderContainer}>
+            <Text style={styles.timeText}>{`${Math.floor(playbackPosition / 1000)} / ${Math.floor(playbackDuration / 1000)} 秒`}</Text>
             <RNAnimated.View>
               <Animated.View>
                 <Slider
@@ -457,19 +457,24 @@ export default function NewRecordingScreen() {
             </RNAnimated.View>
           </View>
           {/* 檔名編輯 */}
-          <TextInput
-            style={{ backgroundColor: "#fff", borderRadius: 8, padding: 10, width: "90%", fontSize: 18, marginBottom: 24 }}
-            value={recordingName}
-            onChangeText={setRecordingName}
-            placeholder="輸入錄音名稱"
-          />
+          <View style={styles.inputContainer}>
+            <Ionicons name="pencil" size={20} color="#3A7BFF" style={styles.inputIcon} />
+            <TextInput
+              style={styles.nameInput}
+              value={recordingName}
+              onChangeText={setRecordingName}
+              placeholder="輸入錄音名稱"
+              placeholderTextColor="rgba(150, 150, 150, 0.8)"
+              selectionColor="#3A7BFF"
+            />
+          </View>
           {/* 操作按鈕 */}
-          <View style={{ flexDirection: "row", gap: 20 }}>
-            <TouchableOpacity onPress={handleDiscard} style={{ backgroundColor: "#FF4A6B", padding: 14, borderRadius: 10 }}>
-              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>放棄</Text>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity onPress={handleDiscard} style={styles.discardButton}>
+              <Text style={styles.buttonText}>放棄</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleSave} style={{ backgroundColor: "#3A7BFF", padding: 14, borderRadius: 10 }}>
-              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>儲存</Text>
+            <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
+              <Text style={styles.buttonText}>儲存</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -620,5 +625,70 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
+  },
+  previewContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  previewTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 16,
+    color: "#fff",
+  },
+  playButton: {
+    marginBottom: 16,
+  },
+  sliderContainer: {
+    width: "90%",
+    marginBottom: 16,
+  },
+  timeText: {
+    color: "#fff",
+    marginBottom: 4,
+  },
+  nameInput: {
+    flex: 1,
+    fontSize: 18,
+    color: "#fff",
+    fontWeight: "500",
+    padding: 8,
+    backgroundColor: "transparent",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 12,
+    width: "90%",
+    marginBottom: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  inputIcon: {
+    marginRight: 10,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    gap: 20,
+  },
+  discardButton: {
+    backgroundColor: "#FF4A6B",
+    padding: 14,
+    borderRadius: 10,
+  },
+  saveButton: {
+    backgroundColor: "#3A7BFF",
+    padding: 14,
+    borderRadius: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 16,
   },
 });
