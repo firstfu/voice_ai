@@ -76,14 +76,17 @@ class NotificationService {
    * 發送即時本地通知
    */
   async sendImmediateNotification(notification: NotificationData): Promise<string> {
+    const content: any = {
+      title: notification.title,
+      body: notification.body,
+      data: notification.data || {},
+      sound: notification.sound ?? true,
+    };
+    if (typeof notification.badge === "number") {
+      content.badge = notification.badge;
+    }
     return Notifications.scheduleNotificationAsync({
-      content: {
-        title: notification.title,
-        body: notification.body,
-        data: notification.data || {},
-        sound: notification.sound ?? true,
-        badge: notification.badge,
-      },
+      content,
       trigger: null, // 立即發送
     });
   }
@@ -92,14 +95,17 @@ class NotificationService {
    * 發送延遲通知
    */
   async sendDelayedNotification(notification: NotificationData, delayInSeconds: number): Promise<string> {
+    const content: any = {
+      title: notification.title,
+      body: notification.body,
+      data: notification.data || {},
+      sound: notification.sound ?? true,
+    };
+    if (typeof notification.badge === "number") {
+      content.badge = notification.badge;
+    }
     return Notifications.scheduleNotificationAsync({
-      content: {
-        title: notification.title,
-        body: notification.body,
-        data: notification.data || {},
-        sound: notification.sound ?? true,
-        badge: notification.badge,
-      },
+      content,
       trigger: {
         seconds: delayInSeconds,
         type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
@@ -111,14 +117,17 @@ class NotificationService {
    * 排程每日通知
    */
   async scheduleDailyNotification(notification: NotificationData, hour: number, minute: number): Promise<string> {
+    const content: any = {
+      title: notification.title,
+      body: notification.body,
+      data: notification.data || {},
+      sound: notification.sound ?? true,
+    };
+    if (typeof notification.badge === "number") {
+      content.badge = notification.badge;
+    }
     return Notifications.scheduleNotificationAsync({
-      content: {
-        title: notification.title,
-        body: notification.body,
-        data: notification.data || {},
-        sound: notification.sound ?? true,
-        badge: notification.badge,
-      },
+      content,
       trigger: {
         hour,
         minute,
