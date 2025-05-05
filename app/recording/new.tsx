@@ -363,7 +363,7 @@ export default function NewRecordingScreen() {
           <Ionicons name="close" size={24} color="#FFFFFF" />
         </TouchableOpacity>
 
-        <ThemedText style={styles.headerTitle}>{isRecording ? "錄音中" : "開始錄音"}</ThemedText>
+        <ThemedText style={styles.headerTitle}>{isPreviewing ? "預覽錄音" : isRecording ? "錄音中" : "開始錄音"}</ThemedText>
 
         <View style={styles.placeholderButton} />
       </View>
@@ -379,16 +379,19 @@ export default function NewRecordingScreen() {
 
         {/* 錄音狀態文字 */}
         <View style={styles.statusContainer}>
-          {isRecording && (
+          {isPreviewing ? (
             <Animated.View entering={FadeIn} exiting={FadeOut}>
-              <View style={styles.recordingStatus}>
-                <View style={[styles.recordingIndicator, isPaused && styles.pausedIndicator]} />
-                <ThemedText style={styles.recordingStatusText}>{isPaused ? "已暫停" : "正在錄音"}</ThemedText>
-              </View>
+              <ThemedText style={styles.instructions}>請預覽錄音內容，確認無誤後儲存，或重新錄製</ThemedText>
             </Animated.View>
-          )}
-
-          {!isRecording && (
+          ) : isRecording ? (
+            <Animated.View entering={FadeIn} exiting={FadeOut}>
+              <ThemedText style={styles.instructions}>正在錄音，點擊下方按鈕可暫停或停止</ThemedText>
+            </Animated.View>
+          ) : isPaused ? (
+            <Animated.View entering={FadeIn} exiting={FadeOut}>
+              <ThemedText style={styles.instructions}>錄音已暫停，點擊下方按鈕繼續或停止</ThemedText>
+            </Animated.View>
+          ) : (
             <Animated.View entering={FadeIn} exiting={FadeOut}>
               <ThemedText style={styles.instructions}>點擊下方按鈕開始錄音</ThemedText>
             </Animated.View>
