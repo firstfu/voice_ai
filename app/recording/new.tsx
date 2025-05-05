@@ -9,12 +9,13 @@
  */
 
 import { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, TouchableOpacity, Platform, StatusBar, BackHandler, Animated as RNAnimated, Text } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Platform, StatusBar, BackHandler, Animated as RNAnimated, Text, Alert } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, FadeIn, FadeOut, withTiming, withRepeat, withSequence, Easing } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
+import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -50,6 +51,8 @@ export default function NewRecordingScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [recordingInstance, setRecordingInstance] = useState<Audio.Recording | null>(null);
+  const [recordingUri, setRecordingUri] = useState<string | null>(null);
 
   const recordButtonScale = useSharedValue(1);
   const pauseButtonScale = useSharedValue(1);
@@ -97,10 +100,7 @@ export default function NewRecordingScreen() {
 
           // 正弦波的組合創建更複雜的波形
           const value =
-            0.6 +
-            0.2 * Math.sin(elapsed / frequency + phase) +
-            0.1 * Math.sin(elapsed / (frequency / 2) + phase * 2) +
-            0.1 * Math.sin(elapsed / (frequency / 3) + phase / 2);
+            0.6 + 0.2 * Math.sin(elapsed / frequency + phase) + 0.1 * Math.sin(elapsed / (frequency / 2) + phase * 2) + 0.1 * Math.sin(elapsed / (frequency / 3) + phase / 2);
 
           animValue.value = withTiming(value, { duration: 100 });
         });
@@ -164,38 +164,101 @@ export default function NewRecordingScreen() {
     return () => clearInterval(interval);
   }, [isRecording, isPaused]);
 
-  // 處理開始/停止錄音
-  const handleRecordPress = () => {
-    recordButtonScale.value = withSpring(0.9, { damping: 10 });
+  // 權限檢查
+  const checkAndRequestAudioPermissions = async () => {
+    const { status } = await Audio.getPermissionsAsync();
+    if (status === "granted") return true;
+    const { status: newStatus } = await Audio.requestPermissionsAsync();
+    return newStatus === "granted";
+  };
 
-    setTimeout(() => {
-      recordButtonScale.value = withSpring(1, { damping: 8 });
-    }, 200);
+  // 開始錄音
+  const startRecording = async () => {
+    const hasPermission = await checkAndRequestAudioPermissions();
+    if (!hasPermission) {
+      Alert.alert("需要麥克風權限", "請在設定中允許麥克風權限");
+      return;
+    }
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      interruptionModeIOS: InterruptionModeIOS.DoNotMix,
+      interruptionModeAndroid: InterruptionModeAndroid.DoNotMix,
+    });
+    const recording = new Audio.Recording();
+    await recording.prepareToRecordAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+    await recording.startAsync();
+    setRecordingInstance(recording);
+    setIsRecording(true);
+    setIsPaused(false);
+  };
 
-    if (!isRecording) {
-      // 開始錄音
-      setIsRecording(true);
-      pulseAnimation.start();
-    } else {
-      // 停止錄音並保存
-      setIsRecording(false);
-      setIsPaused(false);
-      pulseAnimation.stop();
-
-      // 直接跳轉到錄音庫頁面
-      router.push("/(tabs)/recordings");
+  // 暫停錄音
+  const pauseRecording = async () => {
+    if (recordingInstance) {
+      await recordingInstance.pauseAsync();
+      setIsPaused(true);
     }
   };
 
-  // 處理暫停/繼續錄音
-  const handlePauseResumePress = () => {
-    pauseButtonScale.value = withSpring(0.9, { damping: 10 });
+  // 繼續錄音
+  const resumeRecording = async () => {
+    if (recordingInstance) {
+      await recordingInstance.startAsync();
+      setIsPaused(false);
+    }
+  };
 
+  // 停止錄音
+  const stopRecording = async () => {
+    if (!recordingInstance) return;
+    await recordingInstance.stopAndUnloadAsync();
+    const uri = recordingInstance.getURI();
+    setRecordingUri(uri);
+    setIsRecording(false);
+    setIsPaused(false);
+    setRecordingInstance(null);
+    // 跳轉或儲存錄音檔案
+    router.push("/(tabs)/recordings");
+  };
+
+  // 修改 handleRecordPress
+  const handleRecordPress = async () => {
+    recordButtonScale.value = withSpring(0.9, { damping: 10 });
+    setTimeout(() => {
+      recordButtonScale.value = withSpring(1, { damping: 8 });
+    }, 200);
+    if (!isRecording) {
+      await startRecording();
+      pulseAnimation.start();
+    } else {
+      await stopRecording();
+      pulseAnimation.stop();
+    }
+  };
+
+  // 修改 handlePauseResumePress
+  const handlePauseResumePress = async () => {
+    pauseButtonScale.value = withSpring(0.9, { damping: 10 });
     setTimeout(() => {
       pauseButtonScale.value = withSpring(1, { damping: 8 });
     }, 200);
+    if (isPaused) {
+      await resumeRecording();
+    } else {
+      await pauseRecording();
+    }
+  };
 
-    setIsPaused(!isPaused);
+  // 修改 handleCancelPress
+  const handleCancelPress = async () => {
+    // 停止錄音並確認是否放棄
+    if (isRecording && recordingInstance) {
+      await stopRecording();
+      pulseAnimation.stop();
+    }
+    router.back();
   };
 
   // 動畫樣式
@@ -210,18 +273,6 @@ export default function NewRecordingScreen() {
       transform: [{ scale: pauseButtonScale.value }],
     };
   });
-
-  // 處理取消錄音
-  const handleCancelPress = () => {
-    // 停止錄音並確認是否放棄
-    if (isRecording) {
-      setIsRecording(false);
-      setIsPaused(false);
-      pulseAnimation.stop();
-    }
-
-    router.back();
-  };
 
   return (
     <ThemedView style={styles.container}>
@@ -288,12 +339,7 @@ export default function NewRecordingScreen() {
         {/* 暫停/繼續按鈕 (僅在錄音中顯示) */}
         {isRecording && (
           <AnimatedTouchable style={[styles.pauseButton, pauseButtonStyle]} onPress={handlePauseResumePress}>
-            <LinearGradient
-              colors={isPaused ? ["#3A7BFF", "#00C2A8"] : ["#F59E0B", "#FF4A6B"]}
-              style={styles.pauseButtonGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
+            <LinearGradient colors={isPaused ? ["#3A7BFF", "#00C2A8"] : ["#F59E0B", "#FF4A6B"]} style={styles.pauseButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
               <Ionicons name={isPaused ? "play" : "pause"} size={24} color="#FFFFFF" />
             </LinearGradient>
           </AnimatedTouchable>
@@ -301,12 +347,7 @@ export default function NewRecordingScreen() {
 
         {/* 錄音按鈕 */}
         <AnimatedTouchable style={[styles.recordButton, recordButtonStyle]} onPress={handleRecordPress}>
-          <LinearGradient
-            colors={isRecording ? ["#FF4A6B", "#F59E0B"] : ["#3A7BFF", "#00C2A8"]}
-            style={styles.recordButtonGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-          >
+          <LinearGradient colors={isRecording ? ["#FF4A6B", "#F59E0B"] : ["#3A7BFF", "#00C2A8"]} style={styles.recordButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
             {isRecording ? <Ionicons name="square" size={28} color="#FFFFFF" /> : <Ionicons name="mic" size={32} color="#FFFFFF" />}
           </LinearGradient>
         </AnimatedTouchable>
