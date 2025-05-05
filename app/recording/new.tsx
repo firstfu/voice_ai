@@ -9,13 +9,15 @@
  */
 
 import { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, TouchableOpacity, Platform, StatusBar, BackHandler, Animated as RNAnimated, Text, Alert } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Platform, StatusBar, BackHandler, Animated as RNAnimated, Text, Alert, TextInput } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, FadeIn, FadeOut, withTiming, withRepeat, withSequence, Easing } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { Audio, InterruptionModeIOS, InterruptionModeAndroid } from "expo-av";
+import * as FileSystem from "expo-file-system";
+import Slider from "@react-native-community/slider";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -53,6 +55,12 @@ export default function NewRecordingScreen() {
   const [isPaused, setIsPaused] = useState(false);
   const [recordingInstance, setRecordingInstance] = useState<Audio.Recording | null>(null);
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
+  const [isPreviewing, setIsPreviewing] = useState(false);
+  const [soundInstance, setSoundInstance] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playbackPosition, setPlaybackPosition] = useState(0);
+  const [playbackDuration, setPlaybackDuration] = useState(0);
+  const [recordingName, setRecordingName] = useState("新錄音");
 
   const recordButtonScale = useSharedValue(1);
   const pauseButtonScale = useSharedValue(1);
@@ -219,9 +227,75 @@ export default function NewRecordingScreen() {
     setIsRecording(false);
     setIsPaused(false);
     setRecordingInstance(null);
-    // 跳轉或儲存錄音檔案
+    setIsPreviewing(true); // 進入預覽模式
+  };
+
+  // 預覽播放功能
+  const loadAndPlaySound = async () => {
+    if (!recordingUri) return;
+    if (soundInstance) {
+      await soundInstance.unloadAsync();
+      setSoundInstance(null);
+    }
+    const { sound, status } = await Audio.Sound.createAsync({ uri: recordingUri }, { shouldPlay: true }, onPlaybackStatusUpdate);
+    setSoundInstance(sound);
+  };
+
+  const onPlaybackStatusUpdate = (status: any) => {
+    if (status.isLoaded) {
+      setPlaybackPosition(status.positionMillis || 0);
+      setPlaybackDuration(status.durationMillis || 0);
+      setIsPlaying(status.isPlaying);
+    } else {
+      setIsPlaying(false);
+    }
+  };
+
+  const handlePlayPause = async () => {
+    if (!soundInstance) {
+      await loadAndPlaySound();
+      return;
+    }
+    if (isPlaying) {
+      await soundInstance.pauseAsync();
+    } else {
+      await soundInstance.playAsync();
+    }
+  };
+
+  const handleSeek = async (value: number) => {
+    if (soundInstance) {
+      await soundInstance.setPositionAsync(value);
+    }
+  };
+
+  // 放棄錄音
+  const handleDiscard = async () => {
+    if (recordingUri) {
+      try {
+        await FileSystem.deleteAsync(recordingUri, { idempotent: true });
+      } catch {}
+    }
+    setRecordingUri(null);
+    setIsPreviewing(false);
+    setRecordingName("新錄音");
+  };
+
+  // 儲存錄音（可根據實際需求擴充，這裡僅模擬）
+  const handleSave = async () => {
+    // 這裡可將錄音資訊（recordingName, recordingUri）儲存到全域狀態或伺服器
+    setIsPreviewing(false);
     router.push("/(tabs)/recordings");
   };
+
+  // 清理音訊資源
+  useEffect(() => {
+    return () => {
+      if (soundInstance) {
+        soundInstance.unloadAsync();
+      }
+    };
+  }, [soundInstance]);
 
   // 修改 handleRecordPress
   const handleRecordPress = async () => {
@@ -352,6 +426,56 @@ export default function NewRecordingScreen() {
           </LinearGradient>
         </AnimatedTouchable>
       </View>
+
+      {/* 預覽模式 */}
+      {isPreviewing && recordingUri ? (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 24 }}>
+          <ThemedText style={{ fontSize: 22, fontWeight: "700", marginBottom: 16, color: "#fff" }}>預覽錄音</ThemedText>
+          {/* 播放控制 */}
+          <TouchableOpacity onPress={handlePlayPause} style={{ marginBottom: 16 }}>
+            <Ionicons name={isPlaying ? "pause" : "play"} size={48} color="#fff" />
+          </TouchableOpacity>
+          {/* 進度條 */}
+          <View style={{ width: "90%", marginBottom: 16 }}>
+            <Text style={{ color: "#fff", marginBottom: 4 }}>{`${Math.floor(playbackPosition / 1000)} / ${Math.floor(playbackDuration / 1000)} 秒`}</Text>
+            <RNAnimated.View>
+              <Animated.View>
+                <Slider
+                  style={{ width: "100%" }}
+                  minimumValue={0}
+                  maximumValue={playbackDuration}
+                  value={playbackPosition}
+                  onValueChange={handleSeek}
+                  minimumTrackTintColor="#fff"
+                  maximumTrackTintColor="#D1D5DB"
+                  thumbTintColor="#fff"
+                />
+              </Animated.View>
+            </RNAnimated.View>
+          </View>
+          {/* 檔名編輯 */}
+          <TextInput
+            style={{ backgroundColor: "#fff", borderRadius: 8, padding: 10, width: "90%", fontSize: 18, marginBottom: 24 }}
+            value={recordingName}
+            onChangeText={setRecordingName}
+            placeholder="輸入錄音名稱"
+          />
+          {/* 操作按鈕 */}
+          <View style={{ flexDirection: "row", gap: 20 }}>
+            <TouchableOpacity onPress={handleDiscard} style={{ backgroundColor: "#FF4A6B", padding: 14, borderRadius: 10 }}>
+              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>放棄</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleSave} style={{ backgroundColor: "#3A7BFF", padding: 14, borderRadius: 10 }}>
+              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>儲存</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      ) : (
+        <>
+          {/* 原本錄音 UI 內容 */}
+          {/* ...原有錄音頁面內容... */}
+        </>
+      )}
     </ThemedView>
   );
 }
