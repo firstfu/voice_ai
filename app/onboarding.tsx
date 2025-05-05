@@ -28,21 +28,24 @@ const { width } = Dimensions.get("window");
 const onboardingData = [
   {
     id: "1",
-    title: "歡迎使用 Voice AI",
-    description: "專業的語音助手，幫助您更高效地處理語音訊息和記錄",
-    image: require("../assets/images/icon.png"),
+    title: "歡迎使用錄智通",
+    description: "結合 LLM AI 技術的高級錄音應用，為您提供專業的語音處理體驗",
+    image: require("../assets/images/logo_3d_elegant.webp"),
+    bgColor: "transparent",
   },
   {
     id: "2",
-    title: "語音錄製",
-    description: "高品質錄音功能，捕捉每一個重要時刻",
-    image: require("../assets/images/splash-icon.png"),
+    title: "高品質錄音",
+    description: "支援多種採樣率和音頻格式，智能過濾背景噪音，捕捉每一個清晰音符",
+    image: require("../assets/images/logo_3d_premium.webp"),
+    bgColor: "transparent",
   },
   {
     id: "3",
     title: "智能分析",
-    description: "先進的 AI 技術，自動分析語音內容",
-    image: require("../assets/images/notification-icon.png"),
+    description: "先進的 AI 技術，自動轉錄、提取關鍵點、生成摘要，讓語音資料更有價值",
+    image: require("../assets/images/logo_3d_no_text.webp"),
+    bgColor: "transparent",
   },
 ];
 
@@ -119,8 +122,8 @@ export default function OnboardingScreen() {
 
       {/* 內容區域 */}
       <Animated.View key={currentItem.id} entering={SlideInRight.duration(300)} exiting={SlideOutLeft.duration(300)} style={styles.contentContainer}>
-        <View style={styles.imageContainer}>
-          <Image source={currentItem.image} style={styles.image} />
+        <View style={styles.logoOuterContainer}>
+          <Image source={currentItem.image} style={styles.logoImage} resizeMode="cover" />
         </View>
 
         <Animated.Text entering={FadeIn.duration(400)} exiting={FadeOut.duration(200)} style={styles.title}>
@@ -179,17 +182,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingHorizontal: 30,
   },
-  imageContainer: {
-    width: width * 0.6,
-    height: width * 0.6,
+  logoOuterContainer: {
     marginBottom: 40,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+    elevation: 10,
+    width: width * 0.62,
+    height: width * 0.62,
     alignItems: "center",
     justifyContent: "center",
+    borderRadius: width * 0.31,
+    overflow: "hidden",
   },
-  image: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
+  logoImage: {
+    width: width * 0.62,
+    height: width * 0.62,
+    resizeMode: "cover",
   },
   title: {
     fontSize: 28,
@@ -203,7 +213,7 @@ const styles = StyleSheet.create({
     color: "#64748B",
     textAlign: "center",
     lineHeight: 24,
-    maxWidth: "80%",
+    maxWidth: "85%",
   },
   bottomContainer: {
     paddingHorizontal: 20,
