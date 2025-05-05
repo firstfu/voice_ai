@@ -13,6 +13,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Animated, { FadeIn, FadeOut, SlideInRight, SlideOutLeft } from "react-native-reanimated";
 
+// 擴展全局變量的聲明
+declare global {
+  var hasCompletedOnboarding: boolean;
+}
+
 // onBoarding 完成標記的鍵名
 const HAS_ONBOARDED_KEY = "hasOnboarded";
 
@@ -53,12 +58,16 @@ export default function OnboardingScreen() {
     setIsNavigating(true);
 
     try {
+      // 設置全局變量，確保根佈局立即獲知引導已完成
+      global.hasCompletedOnboarding = true;
+      console.log("已設置全局完成標記");
+
       // 先儲存已完成狀態
       await AsyncStorage.setItem(HAS_ONBOARDED_KEY, "true");
 
       console.log("完成 onBoarding，準備跳轉到首頁");
 
-      // 嘗試直接返回到首頁
+      // 直接導航到主頁，不使用延遲
       router.replace("/(tabs)");
     } catch (error) {
       console.error("Error saving onboarding status", error);
@@ -83,12 +92,16 @@ export default function OnboardingScreen() {
     setIsNavigating(true);
 
     try {
+      // 設置全局變量，確保根佈局立即獲知引導已完成
+      global.hasCompletedOnboarding = true;
+      console.log("已設置全局完成標記 (跳過)");
+
       // 確保設置了已完成標記
       await AsyncStorage.setItem(HAS_ONBOARDED_KEY, "true");
 
       console.log("跳過 onBoarding，準備跳轉到首頁");
 
-      // 嘗試直接返回到首頁
+      // 直接導航到主頁，不使用延遲
       router.replace("/(tabs)");
     } catch (error) {
       console.error("Error while skipping onboarding", error);
@@ -143,12 +156,7 @@ export default function OnboardingScreen() {
               </TouchableOpacity>
             </>
           ) : (
-            <TouchableOpacity
-              style={[styles.finishButton, isNavigating && styles.disabledButton]}
-              onPress={handleFinish}
-              activeOpacity={0.8}
-              disabled={isNavigating}
-            >
+            <TouchableOpacity style={[styles.finishButton, isNavigating && styles.disabledButton]} onPress={handleFinish} activeOpacity={0.8} disabled={isNavigating}>
               <LinearGradient colors={["#3A7BFF", "#6E99FF"]} style={styles.gradientButton} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
                 <Text style={styles.nextButtonText}>{isNavigating ? "處理中..." : "開始使用"}</Text>
               </LinearGradient>

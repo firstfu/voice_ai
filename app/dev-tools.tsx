@@ -16,6 +16,7 @@ import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import NotificationService from "@/services/NotificationService";
+import { Linking } from "react-native";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -50,12 +51,26 @@ export default function DevToolsScreen() {
     });
 
     // 初始化通知服務
-    NotificationService.init().then(hasPermission => {
-      setNotificationPermission(hasPermission);
-    });
+    NotificationService.init()
+      .then(hasPermission => {
+        setNotificationPermission(hasPermission);
+        if (!hasPermission) {
+          Alert.alert("通知權限未授權", "您需要開啟通知權限才能使用推播功能", [
+            { text: "取消", style: "cancel" },
+            { text: "開啟設定", onPress: () => Linking.openSettings() },
+          ]);
+        }
 
-    // 獲取當前已排程的通知
-    fetchScheduledNotifications();
+        // 檢查並清除血壓相關的錯誤通知
+        NotificationService.checkForInvalidNotifications();
+
+        // 獲取當前已排程的通知
+        fetchScheduledNotifications();
+      })
+      .catch(error => {
+        console.error("通知服務初始化失敗:", error);
+        Alert.alert("初始化失敗", "通知服務初始化失敗，部分功能可能無法使用");
+      });
   }, []);
 
   // 註冊推播通知權限並取得Token
@@ -106,58 +121,82 @@ export default function DevToolsScreen() {
 
   // 發送本地通知
   async function sendLocalNotification() {
-    await NotificationService.sendImmediateNotification({
-      title: "本地通知測試",
-      body: "這是一條本地推播通知，點擊查看詳情",
-      data: { screen: "recording" },
-    });
-    fetchScheduledNotifications();
+    try {
+      await NotificationService.sendImmediateNotification({
+        title: "本地通知測試",
+        body: "這是一條本地推播通知，點擊查看詳情",
+        data: { screen: "recording" },
+      });
+      // 重新獲取通知列表
+      fetchScheduledNotifications();
+    } catch (error) {
+      console.error("發送通知錯誤:", error);
+      Alert.alert("通知發送失敗", "請確認您已授予通知權限");
+    }
   }
 
   // 發送延遲通知
   async function sendDelayedNotification() {
-    await NotificationService.sendDelayedNotification(
-      {
-        title: "延遲通知測試",
-        body: "這是一條延遲5秒後發送的通知",
-        data: { screen: "settings" },
-      },
-      5
-    );
-    fetchScheduledNotifications();
+    try {
+      await NotificationService.sendDelayedNotification(
+        {
+          title: "延遲通知測試",
+          body: "這是一條延遲5秒後發送的通知",
+          data: { screen: "settings" },
+        },
+        5
+      );
+      // 重新獲取通知列表
+      fetchScheduledNotifications();
+    } catch (error) {
+      console.error("發送延遲通知錯誤:", error);
+      Alert.alert("延遲通知發送失敗", "請確認您已授予通知權限");
+    }
   }
 
   // 發送帶圖標的通知
   async function sendNotificationWithIcon() {
-    await NotificationService.sendImmediateNotification({
-      title: "錄智通錄音完成",
-      body: "您的錄音已完成處理，點擊查看詳情",
-      data: { screen: "recordings" },
-      sound: "notification.wav",
-      badge: 1,
-    });
-    fetchScheduledNotifications();
+    try {
+      await NotificationService.sendImmediateNotification({
+        title: "錄智通錄音完成",
+        body: "您的錄音已完成處理，點擊查看詳情",
+        data: { screen: "recordings" },
+        sound: "notification.wav",
+        badge: 1,
+      });
+      // 重新獲取通知列表
+      fetchScheduledNotifications();
+    } catch (error) {
+      console.error("發送豐富通知錯誤:", error);
+      Alert.alert("豐富通知發送失敗", "請確認您已授予通知權限");
+    }
   }
 
   // 發送每日通知
   async function sendDailyNotification() {
-    // 獲取當前時間並設定為每天的這個時間點
-    const now = new Date();
-    const minute = (now.getMinutes() + 1) % 60; // 設定為一分鐘後，如果大於59則回到0
-    const hour = minute === 0 ? (now.getHours() + 1) % 24 : now.getHours(); // 如果分鐘變為0，則小時+1
+    try {
+      // 獲取當前時間並設定為每天的這個時間點
+      const now = new Date();
+      const minute = (now.getMinutes() + 1) % 60; // 設定為一分鐘後，如果大於59則回到0
+      const hour = minute === 0 ? (now.getHours() + 1) % 24 : now.getHours(); // 如果分鐘變為0，則小時+1
 
-    await NotificationService.scheduleDailyNotification(
-      {
-        title: "每日提醒",
-        body: `這是一個在每天 ${hour}:${minute} 發送的定時通知`,
-        data: { screen: "home" },
-      },
-      hour,
-      minute
-    );
+      await NotificationService.scheduleDailyNotification(
+        {
+          title: "每日提醒",
+          body: `這是一個在每天 ${hour}:${minute} 發送的定時通知`,
+          data: { screen: "home" },
+        },
+        hour,
+        minute
+      );
 
-    Alert.alert("每日通知已設定", `通知將在每天 ${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")} 發送`);
-    fetchScheduledNotifications();
+      Alert.alert("每日通知已設定", `通知將在每天 ${hour.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")} 發送`);
+      // 重新獲取通知列表
+      fetchScheduledNotifications();
+    } catch (error) {
+      console.error("設定每日通知錯誤:", error);
+      Alert.alert("每日通知設定失敗", "請確認您已授予通知權限");
+    }
   }
 
   // 清除所有通知
@@ -195,6 +234,18 @@ export default function DevToolsScreen() {
     return JSON.stringify(trigger);
   }
 
+  // 清除血壓相關通知
+  async function clearBloodPressureNotifications() {
+    try {
+      await NotificationService.checkForInvalidNotifications();
+      Alert.alert("清除完成", "已清除所有與血壓測量相關的通知");
+      fetchScheduledNotifications();
+    } catch (error) {
+      console.error("清除血壓相關通知時出錯:", error);
+      Alert.alert("清除失敗", "嘗試清除血壓相關通知時出現錯誤");
+    }
+  }
+
   return (
     <ThemedView style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
@@ -224,11 +275,7 @@ export default function DevToolsScreen() {
         </View>
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 20 }]}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 20 }]} showsVerticalScrollIndicator={false}>
         <View style={styles.sectionContainer}>
           <ThemedText style={styles.sectionTitle}>本地推播測試</ThemedText>
 
@@ -256,6 +303,11 @@ export default function DevToolsScreen() {
             <TouchableOpacity style={styles.button} onPress={sendDailyNotification} activeOpacity={0.7}>
               <Ionicons name="time" size={20} color="#FFFFFF" />
               <Text style={styles.buttonText}>設定每日通知</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={[styles.button, styles.warningButton]} onPress={clearBloodPressureNotifications} activeOpacity={0.7}>
+              <Ionicons name="medkit" size={20} color="#FFFFFF" />
+              <Text style={styles.buttonText}>清除血壓相關通知</Text>
             </TouchableOpacity>
 
             <TouchableOpacity style={[styles.button, styles.dangerButton]} onPress={dismissAllNotifications} activeOpacity={0.7}>
@@ -410,6 +462,9 @@ const styles = StyleSheet.create({
   },
   dangerButton: {
     backgroundColor: "#EF4444",
+  },
+  warningButton: {
+    backgroundColor: "#F59E0B",
   },
   buttonText: {
     color: "#FFFFFF",

@@ -188,6 +188,28 @@ class NotificationService {
   async dismissAllNotifications(): Promise<void> {
     return Notifications.dismissAllNotificationsAsync();
   }
+
+  /**
+   * 檢查通知系統中是否有非法或過期的通知，特別是關於「測量晨間血壓」的通知
+   */
+  async checkForInvalidNotifications(): Promise<void> {
+    try {
+      const scheduledNotifications = await Notifications.getAllScheduledNotificationsAsync();
+      const invalidNotifications = scheduledNotifications.filter(notification => notification.content.body?.includes("血壓") || notification.content.title?.includes("血壓"));
+
+      if (invalidNotifications.length > 0) {
+        console.warn(`發現 ${invalidNotifications.length} 個與血壓相關的通知，這些可能是來自其他應用或舊的測試通知`);
+
+        // 取消這些不相關的通知
+        for (const notification of invalidNotifications) {
+          await Notifications.cancelScheduledNotificationAsync(notification.identifier);
+          console.log(`已取消不相關通知: ${notification.identifier} - ${notification.content.title}`);
+        }
+      }
+    } catch (error) {
+      console.error("檢查無效通知時出錯:", error);
+    }
+  }
 }
 
 export default new NotificationService();
