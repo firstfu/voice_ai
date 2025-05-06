@@ -21,6 +21,7 @@ import Slider from "@react-native-community/slider";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import RecordingPreview from "@/components/ui/RecordingPreview";
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
@@ -368,120 +369,72 @@ export default function NewRecordingScreen() {
         <View style={styles.placeholderButton} />
       </View>
 
-      {/* 主內容區 */}
-      <View style={styles.content}>
-        {/* 錄音時間 - 移動到狀態指示器上方 */}
-        {isRecording && (
-          <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.timerContainer}>
-            <ThemedText style={styles.timerText}>{formatTime(recordingTime)}</ThemedText>
-          </Animated.View>
-        )}
-
-        {/* 錄音狀態文字 */}
-        <View style={styles.statusContainer}>
-          {isPreviewing ? (
-            <Animated.View entering={FadeIn} exiting={FadeOut}>
-              <ThemedText style={styles.instructions}>請預覽錄音內容，確認無誤後儲存，或重新錄製</ThemedText>
-            </Animated.View>
-          ) : isRecording ? (
-            <Animated.View entering={FadeIn} exiting={FadeOut}>
-              <ThemedText style={styles.instructions}>正在錄音，點擊下方按鈕可暫停或停止</ThemedText>
-            </Animated.View>
-          ) : isPaused ? (
-            <Animated.View entering={FadeIn} exiting={FadeOut}>
-              <ThemedText style={styles.instructions}>錄音已暫停，點擊下方按鈕繼續或停止</ThemedText>
-            </Animated.View>
-          ) : (
-            <Animated.View entering={FadeIn} exiting={FadeOut}>
-              <ThemedText style={styles.instructions}>點擊下方按鈕開始錄音</ThemedText>
-            </Animated.View>
-          )}
-        </View>
-
-        {/* 波形動畫 (優化版) */}
-        <View style={styles.waveformContainer}>
-          {isRecording && (
-            <Animated.View style={styles.waveform} entering={FadeIn}>
-              {/* 使用預先生成的動畫樣式 */}
-              {waveformData.map((_, index) => (
-                <Animated.View key={index} style={[styles.waveformBar, barStyles[index]]} />
-              ))}
-            </Animated.View>
-          )}
-        </View>
-      </View>
-
-      {/* 底部控制區 */}
-      <View style={styles.controlsContainer}>
-        {/* 暫停/繼續按鈕 (僅在錄音中顯示) */}
-        {isRecording && (
-          <AnimatedTouchable style={[styles.pauseButton, pauseButtonStyle]} onPress={handlePauseResumePress}>
-            <LinearGradient colors={isPaused ? ["#3A7BFF", "#00C2A8"] : ["#F59E0B", "#FF4A6B"]} style={styles.pauseButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-              <Ionicons name={isPaused ? "play" : "pause"} size={24} color="#FFFFFF" />
-            </LinearGradient>
-          </AnimatedTouchable>
-        )}
-
-        {/* 錄音按鈕 */}
-        <AnimatedTouchable style={[styles.recordButton, recordButtonStyle]} onPress={handleRecordPress}>
-          <LinearGradient colors={isRecording ? ["#FF4A6B", "#F59E0B"] : ["#3A7BFF", "#00C2A8"]} style={styles.recordButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-            {isRecording ? <Ionicons name="square" size={28} color="#FFFFFF" /> : <Ionicons name="mic" size={32} color="#FFFFFF" />}
-          </LinearGradient>
-        </AnimatedTouchable>
-      </View>
-
-      {/* 預覽模式 */}
       {isPreviewing && recordingUri ? (
-        <View style={styles.previewContainer}>
-          <ThemedText style={styles.previewTitle}>預覽錄音</ThemedText>
-          {/* 播放控制 */}
-          <TouchableOpacity onPress={handlePlayPause} style={styles.playButton}>
-            <Ionicons name={isPlaying ? "pause" : "play"} size={48} color="#fff" />
-          </TouchableOpacity>
-          {/* 進度條 */}
-          <View style={styles.sliderContainer}>
-            <Text style={styles.timeText}>{`${Math.floor(playbackPosition / 1000)} / ${Math.floor(playbackDuration / 1000)} 秒`}</Text>
-            <RNAnimated.View>
-              <Animated.View>
-                <Slider
-                  style={{ width: "100%" }}
-                  minimumValue={0}
-                  maximumValue={playbackDuration}
-                  value={playbackPosition}
-                  onValueChange={handleSeek}
-                  minimumTrackTintColor="#fff"
-                  maximumTrackTintColor="#D1D5DB"
-                  thumbTintColor="#fff"
-                />
-              </Animated.View>
-            </RNAnimated.View>
-          </View>
-          {/* 檔名編輯 */}
-          <View style={styles.inputContainer}>
-            <Ionicons name="pencil" size={20} color="#3A7BFF" style={styles.inputIcon} />
-            <TextInput
-              style={styles.nameInput}
-              value={recordingName}
-              onChangeText={setRecordingName}
-              placeholder="輸入錄音名稱"
-              placeholderTextColor="rgba(150, 150, 150, 0.8)"
-              selectionColor="#3A7BFF"
-            />
-          </View>
-          {/* 操作按鈕 */}
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity onPress={handleDiscard} style={styles.discardButton}>
-              <Text style={styles.buttonText}>放棄</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
-              <Text style={styles.buttonText}>儲存</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        <RecordingPreview recordingUri={recordingUri} recordingDuration={recordingTime} onSave={handleSave} onDiscard={handleDiscard} />
       ) : (
         <>
-          {/* 原本錄音 UI 內容 */}
-          {/* ...原有錄音頁面內容... */}
+          {/* 主內容區 */}
+          <View style={styles.content}>
+            {/* 錄音時間 - 移動到狀態指示器上方 */}
+            {isRecording && (
+              <Animated.View entering={FadeIn} exiting={FadeOut} style={styles.timerContainer}>
+                <ThemedText style={styles.timerText}>{formatTime(recordingTime)}</ThemedText>
+              </Animated.View>
+            )}
+
+            {/* 錄音狀態文字 */}
+            <View style={styles.statusContainer}>
+              {isRecording ? (
+                <Animated.View entering={FadeIn} exiting={FadeOut}>
+                  <ThemedText style={styles.instructions}>正在錄音，點擊下方按鈕可暫停或停止</ThemedText>
+                </Animated.View>
+              ) : isPaused ? (
+                <Animated.View entering={FadeIn} exiting={FadeOut}>
+                  <ThemedText style={styles.instructions}>錄音已暫停，點擊下方按鈕繼續或停止</ThemedText>
+                </Animated.View>
+              ) : (
+                <Animated.View entering={FadeIn} exiting={FadeOut}>
+                  <ThemedText style={styles.instructions}>點擊下方按鈕開始錄音</ThemedText>
+                </Animated.View>
+              )}
+            </View>
+
+            {/* 波形動畫 (優化版) */}
+            <View style={styles.waveformContainer}>
+              {isRecording && (
+                <Animated.View style={styles.waveform} entering={FadeIn}>
+                  {/* 使用預先生成的動畫樣式 */}
+                  {waveformData.map((_, index) => (
+                    <Animated.View key={index} style={[styles.waveformBar, barStyles[index]]} />
+                  ))}
+                </Animated.View>
+              )}
+            </View>
+          </View>
+
+          {/* 底部控制區 */}
+          <View style={styles.controlsContainer}>
+            {/* 暫停/繼續按鈕 (僅在錄音中顯示) */}
+            {isRecording && (
+              <AnimatedTouchable style={[styles.pauseButton, pauseButtonStyle]} onPress={handlePauseResumePress}>
+                <LinearGradient colors={isPaused ? ["#3A7BFF", "#00C2A8"] : ["#F59E0B", "#FF4A6B"]} style={styles.pauseButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+                  <Ionicons name={isPaused ? "play" : "pause"} size={24} color="#FFFFFF" />
+                </LinearGradient>
+              </AnimatedTouchable>
+            )}
+
+            {/* 錄音按鈕 */}
+            <AnimatedTouchable style={[styles.recordButton, recordButtonStyle]} onPress={handleRecordPress}>
+              <LinearGradient
+                colors={isRecording ? ["#FF4A6B", "#F59E0B"] : ["#3A7BFF", "#00C2A8"]}
+                style={styles.recordButtonGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+              >
+                {isRecording ? <Ionicons name="square" size={28} color="#FFFFFF" /> : <Ionicons name="mic" size={32} color="#FFFFFF" />}
+              </LinearGradient>
+            </AnimatedTouchable>
+          </View>
         </>
       )}
     </ThemedView>
@@ -625,70 +578,5 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
-  },
-  previewContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-  previewTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginBottom: 16,
-    color: "#fff",
-  },
-  playButton: {
-    marginBottom: 16,
-  },
-  sliderContainer: {
-    width: "90%",
-    marginBottom: 16,
-  },
-  timeText: {
-    color: "#fff",
-    marginBottom: 4,
-  },
-  nameInput: {
-    flex: 1,
-    fontSize: 18,
-    color: "#fff",
-    fontWeight: "500",
-    padding: 8,
-    backgroundColor: "transparent",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 12,
-    width: "90%",
-    marginBottom: 24,
-    paddingHorizontal: 16,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    gap: 20,
-  },
-  discardButton: {
-    backgroundColor: "#FF4A6B",
-    padding: 14,
-    borderRadius: 10,
-  },
-  saveButton: {
-    backgroundColor: "#3A7BFF",
-    padding: 14,
-    borderRadius: 10,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 16,
   },
 });
