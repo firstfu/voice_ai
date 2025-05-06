@@ -55,6 +55,7 @@ export default function RecordingPreview({ recordingUri, recordingDuration, onSa
   });
 
   const playButtonScale = useSharedValue(1);
+  const replayButtonScale = useSharedValue(1);
   const saveButtonScale = useSharedValue(1);
   const discardButtonScale = useSharedValue(1);
 
@@ -115,6 +116,22 @@ export default function RecordingPreview({ recordingUri, recordingDuration, onSa
     }
   };
 
+  // 重播功能
+  const handleReplay = async () => {
+    // 重播按鈕動畫效果
+    replayButtonScale.value = withSpring(0.9, { damping: 10 });
+    setTimeout(() => {
+      replayButtonScale.value = withSpring(1, { damping: 8 });
+    }, 200);
+
+    if (!sound) return;
+
+    // 將播放位置設回開始
+    await sound.setPositionAsync(0);
+    // 確保開始播放
+    await sound.playAsync();
+  };
+
   // 進度調整功能
   const handleSeek = async (value: number) => {
     if (sound) {
@@ -156,6 +173,12 @@ export default function RecordingPreview({ recordingUri, recordingDuration, onSa
   const playButtonStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: playButtonScale.value }],
+    };
+  });
+
+  const replayButtonStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: replayButtonScale.value }],
     };
   });
 
@@ -230,6 +253,15 @@ export default function RecordingPreview({ recordingUri, recordingDuration, onSa
           <TouchableOpacity style={styles.playButton} onPress={handlePlayPause}>
             <LinearGradient colors={["#3A7BFF", "#00C2A8"]} style={styles.playButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
               <Ionicons name={isPlaying ? "pause" : "play"} size={28} color="#FFFFFF" />
+            </LinearGradient>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* 重播按鈕 */}
+        <Animated.View style={replayButtonStyle}>
+          <TouchableOpacity style={styles.replayButton} onPress={handleReplay}>
+            <LinearGradient colors={["#00C2A8", "#3A7BFF"]} style={styles.replayButtonGradient} start={{ x: 0, y: 1 }} end={{ x: 1, y: 0 }}>
+              <Ionicons name="refresh-outline" size={24} color="#FFFFFF" />
             </LinearGradient>
           </TouchableOpacity>
         </Animated.View>
@@ -310,8 +342,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   playButtonContainer: {
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: 40,
+    gap: 30,
   },
   playButton: {
     width: 70,
@@ -325,6 +360,21 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  replayButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1A1A1A",
+  },
+  replayButtonGradient: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: "center",
     alignItems: "center",
   },
