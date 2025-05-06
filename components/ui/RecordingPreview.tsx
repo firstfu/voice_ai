@@ -155,8 +155,6 @@ export default function RecordingPreview({ recordingUri, recordingDuration, onSa
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container} keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}>
       <TouchableWithoutFeedback onPress={dismissKeyboard}>
         <LinearGradient colors={["#1f2235", "#2a2d4a", "#2d325e"]} style={styles.previewContainer}>
-          <View style={styles.header}>{/* <ThemedText style={styles.previewTitle}>預覽錄音</ThemedText> */}</View>
-
           <View style={styles.contentContainer}>
             {/* 播放控制 */}
             <View style={styles.playbackControls}>
@@ -248,7 +246,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: 24,
   },
@@ -262,7 +260,7 @@ const styles = StyleSheet.create({
   playbackControls: {
     width: "100%",
     alignItems: "center",
-    marginVertical: 16,
+    marginVertical: 40,
   },
   playButton: {
     marginBottom: 24,
@@ -346,6 +344,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 3,
+    marginTop: 40,
   },
   inputIcon: {
     marginRight: 10,
@@ -355,6 +354,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 20,
     width: "100%",
+    marginTop: 16,
   },
   discardButton: {
     backgroundColor: "#ff4a6b",
