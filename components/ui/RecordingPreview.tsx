@@ -43,7 +43,16 @@ export default function RecordingPreview({ recordingUri, recordingDuration, onSa
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackPosition, setPlaybackPosition] = useState(0);
   const [playbackDuration, setPlaybackDuration] = useState(recordingDuration * 1000); // 轉為毫秒
-  const [recordingName, setRecordingName] = useState("新錄音");
+  const [recordingName, setRecordingName] = useState(() => {
+    // 產生包含當前時間的預設錄音名稱
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    return `新錄音 ${year}-${month}-${day} ${hours}:${minutes}`;
+  });
 
   const playButtonScale = useSharedValue(1);
   const saveButtonScale = useSharedValue(1);
