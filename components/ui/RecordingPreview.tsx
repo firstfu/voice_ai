@@ -1,393 +1,352 @@
-import { useState, useEffect, useRef } from "react";
-import { View, TouchableOpacity, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Dimensions } from "react-native";
+/**
+ * 錄音預覽組件
+ *
+ * 提供錄音完成後的預覽功能，包括：
+ * - 音訊播放控制（播放/暫停/進度控制）
+ * - 錄音波形視覺化顯示
+ * - 錄音命名編輯
+ * - 儲存和捨棄選項
+ */
+
+import React, { useState, useEffect, useRef } from "react";
+import { StyleSheet, View, TouchableOpacity, TextInput, Dimensions, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Audio } from "expo-av";
 import Slider from "@react-native-community/slider";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming, withRepeat, withSequence, Easing } from "react-native-reanimated";
-import { BlurView } from "expo-blur";
+import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
+import Animated, { FadeIn, FadeOut, useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 
 import { ThemedText } from "@/components/ThemedText";
+import { ThemedView } from "@/components/ThemedView";
 
 interface RecordingPreviewProps {
   recordingUri: string;
   recordingDuration: number;
-  onSave: (name: string) => void;
+  onSave: () => void;
   onDiscard: () => void;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+// 產生靜態的波形顯示資料
+const generateWaveformData = (length: number) => {
+  // 創建具有韻律感的波形數據陣列
+  return Array.from({ length }).map(() => {
+    const height = 0.2 + Math.random() * 0.6; // 介於 0.2 和 0.8 之間的隨機高度
+    return height;
+  });
+};
+
+// 預生成波形資料
+const waveformData = generateWaveformData(60);
 
 export default function RecordingPreview({ recordingUri, recordingDuration, onSave, onDiscard }: RecordingPreviewProps) {
-  const [recordingName, setRecordingName] = useState("新錄音");
-  const [soundInstance, setSoundInstance] = useState<Audio.Sound | null>(null);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackPosition, setPlaybackPosition] = useState(0);
-  const [playbackDuration, setPlaybackDuration] = useState(0);
+  const [playbackDuration, setPlaybackDuration] = useState(recordingDuration * 1000); // 轉為毫秒
+  const [recordingName, setRecordingName] = useState("新錄音");
 
-  // 動畫值
-  const buttonScale = useSharedValue(1);
-  const playIconScale = useSharedValue(1);
-  const waveOpacity = useSharedValue(0.3);
-  const inputFocus = useSharedValue(0);
+  const playButtonScale = useSharedValue(1);
+  const saveButtonScale = useSharedValue(1);
+  const discardButtonScale = useSharedValue(1);
 
-  // 計算格式化時間
-  const formatTime = (milliseconds: number) => {
-    const totalSeconds = Math.floor(milliseconds / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
-  };
+  const inputRef = useRef<TextInput>(null);
 
-  // 預覽播放功能
-  const loadAndPlaySound = async () => {
-    if (!recordingUri) return;
-    if (soundInstance) {
-      await soundInstance.unloadAsync();
-      setSoundInstance(null);
+  // 載入音訊
+  useEffect(() => {
+    loadSound();
+    return () => {
+      unloadSound();
+    };
+  }, [recordingUri]);
+
+  const loadSound = async () => {
+    try {
+      const { sound: newSound } = await Audio.Sound.createAsync({ uri: recordingUri }, { shouldPlay: false }, onPlaybackStatusUpdate);
+      setSound(newSound);
+    } catch (error) {
+      console.error("載入音訊失敗:", error);
     }
-    const { sound, status } = await Audio.Sound.createAsync({ uri: recordingUri }, { shouldPlay: true }, onPlaybackStatusUpdate);
-    setSoundInstance(sound);
   };
 
+  const unloadSound = async () => {
+    if (sound) {
+      await sound.unloadAsync();
+      setSound(null);
+    }
+  };
+
+  // 播放狀態更新回調
   const onPlaybackStatusUpdate = (status: any) => {
     if (status.isLoaded) {
       setPlaybackPosition(status.positionMillis || 0);
-      setPlaybackDuration(status.durationMillis || 0);
+      setPlaybackDuration(status.durationMillis || playbackDuration);
       setIsPlaying(status.isPlaying);
+
+      // 播放完成時自動重置
       if (status.didJustFinish) {
-        setIsPlaying(false);
-        waveOpacity.value = withTiming(0.3, { duration: 500 });
+        sound?.setPositionAsync(0);
       }
-    } else {
-      setIsPlaying(false);
-      waveOpacity.value = withTiming(0.3, { duration: 500 });
     }
   };
 
+  // 播放/暫停功能
   const handlePlayPause = async () => {
-    // 播放按鈕動畫
-    playIconScale.value = withSequence(withTiming(0.8, { duration: 100 }), withTiming(1.1, { duration: 100 }), withTiming(1, { duration: 100 }));
+    // 播放按鈕動畫效果
+    playButtonScale.value = withSpring(0.9, { damping: 10 });
+    setTimeout(() => {
+      playButtonScale.value = withSpring(1, { damping: 8 });
+    }, 200);
 
-    if (!soundInstance) {
-      waveOpacity.value = withTiming(0.8, { duration: 500 });
-      await loadAndPlaySound();
-      return;
-    }
+    if (!sound) return;
+
     if (isPlaying) {
-      waveOpacity.value = withTiming(0.3, { duration: 500 });
-      await soundInstance.pauseAsync();
+      await sound.pauseAsync();
     } else {
-      waveOpacity.value = withTiming(0.8, { duration: 500 });
-      await soundInstance.playAsync();
+      await sound.playAsync();
     }
   };
 
+  // 進度調整功能
   const handleSeek = async (value: number) => {
-    if (soundInstance) {
-      await soundInstance.setPositionAsync(value);
+    if (sound) {
+      await sound.setPositionAsync(value);
     }
   };
 
-  // 清理音訊資源
-  useEffect(() => {
-    return () => {
-      if (soundInstance) {
-        soundInstance.unloadAsync();
-      }
-    };
-  }, [soundInstance]);
+  // 儲存功能
+  const handleSave = () => {
+    // 儲存按鈕動畫效果
+    saveButtonScale.value = withSpring(0.9, { damping: 10 });
+    setTimeout(() => {
+      saveButtonScale.value = withSpring(1, { damping: 8 });
+    }, 200);
 
-  const handleSavePress = () => {
-    // 儲存按鈕動畫
-    buttonScale.value = withSequence(withTiming(0.95, { duration: 100 }), withTiming(1, { duration: 100 }));
-    onSave(recordingName);
+    onSave();
   };
 
-  const handleDiscardPress = () => {
-    // 放棄按鈕動畫
-    buttonScale.value = withSequence(withTiming(0.95, { duration: 100 }), withTiming(1, { duration: 100 }));
+  // 捨棄功能
+  const handleDiscard = () => {
+    // 捨棄按鈕動畫效果
+    discardButtonScale.value = withSpring(0.9, { damping: 10 });
+    setTimeout(() => {
+      discardButtonScale.value = withSpring(1, { damping: 8 });
+    }, 200);
+
     onDiscard();
   };
 
-  // 點擊背景關閉鍵盤
-  const dismissKeyboard = () => {
-    Keyboard.dismiss();
-    inputFocus.value = withTiming(0, { duration: 200 });
-  };
-
-  // 輸入框聚焦動畫
-  const handleInputFocus = () => {
-    inputFocus.value = withTiming(1, { duration: 200 });
-  };
-
-  const handleInputBlur = () => {
-    inputFocus.value = withTiming(0, { duration: 200 });
+  // 格式化時間
+  const formatTime = (milliseconds: number) => {
+    const totalSeconds = Math.floor(milliseconds / 1000);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   // 動畫樣式
   const playButtonStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ scale: playIconScale.value }],
+      transform: [{ scale: playButtonScale.value }],
     };
   });
 
-  const waveAnimatedStyle = useAnimatedStyle(() => {
+  const saveButtonStyle = useAnimatedStyle(() => {
     return {
-      opacity: waveOpacity.value,
+      transform: [{ scale: saveButtonScale.value }],
     };
   });
 
-  const saveButtonAnimatedStyle = useAnimatedStyle(() => {
+  const discardButtonStyle = useAnimatedStyle(() => {
     return {
-      transform: [{ scale: buttonScale.value }],
-    };
-  });
-
-  const inputContainerStyle = useAnimatedStyle(() => {
-    return {
-      borderColor: `rgba(58, 123, 255, ${0.2 + inputFocus.value * 0.8})`,
-      transform: [{ scale: 1 + inputFocus.value * 0.02 }],
+      transform: [{ scale: discardButtonScale.value }],
     };
   });
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container} keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 20}>
-      <TouchableWithoutFeedback onPress={dismissKeyboard}>
-        <LinearGradient colors={["#1f2235", "#2a2d4a", "#2d325e"]} style={styles.previewContainer}>
-          <View style={styles.contentContainer}>
-            {/* 播放控制 */}
-            <View style={styles.playbackControls}>
-              <Animated.View style={playButtonStyle}>
-                <TouchableOpacity onPress={handlePlayPause} style={styles.playButton} activeOpacity={0.7}>
-                  <LinearGradient
-                    colors={isPlaying ? ["#ff4a6b", "#ff6b8b"] : ["#3a7bff", "#6b94ff"]}
-                    style={styles.playButtonGradient}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <Ionicons name={isPlaying ? "pause" : "play"} size={28} color="#fff" />
-                  </LinearGradient>
-                </TouchableOpacity>
-              </Animated.View>
+    <View style={styles.container}>
+      {/* 錄音名稱輸入 */}
+      <View style={styles.nameContainer}>
+        <ThemedText style={styles.nameLabel}>錄音名稱</ThemedText>
+        <TextInput
+          ref={inputRef}
+          style={styles.nameInput}
+          value={recordingName}
+          onChangeText={setRecordingName}
+          placeholder="輸入錄音名稱"
+          placeholderTextColor="#8E8E93"
+          maxLength={40}
+          selectionColor="#3A7BFF"
+        />
+      </View>
 
-              {/* 進度條 */}
-              <View style={styles.sliderContainer}>
-                <View style={styles.timeTextContainer}>
-                  <Text style={styles.timeText}>{formatTime(playbackPosition)}</Text>
-                  <Text style={styles.timeText}>{formatTime(playbackDuration > 0 ? playbackDuration : recordingDuration * 1000)}</Text>
-                </View>
-                <Slider
-                  style={styles.slider}
-                  minimumValue={0}
-                  maximumValue={playbackDuration > 0 ? playbackDuration : recordingDuration * 1000}
-                  value={playbackPosition}
-                  onValueChange={handleSeek}
-                  minimumTrackTintColor="#3a7bff"
-                  maximumTrackTintColor="rgba(255, 255, 255, 0.3)"
-                  thumbTintColor="#fff"
-                />
-              </View>
-            </View>
+      {/* 波形顯示 */}
+      <View style={styles.waveformContainer}>
+        <View style={styles.waveform}>
+          {waveformData.map((height, index) => (
+            <View
+              key={index}
+              style={[
+                styles.waveformBar,
+                {
+                  height: height * 60,
+                  backgroundColor: (index / waveformData.length) * playbackDuration <= playbackPosition ? "#3A7BFF" : "rgba(255, 255, 255, 0.3)",
+                },
+              ]}
+            />
+          ))}
+        </View>
+      </View>
 
-            {/* 檔名編輯 */}
-            <Animated.View style={[styles.inputContainer, inputContainerStyle]}>
-              <Ionicons name="pencil" size={20} color="#3A7BFF" style={styles.inputIcon} />
-              <TextInput
-                style={styles.nameInput}
-                value={recordingName}
-                onChangeText={setRecordingName}
-                placeholder="輸入錄音名稱"
-                placeholderTextColor="rgba(255, 255, 255, 0.5)"
-                selectionColor="#3A7BFF"
-                onFocus={handleInputFocus}
-                onBlur={handleInputBlur}
-              />
-            </Animated.View>
+      {/* 播放控制 */}
+      <View style={styles.playbackContainer}>
+        <ThemedText style={styles.timeText}>{formatTime(playbackPosition)}</ThemedText>
 
-            {/* 操作按鈕 */}
-            <View style={styles.buttonContainer}>
-              <Animated.View style={saveButtonAnimatedStyle}>
-                <TouchableOpacity onPress={handleDiscardPress} style={styles.discardButton} activeOpacity={0.8}>
-                  <Ionicons name="trash-outline" size={18} color="#fff" style={styles.buttonIcon} />
-                  <Text style={styles.buttonText}>放棄</Text>
-                </TouchableOpacity>
-              </Animated.View>
+        <Slider
+          style={styles.slider}
+          minimumValue={0}
+          maximumValue={playbackDuration || 1}
+          value={playbackPosition}
+          onValueChange={handleSeek}
+          minimumTrackTintColor="#3A7BFF"
+          maximumTrackTintColor="rgba(255, 255, 255, 0.2)"
+          thumbTintColor="#FFFFFF"
+        />
 
-              <Animated.View style={saveButtonAnimatedStyle}>
-                <TouchableOpacity onPress={handleSavePress} style={styles.saveButton} activeOpacity={0.8}>
-                  <Ionicons name="save-outline" size={18} color="#fff" style={styles.buttonIcon} />
-                  <Text style={styles.buttonText}>儲存</Text>
-                </TouchableOpacity>
-              </Animated.View>
-            </View>
-          </View>
-        </LinearGradient>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+        <ThemedText style={styles.timeText}>{formatTime(playbackDuration)}</ThemedText>
+      </View>
+
+      {/* 播放按鈕 */}
+      <View style={styles.playButtonContainer}>
+        <Animated.View style={playButtonStyle}>
+          <TouchableOpacity style={styles.playButton} onPress={handlePlayPause}>
+            <LinearGradient colors={["#3A7BFF", "#00C2A8"]} style={styles.playButtonGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+              <Ionicons name={isPlaying ? "pause" : "play"} size={28} color="#FFFFFF" />
+            </LinearGradient>
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+
+      {/* 底部操作按鈕 */}
+      <View style={styles.actionsContainer}>
+        <Animated.View style={discardButtonStyle}>
+          <TouchableOpacity style={[styles.actionButton, styles.discardButton]} onPress={handleDiscard}>
+            <Ionicons name="trash-outline" size={20} color="#FFFFFF" />
+            <ThemedText style={styles.actionButtonText}>捨棄</ThemedText>
+          </TouchableOpacity>
+        </Animated.View>
+
+        <Animated.View style={saveButtonStyle}>
+          <TouchableOpacity style={[styles.actionButton, styles.saveButton]} onPress={handleSave}>
+            <Ionicons name="save-outline" size={20} color="#FFFFFF" />
+            <ThemedText style={styles.actionButtonText}>儲存</ThemedText>
+          </TouchableOpacity>
+        </Animated.View>
+      </View>
+    </View>
   );
 }
+
+const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
   },
-  previewContainer: {
+  nameContainer: {
+    marginBottom: 30,
+  },
+  nameLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+    marginBottom: 8,
+    color: "rgba(255, 255, 255, 0.7)",
+  },
+  nameInput: {
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
+    color: "#FFFFFF",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  waveformContainer: {
+    height: 80,
+    marginBottom: 30,
+    justifyContent: "center",
+  },
+  waveform: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: 60,
+  },
+  waveformBar: {
+    width: 3,
+    borderRadius: 1.5,
+  },
+  playbackContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  timeText: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.7)",
+    width: 45,
+  },
+  slider: {
     flex: 1,
-    padding: 0,
+    marginHorizontal: 10,
   },
-  header: {
-    paddingTop: 20,
-    paddingHorizontal: 24,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+  playButtonContainer: {
     alignItems: "center",
-  },
-  contentContainer: {
-    flex: 1,
-    justifyContent: "flex-start",
-    alignItems: "center",
-    padding: 24,
-  },
-  previewTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginVertical: 12,
-    color: "#fff",
-    textAlign: "center",
-  },
-  playbackControls: {
-    width: "100%",
-    alignItems: "center",
-    marginVertical: 40,
+    marginBottom: 40,
   },
   playButton: {
-    marginBottom: 24,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1A1A1A",
   },
   playButtonGradient: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     justifyContent: "center",
     alignItems: "center",
   },
-  sliderContainer: {
-    width: "100%",
-    marginBottom: 24,
-  },
-  slider: {
-    width: "100%",
-    height: 40,
-  },
-  sliderThumb: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-  },
-  timeTextContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    marginBottom: 4,
-  },
-  timeText: {
-    color: "#fff",
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  waveformContainer: {
-    flexDirection: "row",
-    height: 60,
-    justifyContent: "space-around",
-    alignItems: "center",
-    width: "80%",
-    marginVertical: 20,
-  },
-  waveBar: {
-    width: 4,
-    backgroundColor: "#3a7bff",
-    borderRadius: 2,
-    marginHorizontal: 3,
-  },
-  nameInput: {
-    flex: 1,
-    fontSize: 16,
-    color: "#fff",
-    fontWeight: "500",
-    padding: 12,
-    backgroundColor: "transparent",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    borderRadius: 12,
-    width: "90%",
-    marginBottom: 36,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: "rgba(58, 123, 255, 0.2)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-    marginTop: 40,
-  },
-  inputIcon: {
-    marginRight: 10,
-  },
-  buttonContainer: {
+  actionsContainer: {
     flexDirection: "row",
     justifyContent: "center",
     gap: 20,
-    width: "100%",
-    marginTop: 16,
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    justifyContent: "center",
+    minWidth: 120,
   },
   discardButton: {
-    backgroundColor: "#ff4a6b",
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: "rgba(255, 75, 75, 0.2)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 75, 75, 0.4)",
   },
   saveButton: {
-    backgroundColor: "#3a7bff",
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: "rgba(58, 123, 255, 0.2)",
+    borderWidth: 1,
+    borderColor: "rgba(58, 123, 255, 0.4)",
   },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "700",
+  actionButtonText: {
+    marginLeft: 8,
     fontSize: 16,
-  },
-  buttonIcon: {
-    marginRight: 8,
+    fontWeight: "500",
+    color: "#FFFFFF",
   },
 });
