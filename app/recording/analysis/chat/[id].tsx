@@ -47,18 +47,18 @@ export default function AIChat() {
 
   // 預設推薦問題
   const defaultSuggestions: SuggestedQuestion[] = [
-    { id: "1", text: "這個錄音的主要內容是什麼？" },
-    { id: "2", text: "有哪些關鍵決策被提及？" },
-    { id: "3", text: "總結一下會議的重點" },
-    { id: "4", text: "誰是這次會議的主要參與者？" },
-    { id: "5", text: "會議的整體氛圍如何？" },
+    { id: "1", text: "這次會談的主要內容是什麼？" },
+    { id: "2", text: "社工師提出了哪些服務建議？" },
+    { id: "3", text: "個案面臨的主要困境有哪些？" },
+    { id: "4", text: "社工師運用了哪些評估方法？" },
+    { id: "5", text: "會談中連結了哪些社會福利資源？" },
   ];
 
   // 初始歡迎消息
   useEffect(() => {
     const welcomeMessage: Message = {
       id: "welcome",
-      text: "歡迎使用AI問答功能！我已經分析了您的錄音內容，您可以向我詢問任何關於該錄音的問題，或選擇下方的推薦問題：",
+      text: "歡迎使用AI問答功能！我已經分析了您的個案會談錄音內容，您可以向我詢問關於個案評估、服務計畫、資源連結或會談技巧的相關問題，或選擇下方的推薦問題：",
       isUser: false,
       timestamp: new Date(),
     };
@@ -69,30 +69,30 @@ export default function AIChat() {
   // 根據對話上下文生成新的推薦問題
   const generateContextualSuggestions = (lastMessage: string) => {
     // 這裡可以基於最後一條AI訊息來決定下一步可能的問題
-    if (lastMessage.includes("專案進度") || lastMessage.includes("核心功能")) {
+    if (lastMessage.includes("行動不便") || lastMessage.includes("居家安全") || lastMessage.includes("輔具")) {
       return [
-        { id: "6", text: "核心功能的實現順序是什麼？" },
-        { id: "7", text: "有沒有提到專案的截止日期？" },
-        { id: "8", text: "團隊目前遇到了哪些挑戰？" },
+        { id: "6", text: "李先生在家中面臨哪些主要安全風險？" },
+        { id: "7", text: "社工師建議申請哪些輔具補助？" },
+        { id: "8", text: "輔具補助的申請流程是什麼？" },
       ];
-    } else if (lastMessage.includes("測試") || lastMessage.includes("測試計劃")) {
+    } else if (lastMessage.includes("社區關懷據點") || lastMessage.includes("社交機會") || lastMessage.includes("孤獨感")) {
       return [
-        { id: "9", text: "測試計劃的具體內容是什麼？" },
-        { id: "10", text: "誰負責測試工作？" },
-        { id: "11", text: "測試階段的時間安排如何？" },
+        { id: "9", text: "李先生目前的社會支持網絡如何？" },
+        { id: "10", text: "社區關懷據點能提供哪些服務？" },
+        { id: "11", text: "如何改善獨居長者的社會參與？" },
       ];
-    } else if (lastMessage.includes("情感") || lastMessage.includes("氛圍")) {
+    } else if (lastMessage.includes("情感") || lastMessage.includes("情緒") || lastMessage.includes("態度")) {
       return [
-        { id: "12", text: "有沒有出現意見分歧的情況？" },
-        { id: "13", text: "團隊成員的參與度如何？" },
-        { id: "14", text: "會議結束時的整體結論是正面的嗎？" },
+        { id: "12", text: "李先生對接受服務的意願如何？" },
+        { id: "13", text: "社工師如何建立與個案的信任關係？" },
+        { id: "14", text: "會談結束時李先生的心理狀態有改善嗎？" },
       ];
     } else {
       // 默認問題集
       return [
-        { id: "15", text: "這個錄音中有哪些重要數據被提及？" },
-        { id: "16", text: "有哪些後續行動計劃？" },
-        { id: "17", text: "會議達成了哪些共識？" },
+        { id: "15", text: "這個案例中運用了哪些社會福利資源？" },
+        { id: "16", text: "社工師安排了哪些後續追蹤計畫？" },
+        { id: "17", text: "這次會談達成了哪些服務目標？" },
       ];
     }
   };
@@ -152,24 +152,24 @@ export default function AIChat() {
   const generateMockResponse = (query: string, recordingId: string): string => {
     // 這裡只是模擬回應，實際應用中會調用真實的 AI API
     const possibleResponses = [
-      "根據錄音內容分析，這次會議主要討論了專案進度和下一步計劃。團隊計劃先實現核心功能，並討論了測試計劃的安排。",
-      "在這段錄音中，主要決定包括：優先實現核心功能、分階段進行測試、以及安排下一次會議討論測試細節。",
-      "錄音中提到的關鍵人物包括三位發言者，他們分別代表了開發、設計和測試團隊。",
-      "根據分析，會議的情感基調較為正面和專業，團隊成員之間合作良好，對專案未來發展表現出信心。",
-      "這次會議的主要目的是審視專案進度並計劃下一階段工作。團隊決定優先開發核心功能，並制定了初步的測試策略。",
-      "根據錄音轉錄，參會者討論了設計階段的完成情況、開發階段的優先事項以及測試計劃的安排。決定下週再開一次會議討論測試細節。",
+      "根據錄音內容分析，這次會談主要是社工師與獨居長者李先生討論其生活情況和所需支持。社工師評估了李先生的行動不便問題，特別是上下樓梯和廁所安全的風險，並提出申請輔具補助的建議。",
+      "在這段錄音中，社工師提出的主要服務計畫包括：申請居家安全輔具補助、連結社區關懷據點增加社交機會，以及安排定期家訪關懷。這些決定都旨在改善李先生的生活品質和安全。",
+      "錄音中的主要人物是社工師和獨居長者李先生。李先生提到他的子女長期在國外，很少聯絡，因此社會支持不足，感到孤獨。",
+      "根據分析，會談的情感基調起初較為中性，隨著社工師提供具體協助方案後，情緒逐漸轉為正向。李先生對於社工師提出的社區資源連結表現出謹慎但樂觀的態度。",
+      "這次會談的主要目的是評估獨居長者的居家安全和社會支持需求。社工師運用多面向評估，包括身體功能、居家環境安全、社會支持網絡和心理狀態等，並制定了相應的服務計畫。",
+      "根據錄音轉錄，社工師評估了李先生的日常生活能力、居家安全風險和社會支持網絡。建議申請輔具補助改善居家安全，並連結社區關懷據點增加社交機會，以改善因子女長期在國外造成的孤獨感。",
     ];
 
     // 根據問題類型返回不同回應
     if (query.toLowerCase().includes("總結") || query.toLowerCase().includes("概述")) {
       return possibleResponses[0];
-    } else if (query.toLowerCase().includes("決策") || query.toLowerCase().includes("決定")) {
+    } else if (query.toLowerCase().includes("決策") || query.toLowerCase().includes("建議") || query.toLowerCase().includes("服務計畫")) {
       return possibleResponses[1];
-    } else if (query.toLowerCase().includes("誰") || query.toLowerCase().includes("人物")) {
+    } else if (query.toLowerCase().includes("誰") || query.toLowerCase().includes("人物") || query.toLowerCase().includes("家庭")) {
       return possibleResponses[2];
-    } else if (query.toLowerCase().includes("情感") || query.toLowerCase().includes("氛圍")) {
+    } else if (query.toLowerCase().includes("情感") || query.toLowerCase().includes("氛圍") || query.toLowerCase().includes("情緒")) {
       return possibleResponses[3];
-    } else if (query.toLowerCase().includes("目的") || query.toLowerCase().includes("為什麼")) {
+    } else if (query.toLowerCase().includes("目的") || query.toLowerCase().includes("為什麼") || query.toLowerCase().includes("評估")) {
       return possibleResponses[4];
     } else {
       return possibleResponses[5];
