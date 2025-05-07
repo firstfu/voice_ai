@@ -25,6 +25,13 @@ function AnalysisLayoutContent() {
     }
   };
 
+  const handleOpenAIChat = () => {
+    // 導航到智能問答頁面，並傳遞錄音ID
+    if (id) {
+      router.push(`/recording/analysis/chat/${id}`);
+    }
+  };
+
   return (
     <>
       <Stack
@@ -52,6 +59,11 @@ function AnalysisLayoutContent() {
           <TouchableOpacity style={styles.toolbarButton}>
             <Ionicons name="share-social-outline" size={24} color="#3A7BFF" />
             <ThemedText style={styles.toolbarButtonText}>分享</ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.toolbarButton} onPress={handleOpenAIChat}>
+            <Ionicons name="chatbubble-ellipses-outline" size={24} color="#3A7BFF" />
+            <ThemedText style={styles.toolbarButtonText}>智能問答</ThemedText>
           </TouchableOpacity>
         </View>
       )}
