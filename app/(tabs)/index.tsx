@@ -26,34 +26,34 @@ import { BlurView } from "expo-blur";
 const recentRecordings = [
   {
     id: "1",
-    title: "會議記錄 - 5月12日",
-    duration: "00:32:15",
+    title: "個案會談 - 獨居長者李先生",
+    duration: "00:42:15",
     date: "2024-05-12",
-    category: "工作",
+    category: "個案工作",
     color: "#F59E0B",
   },
   {
     id: "2",
-    title: "課堂筆記 - 5月10日",
-    duration: "01:15:42",
+    title: "家庭訪視 - 王氏家庭暴力跟進",
+    duration: "01:05:23",
     date: "2024-05-10",
-    category: "學習",
-    color: "#3B82F6",
+    category: "家庭服務",
+    color: "#EF4444",
   },
   {
     id: "3",
-    title: "訪談 - 5月8日",
-    duration: "00:45:30",
+    title: "團體工作 - 青少年情緒支持小組",
+    duration: "00:58:30",
     date: "2024-05-08",
-    category: "工作",
-    color: "#F59E0B",
+    category: "團體工作",
+    color: "#3B82F6",
   },
   {
     id: "4",
-    title: "個人筆記 - 5月5日",
-    duration: "00:12:08",
+    title: "社區評估 - 大安區長者需求調查",
+    duration: "00:34:18",
     date: "2024-05-05",
-    category: "個人",
+    category: "社區工作",
     color: "#8B5CF6",
   },
 ];
@@ -61,9 +61,10 @@ const recentRecordings = [
 // 分類列表
 const categories = [
   { id: "all", name: "全部", icon: "apps", color: "#3A7BFF" },
-  { id: "work", name: "工作", icon: "briefcase", color: "#F59E0B" },
-  { id: "study", name: "學習", icon: "school", color: "#3B82F6" },
-  { id: "personal", name: "個人", icon: "person", color: "#8B5CF6" },
+  { id: "case", name: "個案工作", icon: "person", color: "#F59E0B" },
+  { id: "family", name: "家庭服務", icon: "home", color: "#EF4444" },
+  { id: "group", name: "團體工作", icon: "people", color: "#3B82F6" },
+  { id: "community", name: "社區工作", icon: "business", color: "#8B5CF6" },
 ];
 
 // 定義錄音項目的介面
