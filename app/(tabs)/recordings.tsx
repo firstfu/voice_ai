@@ -24,26 +24,26 @@ import { ThemedView } from "@/components/ThemedView";
 const mockRecordings = [
   {
     id: "1",
-    title: "會議記錄 - 5月12日",
-    duration: "00:32:15",
+    title: "個案會談 - 獨居長者李先生",
+    duration: "00:42:15",
     date: "2024-05-12",
   },
   {
     id: "2",
-    title: "課堂筆記 - 5月10日",
-    duration: "01:15:42",
+    title: "家庭訪視 - 王氏家庭暴力跟進",
+    duration: "01:05:23",
     date: "2024-05-10",
   },
   {
     id: "3",
-    title: "訪談 - 5月8日",
-    duration: "00:45:30",
+    title: "團體工作 - 青少年情緒支持小組",
+    duration: "00:58:30",
     date: "2024-05-08",
   },
   {
     id: "4",
-    title: "個人筆記 - 5月5日",
-    duration: "00:12:08",
+    title: "社區評估 - 大安區長者需求調查",
+    duration: "00:34:18",
     date: "2024-05-05",
   },
 ];
