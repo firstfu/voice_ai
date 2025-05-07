@@ -63,7 +63,7 @@ function AnalysisLayoutContent() {
 
           <TouchableOpacity style={styles.toolbarButton} onPress={handleOpenAIChat}>
             <Ionicons name="chatbubble-ellipses-outline" size={24} color="#3A7BFF" />
-            <ThemedText style={styles.toolbarButtonText}>智能問答</ThemedText>
+            <ThemedText style={styles.toolbarButtonText}>AI問答</ThemedText>
           </TouchableOpacity>
         </View>
       )}

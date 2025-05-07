@@ -13,6 +13,7 @@ export default function ChatLayout() {
         headerTitleStyle: {
           fontWeight: "600",
         },
+        title: "AI問答",
       }}
     />
   );

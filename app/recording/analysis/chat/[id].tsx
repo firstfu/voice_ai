@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { StyleSheet, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList, ActivityIndicator, Keyboard, SafeAreaView } from "react-native";
+import { StyleSheet, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList, ActivityIndicator, Keyboard, SafeAreaView, ScrollView } from "react-native";
 import { useLocalSearchParams, Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
@@ -14,6 +14,12 @@ interface Message {
   timestamp: Date;
 }
 
+// 定義推薦問題類型
+interface SuggestedQuestion {
+  id: string;
+  text: string;
+}
+
 export default function AIChat() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -21,25 +27,67 @@ export default function AIChat() {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
+  const [suggestedQuestions, setSuggestedQuestions] = useState<SuggestedQuestion[]>([]);
+
+  // 預設推薦問題
+  const defaultSuggestions: SuggestedQuestion[] = [
+    { id: "1", text: "這個錄音的主要內容是什麼？" },
+    { id: "2", text: "有哪些關鍵決策被提及？" },
+    { id: "3", text: "總結一下會議的重點" },
+    { id: "4", text: "誰是這次會議的主要參與者？" },
+    { id: "5", text: "會議的整體氛圍如何？" },
+  ];
 
   // 初始歡迎消息
   useEffect(() => {
     const welcomeMessage: Message = {
       id: "welcome",
-      text: "歡迎使用智能問答功能！我已經分析了您的錄音內容，您可以向我詢問任何關於該錄音的問題，例如:\n- 這個錄音的主要內容是什麼？\n- 有哪些關鍵決策被提及？\n- 總結一下會議的重點",
+      text: "歡迎使用AI問答功能！我已經分析了您的錄音內容，您可以向我詢問任何關於該錄音的問題，或選擇下方的推薦問題：",
       isUser: false,
       timestamp: new Date(),
     };
     setMessages([welcomeMessage]);
+    setSuggestedQuestions(defaultSuggestions);
   }, []);
 
+  // 根據對話上下文生成新的推薦問題
+  const generateContextualSuggestions = (lastMessage: string) => {
+    // 這裡可以基於最後一條AI訊息來決定下一步可能的問題
+    if (lastMessage.includes("專案進度") || lastMessage.includes("核心功能")) {
+      return [
+        { id: "6", text: "核心功能的實現順序是什麼？" },
+        { id: "7", text: "有沒有提到專案的截止日期？" },
+        { id: "8", text: "團隊目前遇到了哪些挑戰？" },
+      ];
+    } else if (lastMessage.includes("測試") || lastMessage.includes("測試計劃")) {
+      return [
+        { id: "9", text: "測試計劃的具體內容是什麼？" },
+        { id: "10", text: "誰負責測試工作？" },
+        { id: "11", text: "測試階段的時間安排如何？" },
+      ];
+    } else if (lastMessage.includes("情感") || lastMessage.includes("氛圍")) {
+      return [
+        { id: "12", text: "有沒有出現意見分歧的情況？" },
+        { id: "13", text: "團隊成員的參與度如何？" },
+        { id: "14", text: "會議結束時的整體結論是正面的嗎？" },
+      ];
+    } else {
+      // 默認問題集
+      return [
+        { id: "15", text: "這個錄音中有哪些重要數據被提及？" },
+        { id: "16", text: "有哪些後續行動計劃？" },
+        { id: "17", text: "會議達成了哪些共識？" },
+      ];
+    }
+  };
+
   // 發送新消息
-  const sendMessage = async () => {
-    if (!inputText.trim()) return;
+  const sendMessage = async (text = inputText.trim()) => {
+    if (!text) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      text: inputText.trim(),
+      text: text,
       isUser: true,
       timestamp: new Date(),
     };
@@ -54,16 +102,25 @@ export default function AIChat() {
 
     // 模擬 API 請求延遲
     setTimeout(() => {
+      const aiResponseText = generateMockResponse(text, id);
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
-        text: generateMockResponse(inputText, id),
+        text: aiResponseText,
         isUser: false,
         timestamp: new Date(),
       };
 
       setMessages(prev => [...prev, aiResponse]);
       setIsLoading(false);
+
+      // 更新推薦問題
+      setSuggestedQuestions(generateContextualSuggestions(aiResponseText));
     }, 1500);
+  };
+
+  // 處理推薦問題點擊
+  const handleSuggestedQuestionClick = (question: string) => {
+    sendMessage(question);
   };
 
   // 滾動到底部
@@ -110,11 +167,24 @@ export default function AIChat() {
     </Animated.View>
   );
 
+  // 推薦問題組件
+  const SuggestedQuestions = () => (
+    <View style={styles.suggestedQuestionsContainer}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.suggestedQuestionsScrollContent}>
+        {suggestedQuestions.map(question => (
+          <TouchableOpacity key={question.id} style={styles.suggestedQuestionBubble} onPress={() => handleSuggestedQuestionClick(question.text)}>
+            <ThemedText style={styles.suggestedQuestionText}>{question.text}</ThemedText>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+    </View>
+  );
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}>
       <Stack.Screen
         options={{
-          title: "智能問答",
+          title: "AI問答",
           headerShown: true,
           headerShadowVisible: false,
           headerStyle: {
@@ -140,9 +210,11 @@ export default function AIChat() {
             </View>
           )}
 
+          {messages.length > 0 && !isLoading && <SuggestedQuestions />}
+
           <View style={styles.inputContainer}>
             <TextInput style={styles.textInput} value={inputText} onChangeText={setInputText} placeholder="輸入您的問題..." placeholderTextColor="#9CA3AF" multiline />
-            <TouchableOpacity style={[styles.sendButton, !inputText.trim() && styles.disabledButton]} onPress={sendMessage} disabled={!inputText.trim()}>
+            <TouchableOpacity style={[styles.sendButton, !inputText.trim() && styles.disabledButton]} onPress={() => sendMessage()} disabled={!inputText.trim()}>
               <Ionicons name="send" size={20} color={inputText.trim() ? "white" : "#9CA3AF"} />
             </TouchableOpacity>
           </View>
@@ -206,6 +278,27 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 14,
     color: "#6B7280",
+  },
+  suggestedQuestionsContainer: {
+    marginBottom: 12,
+    marginTop: 8,
+    paddingHorizontal: 16,
+  },
+  suggestedQuestionsScrollContent: {
+    paddingRight: 24, // Extra padding for better scrolling experience
+  },
+  suggestedQuestionBubble: {
+    backgroundColor: "#F0F6FF",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    marginRight: 8,
+    borderWidth: 1,
+    borderColor: "#D0E1FF",
+  },
+  suggestedQuestionText: {
+    fontSize: 14,
+    color: "#3A7BFF",
   },
   inputContainer: {
     flexDirection: "row",
