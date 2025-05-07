@@ -416,9 +416,7 @@ export default function RecordingDetailScreen() {
                     )}
                   </View>
                 </View>
-                <ThemedText style={styles.transcriptText}>
-                  {showOriginal ? transcript.originalText || transcript.text : transcript.editedText || transcript.text}
-                </ThemedText>
+                <ThemedText style={styles.transcriptText}>{showOriginal ? transcript.originalText || transcript.text : transcript.editedText || transcript.text}</ThemedText>
               </TouchableOpacity>
             </Animated.View>
           ))}
@@ -432,14 +430,9 @@ export default function RecordingDetailScreen() {
           <ThemedText style={styles.toolbarButtonText}>編輯</ThemedText>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.toolbarButton} onPress={() => router.push(`/recording/analysis/${recordingId}`)}>
+        <TouchableOpacity style={styles.toolbarButton} onPress={() => router.push(`/recording/${id}/analysis`)}>
           <Ionicons name="analytics-outline" size={24} color="#3A7BFF" />
           <ThemedText style={styles.toolbarButtonText}>分析</ThemedText>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.toolbarButton} onPress={() => router.push(`/recording/manage`)}>
-          <Ionicons name="list-outline" size={24} color="#3A7BFF" />
-          <ThemedText style={styles.toolbarButtonText}>管理</ThemedText>
         </TouchableOpacity>
       </View>
 
