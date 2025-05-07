@@ -399,22 +399,9 @@ export default function RecordingDetailScreen() {
           </Animated.View>
         ))}
 
-        {/* 底部間距 */}
+        {/* 底部間距，增加間距以留出底部導航的空間 */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
-
-      {/* 底部按鈕 */}
-      <View style={styles.bottomBar}>
-        <TouchableOpacity style={styles.bottomButton} onPress={() => goToEditPage()}>
-          <Ionicons name="create-outline" size={24} color="#3A7BFF" />
-          <ThemedText style={styles.bottomButtonText}>編輯</ThemedText>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.bottomButton} onPress={() => goToAnalysisPage()}>
-          <Ionicons name="analytics-outline" size={24} color="#3A7BFF" />
-          <ThemedText style={styles.bottomButtonText}>分析</ThemedText>
-        </TouchableOpacity>
-      </View>
     </ThemedView>
   );
 }
@@ -584,27 +571,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   bottomSpacer: {
-    height: 70,
-  },
-  bottomBar: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "white",
-    borderTopWidth: 1,
-    borderTopColor: "#EDF1F7",
-    paddingVertical: 12,
-  },
-  bottomButton: {
-    alignItems: "center",
-    paddingHorizontal: 16,
-  },
-  bottomButtonText: {
-    marginTop: 4,
-    fontSize: 12,
-    color: "#3A7BFF",
+    height: 80,
   },
 });
