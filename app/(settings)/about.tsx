@@ -45,7 +45,7 @@ export default function AboutScreen() {
           <Ionicons name="arrow-back" size={24} color="#3A7BFF" />
         </TouchableOpacity>
         <ThemedText type="title" style={styles.headerTitle}>
-          關於錄智通
+          關於錄智AI
         </ThemedText>
         <View style={styles.headerRight} />
       </View>
@@ -54,7 +54,7 @@ export default function AboutScreen() {
         {/* 應用程式 Logo */}
         <View style={styles.logoContainer}>
           <Image source={require("../../assets/images/icon.png")} style={styles.logoImage} resizeMode="contain" />
-          <ThemedText style={styles.appName}>錄智通</ThemedText>
+          <ThemedText style={styles.appName}>錄智 AI</ThemedText>
           <ThemedText style={styles.versionText}>版本 1.0.0 (Build 2)</ThemedText>
         </View>
 

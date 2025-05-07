@@ -55,7 +55,7 @@ function InitialLayout() {
         }
 
         const hasOnboardedValue = await AsyncStorage.getItem(HAS_ONBOARDED_KEY);
-        console.log("OnBoarding 狀態檢查: ", hasOnboardedValue);
+        // console.log("OnBoarding 狀態檢查: ", hasOnboardedValue);
 
         const hasCompleted = hasOnboardedValue === "true";
         setHasOnboarded(hasCompleted);
@@ -82,7 +82,7 @@ function InitialLayout() {
     const inOnboardingGroup = firstSegment === "onboarding";
     const inTabsGroup = firstSegment === "(tabs)";
 
-    console.log(`導航檢查: hasOnboarded=${hasOnboarded}, global=${global.hasCompletedOnboarding}, current segment=${firstSegment}`);
+    // console.log(`導航檢查: hasOnboarded=${hasOnboarded}, global=${global.hasCompletedOnboarding}, current segment=${firstSegment}`);
 
     // 如果全局標記顯示已完成引導但本地狀態尚未更新，更新本地狀態
     if (global.hasCompletedOnboarding && !hasOnboarded) {

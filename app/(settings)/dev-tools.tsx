@@ -158,7 +158,7 @@ export default function DevToolsScreen() {
   async function sendNotificationWithIcon() {
     try {
       await NotificationService.sendImmediateNotification({
-        title: "錄智通錄音完成",
+        title: "錄智AI錄音完成",
         body: "您的錄音已完成處理，點擊查看詳情",
         data: { screen: "recordings" },
         sound: "notification.wav",

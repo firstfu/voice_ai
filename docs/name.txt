@@ -7,7 +7,7 @@ AudioMindAI - AI理解音訊內容
 
 
 我特別推薦：
-中文：「錄智通」(Lù Zhì Tōng)
+中文：「錄智AI」(Lù Zhì Tōng)
 英文：RecordAI
 這個組合具有以下優勢：
 「錄」字直接強調錄音功能

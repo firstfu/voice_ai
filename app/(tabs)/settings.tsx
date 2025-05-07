@@ -172,7 +172,7 @@ export default function SettingsScreen() {
       data: [
         {
           id: "about",
-          title: "關於錄智通",
+          title: "關於錄智AI",
           subtitle: "了解我們的故事與使命",
           icon: "information-circle",
           type: "arrow",
@@ -225,13 +225,7 @@ export default function SettingsScreen() {
 
         <View style={styles.settingItemRight}>
           {item.type === "toggle" && (
-            <Switch
-              value={item.value}
-              onValueChange={item.onPress}
-              trackColor={{ false: "#E2E8F0", true: "#3A7BFF" }}
-              thumbColor={"#FFFFFF"}
-              ios_backgroundColor="#E2E8F0"
-            />
+            <Switch value={item.value} onValueChange={item.onPress} trackColor={{ false: "#E2E8F0", true: "#3A7BFF" }} thumbColor={"#FFFFFF"} ios_backgroundColor="#E2E8F0" />
           )}
           {item.type === "arrow" && (
             <View style={styles.arrowContainer}>

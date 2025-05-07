@@ -155,7 +155,7 @@ export default function PremiumScreen() {
 
         {/* 標題區域 */}
         <View style={styles.titleContainer}>
-          <ThemedText style={styles.title}>錄智通 專業版</ThemedText>
+          <ThemedText style={styles.title}>錄智AI 專業版</ThemedText>
           <ThemedText style={styles.subtitle}>解鎖全部進階功能，提升您的錄音體驗</ThemedText>
         </View>
 
