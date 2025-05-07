@@ -277,15 +277,23 @@ export default function AnalysisScreen() {
               </ThemedText>
             </View>
             <View style={styles.card}>
-              {analysisResult.topics.map((topic, index) => (
-                <View key={index} style={styles.topicItem}>
-                  <ThemedText style={styles.topicName}>{topic.name}</ThemedText>
-                  <View style={styles.confidenceBarContainer}>
-                    <View style={[styles.confidenceBar, { width: `${topic.confidence * 100}%` }]} />
-                    <ThemedText style={styles.confidenceText}>{Math.round(topic.confidence * 100)}%</ThemedText>
+              {analysisResult.topics.map((topic, index) => {
+                const confidence = Math.round(topic.confidence * 100);
+                const isShortBar = confidence < 50; // 進度條小於50%時視為較短
+
+                return (
+                  <View key={index} style={styles.topicItem}>
+                    <View style={styles.topicNameContainer}>
+                      <ThemedText style={styles.topicName}>{topic.name}</ThemedText>
+                      {isShortBar && <ThemedText style={styles.percentageOutside}>{confidence}%</ThemedText>}
+                    </View>
+                    <View style={styles.confidenceBarContainer}>
+                      <View style={[styles.confidenceBar, { width: `${confidence}%` }]} />
+                      {!isShortBar && <ThemedText style={styles.confidenceText}>{confidence}%</ThemedText>}
+                    </View>
                   </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           </Animated.View>
 
@@ -528,11 +536,21 @@ const styles = StyleSheet.create({
   topicItem: {
     marginBottom: 12,
   },
+  topicNameContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 4,
+  },
   topicName: {
     fontSize: 14,
     fontWeight: "500",
     color: "#2C3E50",
-    marginBottom: 4,
+  },
+  percentageOutside: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#3A7BFF",
   },
   confidenceBarContainer: {
     height: 20,
@@ -541,6 +559,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     flexDirection: "row",
     alignItems: "center",
+    position: "relative",
   },
   confidenceBar: {
     height: "100%",
@@ -553,6 +572,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#FFFFFF",
     fontWeight: "bold",
+    textShadowColor: "rgba(0, 0, 0, 0.5)",
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 1,
   },
   sentimentOverallContainer: {
     alignItems: "center",
