@@ -82,19 +82,13 @@ export default function LegalScreen() {
         />
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]} showsVerticalScrollIndicator={false}>
         {/* 隱私權政策標籤頁 */}
         {activeTab === 0 && (
           <View style={styles.section}>
             <ThemedText style={styles.paragraph}>最後更新日期：2023年12月15日</ThemedText>
 
-            <ThemedText style={styles.paragraph}>
-              錄智通（以下簡稱「我們」）重視您的隱私。本隱私權政策說明我們在您使用錄智通應用程式時如何收集、使用和保護您的個人資料。
-            </ThemedText>
+            <ThemedText style={styles.paragraph}>錄智通（以下簡稱「我們」）重視您的隱私。本隱私權政策說明我們在您使用錄智通應用程式時如何收集、使用和保護您的個人資料。</ThemedText>
 
             <ThemedText style={styles.subTitle}>資料收集</ThemedText>
             <ThemedText style={styles.paragraph}>我們可能收集以下類型的資料：</ThemedText>
