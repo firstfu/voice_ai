@@ -1,0 +1,550 @@
+{
+    "1": {
+        "id": "1",
+        "title": "個案會談 - 獨居長者李先生",
+        "duration": "00:42:15",
+        "date": "2024-05-12",
+        "tags": [
+            "長者照顧",
+            "居家安全"
+        ],
+        "transcription": [
+            {
+                "id": "1",
+                "speaker": "社工師",
+                "timestamp": "00:00:15",
+                "originalText": "李先生，今天我們來聊聊您最近的生活狀況，以及居家照護服務是否有幫助到您？",
+                "editedText": "李先生，今天我們來聊聊您最近的生活狀況，以及居家照護服務是否有幫助到您？",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "2",
+                "speaker": "李先生",
+                "timestamp": "00:01:22",
+                "originalText": "最近還可以，就是行動不太方便，上下樓梯很困難。居家服務的阿姨每週來兩次，幫我做飯、打掃，人很好。",
+                "editedText": "最近還可以，就是行動不太方便，上下樓梯很困難。居家服務的阿姨每週來兩次，幫我做飯、打掃，人很好。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "3",
+                "speaker": "社工師",
+                "timestamp": "00:02:45",
+                "originalText": "了解。我們也可以評估是否需要申請輔具補助，像是扶手或助行器，這樣您在家中移動會更安全。",
+                "editedText": "了解。我們也可以評估是否需要申請輔具補助，像是扶手或助行器，這樣您在家中移動會更安全。",
+                "isEdited": false,
+                "isEditing": false
+            }
+        ],
+        "markers": [
+            {
+                "id": "m1",
+                "type": "important",
+                "timestamp": "00:01:22",
+                "text": "行動不便問題"
+            },
+            {
+                "id": "m2",
+                "type": "task",
+                "timestamp": "00:02:45",
+                "text": "申請輔具補助"
+            }
+        ]
+    },
+    "2": {
+        "id": "2",
+        "title": "家庭訪視 - 王氏家庭暴力跟進",
+        "duration": "01:05:23",
+        "date": "2024-05-10",
+        "tags": [
+            "家暴案件",
+            "兒少保護"
+        ],
+        "transcription": [
+            {
+                "id": "1",
+                "speaker": "社工師",
+                "timestamp": "00:00:30",
+                "originalText": "王女士，自從上次法院核發保護令後，情況是否有改善？前夫還有騷擾您嗎？",
+                "editedText": "王女士，自從上次法院核發保護令後，情況是否有改善？前夫還有騷擾您嗎？",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "2",
+                "speaker": "王女士",
+                "timestamp": "00:01:15",
+                "originalText": "他不敢再直接來家裡了，但有時候會在小孩放學路上遇到。孩子們晚上常做惡夢，特別是老大。",
+                "editedText": "他不敢再直接來家裡了，但有時候會在小孩放學路上遇到。孩子們晚上常做惡夢，特別是老大。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "3",
+                "speaker": "社工師",
+                "timestamp": "00:02:20",
+                "originalText": "孩子的反應很正常，我們可以安排心理師跟他們會談。經濟方面還有困難嗎？",
+                "editedText": "孩子的反應很正常，我們可以安排心理師跟他們會談。經濟方面還有困難嗎？",
+                "isEdited": false,
+                "isEditing": false
+            }
+        ],
+        "markers": [
+            {
+                "id": "m1",
+                "type": "important",
+                "timestamp": "00:01:15",
+                "text": "兒童創傷症狀"
+            },
+            {
+                "id": "m2",
+                "type": "task",
+                "timestamp": "00:02:20",
+                "text": "安排兒童心理諮商"
+            }
+        ]
+    },
+    "3": {
+        "id": "3",
+        "title": "團體工作 - 青少年情緒支持小組",
+        "duration": "00:58:30",
+        "date": "2024-05-08",
+        "tags": [
+            "團體工作",
+            "青少年"
+        ],
+        "transcription": [
+            {
+                "id": "1",
+                "speaker": "帶領者",
+                "timestamp": "00:00:22",
+                "originalText": "今天是我們小組的第四次聚會，主題是「認識和管理憤怒情緒」，誰願意先分享上週練習的情況？",
+                "editedText": "今天是我們小組的第四次聚會，主題是「認識和管理憤怒情緒」，誰願意先分享上週練習的情況？",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "2",
+                "speaker": "小明",
+                "timestamp": "00:01:30",
+                "originalText": "上週我在班上被其他同學嘲笑成績差，當下很想打人，但我用了深呼吸的方法，然後就離開教室冷靜一下。",
+                "editedText": "上週我在班上被其他同學嘲笑成績差，當下很想打人，但我用了深呼吸的方法，然後就離開教室冷靜一下。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "3",
+                "speaker": "帶領者",
+                "timestamp": "00:02:45",
+                "originalText": "小明做得很好！這正是我們上週學的技巧。大家還記得，憤怒本身不是問題，重要的是我們如何表達它。",
+                "editedText": "小明做得很好！這正是我們上週學的技巧。大家還記得，憤怒本身不是問題，重要的是我們如何表達它。",
+                "isEdited": false,
+                "isEditing": false
+            }
+        ],
+        "markers": [
+            {
+                "id": "m1",
+                "type": "important",
+                "timestamp": "00:01:30",
+                "text": "情緒管理技巧應用"
+            },
+            {
+                "id": "m2",
+                "type": "note",
+                "timestamp": "00:02:45",
+                "text": "肯定成員進步"
+            }
+        ]
+    },
+    "4": {
+        "id": "4",
+        "title": "社區評估 - 大安區長者需求調查",
+        "duration": "00:34:18",
+        "date": "2024-05-05",
+        "tags": [
+            "社區工作",
+            "需求評估"
+        ],
+        "transcription": [
+            {
+                "id": "1",
+                "speaker": "社工師",
+                "timestamp": "00:00:10",
+                "originalText": "感謝各位社區居民參與今天的焦點團體，我們想了解大安區長者的需求，特別是關於活動場所和服務內容。",
+                "editedText": "感謝各位社區居民參與今天的焦點團體，我們想了解大安區長者的需求，特別是關於活動場所和服務內容。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "2",
+                "speaker": "居民甲",
+                "timestamp": "00:01:05",
+                "originalText": "活動中心離很多老人家太遠了，行動不便的長輩根本去不了。如果能有接送服務就好了。",
+                "editedText": "活動中心離很多老人家太遠了，行動不便的長輩根本去不了。如果能有接送服務就好了。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "3",
+                "speaker": "居民乙",
+                "timestamp": "00:02:10",
+                "originalText": "獨居老人最需要的是有人陪他們聊天、協助處理日常事務，像是繳費單、信件這些，很多長輩看不懂。",
+                "editedText": "獨居老人最需要的是有人陪他們聊天、協助處理日常事務，像是繳費單、信件這些，很多長輩看不懂。",
+                "isEdited": false,
+                "isEditing": false
+            }
+        ],
+        "markers": [
+            {
+                "id": "m1",
+                "type": "important",
+                "timestamp": "00:01:05",
+                "text": "交通可及性問題"
+            },
+            {
+                "id": "m2",
+                "type": "task",
+                "timestamp": "00:02:10",
+                "text": "規劃日常事務協助服務"
+            }
+        ]
+    },
+    "5": {
+        "id": "5",
+        "title": "個案研討會 - 多重障礙個案討論",
+        "duration": "01:28:42",
+        "date": "2024-05-03",
+        "tags": [
+            "個案研討",
+            "多重障礙"
+        ],
+        "transcription": [
+            {
+                "id": "1",
+                "speaker": "報告社工",
+                "timestamp": "00:00:25",
+                "originalText": "今天要討論的個案是張先生，45歲，因車禍導致下肢癱瘓，同時有憂鬱症和焦慮症診斷。最近因房東漲租，出現自殺意念。",
+                "editedText": "今天要討論的個案是張先生，45歲，因車禍導致下肢癱瘓，同時有憂鬱症和焦慮症診斷。最近因房東漲租，出現自殺意念。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "2",
+                "speaker": "心理師",
+                "timestamp": "00:01:40",
+                "originalText": "建議先評估自殺風險等級，並建立24小時支持系統。藥物治療也需要重新評估，他的焦慮似乎控制得不好。",
+                "editedText": "建議先評估自殺風險等級，並建立24小時支持系統。藥物治療也需要重新評估，他的焦慮似乎控制得不好。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "3",
+                "speaker": "督導",
+                "timestamp": "00:02:55",
+                "originalText": "除了心理層面，實務上我們需要協助他申請租金補貼，並評估是否符合長照服務資格，減輕他的經濟和生活壓力。",
+                "editedText": "除了心理層面，實務上我們需要協助他申請租金補貼，並評估是否符合長照服務資格，減輕他的經濟和生活壓力。",
+                "isEdited": false,
+                "isEditing": false
+            }
+        ],
+        "markers": [
+            {
+                "id": "m1",
+                "type": "important",
+                "timestamp": "00:01:40",
+                "text": "自殺風險評估"
+            },
+            {
+                "id": "m2",
+                "type": "task",
+                "timestamp": "00:02:55",
+                "text": "申請租金補貼和長照服務"
+            }
+        ]
+    },
+    "6": {
+        "id": "6",
+        "title": "網絡會議 - 家暴防治中心協調",
+        "duration": "00:52:36",
+        "date": "2024-04-29",
+        "tags": [
+            "網絡會議",
+            "家暴防治"
+        ],
+        "transcription": [
+            {
+                "id": "1",
+                "speaker": "協調員",
+                "timestamp": "00:00:18",
+                "originalText": "謝謝各位出席今日的跨網絡協調會議，今天主要討論三個高風險家暴案件的跨專業合作模式。",
+                "editedText": "謝謝各位出席今日的跨網絡協調會議，今天主要討論三個高風險家暴案件的跨專業合作模式。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "2",
+                "speaker": "警政代表",
+                "timestamp": "00:01:30",
+                "originalText": "關於林家案件，我們接獲了三次報案，但每次到場時，加害人都已離開。受害者也拒絕驗傷。",
+                "editedText": "關於林家案件，我們接獲了三次報案，但每次到場時，加害人都已離開。受害者也拒絕驗傷。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "3",
+                "speaker": "社工師",
+                "timestamp": "00:02:40",
+                "originalText": "我們與受害者保持每週聯繫，並已設計安全計畫，但她目前不願意聲請保護令。建議可安排社區巡邏加強注意。",
+                "editedText": "我們與受害者保持每週聯繫，並已設計安全計畫，但她目前不願意聲請保護令。建議可安排社區巡邏加強注意。",
+                "isEdited": false,
+                "isEditing": false
+            }
+        ],
+        "markers": [
+            {
+                "id": "m1",
+                "type": "important",
+                "timestamp": "00:01:30",
+                "text": "高風險家暴案件通報"
+            },
+            {
+                "id": "m2",
+                "type": "task",
+                "timestamp": "00:02:40",
+                "text": "安排社區巡邏資源"
+            }
+        ]
+    },
+    "7": {
+        "id": "7",
+        "title": "個案管理 - 陳小姐就業輔導追蹤",
+        "duration": "00:37:14",
+        "date": "2024-04-25",
+        "tags": [
+            "就業輔導",
+            "單親家庭"
+        ],
+        "transcription": [
+            {
+                "id": "1",
+                "speaker": "社工師",
+                "timestamp": "00:00:12",
+                "originalText": "陳小姐，很高興看到您上次參加我們的就業培訓後有了進展。能跟我分享一下過去兩週的求職情況嗎？",
+                "editedText": "陳小姐，很高興看到您上次參加我們的就業培訓後有了進展。能跟我分享一下過去兩週的求職情況嗎？",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "2",
+                "speaker": "陳小姐",
+                "timestamp": "00:01:05",
+                "originalText": "我去了兩場面試，一個是行政助理，另一個是門市人員。門市已經回覆錄取了，但是輪班時間和小孩放學時間衝突。",
+                "editedText": "我去了兩場面試，一個是行政助理，另一個是門市人員。門市已經回覆錄取了，但是輪班時間和小孩放學時間衝突。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "3",
+                "speaker": "社工師",
+                "timestamp": "00:02:18",
+                "originalText": "了解您的困難。我們可以討論課後照顧資源，或是協助您跟雇主商量固定班別的可能性。您比較傾向哪一種方式？",
+                "editedText": "了解您的困難。我們可以討論課後照顧資源，或是協助您跟雇主商量固定班別的可能性。您比較傾向哪一種方式？",
+                "isEdited": false,
+                "isEditing": false
+            }
+        ],
+        "markers": [
+            {
+                "id": "m1",
+                "type": "important",
+                "timestamp": "00:01:05",
+                "text": "托育與就業衝突"
+            },
+            {
+                "id": "m2",
+                "type": "task",
+                "timestamp": "00:02:18",
+                "text": "連結課後照顧資源"
+            }
+        ]
+    },
+    "8": {
+        "id": "8",
+        "title": "資源連結 - 弱勢家庭物資發放",
+        "duration": "00:45:53",
+        "date": "2024-04-22",
+        "tags": [
+            "物資發放",
+            "弱勢家庭"
+        ],
+        "transcription": [
+            {
+                "id": "1",
+                "speaker": "社工師",
+                "timestamp": "00:00:20",
+                "originalText": "今天我們要確認下週食物銀行發放的流程和名單。目前登記的有45戶家庭，其中15戶需要額外的嬰幼兒用品。",
+                "editedText": "今天我們要確認下週食物銀行發放的流程和名單。目前登記的有45戶家庭，其中15戶需要額外的嬰幼兒用品。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "2",
+                "speaker": "志工組長",
+                "timestamp": "00:01:35",
+                "originalText": "企業捐贈的尿布已經清點完畢，有三種尺寸，應該足夠本次發放。但嬰兒奶粉數量不足，可能需要再尋找贊助。",
+                "editedText": "企業捐贈的尿布已經清點完畢，有三種尺寸，應該足夠本次發放。但嬰兒奶粉數量不足，可能需要再尋找贊助。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "3",
+                "speaker": "社工師",
+                "timestamp": "00:02:50",
+                "originalText": "好的，我會聯繫之前合作過的乳品公司。另外，這次我們需要特別注意疫情防控措施，建議分時段發放。",
+                "editedText": "好的，我會聯繫之前合作過的乳品公司。另外，這次我們需要特別注意疫情防控措施，建議分時段發放。",
+                "isEdited": false,
+                "isEditing": false
+            }
+        ],
+        "markers": [
+            {
+                "id": "m1",
+                "type": "note",
+                "timestamp": "00:01:35",
+                "text": "嬰兒奶粉不足"
+            },
+            {
+                "id": "m2",
+                "type": "task",
+                "timestamp": "00:02:50",
+                "text": "聯繫乳品公司贊助"
+            }
+        ]
+    },
+    "9": {
+        "id": "9",
+        "title": "社工督導 - 精神疾病個案處遇討論",
+        "duration": "00:48:27",
+        "date": "2024-04-18",
+        "tags": [
+            "社工督導",
+            "精神疾病"
+        ],
+        "transcription": [
+            {
+                "id": "1",
+                "speaker": "邱社工",
+                "timestamp": "00:00:22",
+                "originalText": "我負責的是一位思覺失調症個案，他拒絕任何形式的服務介入，三次家訪都拒絕開門，我感到很無力。",
+                "editedText": "我負責的是一位思覺失調症個案，他拒絕任何形式的服務介入，三次家訪都拒絕開門，我感到很無力。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "2",
+                "speaker": "督導",
+                "timestamp": "00:01:30",
+                "originalText": "這類個案確實具有挑戰性。你提到他有一位願意合作的姊姊，我們可以透過她建立關係。試著了解個案平時的興趣。",
+                "editedText": "這類個案確實具有挑戰性。你提到他有一位願意合作的姊姊，我們可以透過她建立關係。試著了解個案平時的興趣。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "3",
+                "speaker": "邱社工",
+                "timestamp": "00:03:10",
+                "originalText": "我會嘗試這個方向。但有時我會擔心，如果他狀況惡化，又不願意就醫怎麼辦？我常感到很焦慮。",
+                "editedText": "我會嘗試這個方向。但有時我會擔心，如果他狀況惡化，又不願意就醫怎麼辦？我常感到很焦慮。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "4",
+                "speaker": "督導",
+                "timestamp": "00:04:20",
+                "originalText": "我理解你的感受，這是社工常見的專業耗竭現象。但重要的是認識到有些事不在我們控制範圍內。下週我們可以在團體督導中討論類似困境。",
+                "editedText": "我理解你的感受，這是社工常見的專業耗竭現象。但重要的是認識到有些事不在我們控制範圍內。下週我們可以在團體督導中討論類似困境。",
+                "isEdited": false,
+                "isEditing": false
+            }
+        ],
+        "markers": [
+            {
+                "id": "m1",
+                "type": "important",
+                "timestamp": "00:01:30",
+                "text": "透過關鍵人物建立關係"
+            },
+            {
+                "id": "m2",
+                "type": "note",
+                "timestamp": "00:04:20",
+                "text": "專業耗竭議題討論"
+            }
+        ]
+    },
+    "10": {
+        "id": "10",
+        "title": "家庭評估 - 收養前家庭訪視",
+        "duration": "01:15:06",
+        "date": "2024-04-15",
+        "tags": [
+            "收養評估",
+            "家庭訪視"
+        ],
+        "transcription": [
+            {
+                "id": "1",
+                "speaker": "社工師",
+                "timestamp": "00:00:28",
+                "originalText": "今天這次家訪的目的是了解你們收養孩子的準備情況。能否先分享一下，是什麼原因讓你們決定走上收養之路？",
+                "editedText": "今天這次家訪的目的是了解你們收養孩子的準備情況。能否先分享一下，是什麼原因讓你們決定走上收養之路？",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "2",
+                "speaker": "王先生",
+                "timestamp": "00:01:15",
+                "originalText": "我們結婚七年了，經過多次人工受孕都失敗後，開始考慮收養。去年參加了收養準備課程，也和其他收養家庭有交流。",
+                "editedText": "我們結婚七年了，經過多次人工受孕都失敗後，開始考慮收養。去年參加了收養準備課程，也和其他收養家庭有交流。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "3",
+                "speaker": "社工師",
+                "timestamp": "00:02:40",
+                "originalText": "謝謝分享。關於收養身分認同和生父母的議題，你們有什麼想法？這些通常是收養家庭會面臨的重要課題。",
+                "editedText": "謝謝分享。關於收養身分認同和生父母的議題，你們有什麼想法？這些通常是收養家庭會面臨的重要課題。",
+                "isEdited": false,
+                "isEditing": false
+            },
+            {
+                "id": "4",
+                "speaker": "王太太",
+                "timestamp": "00:03:30",
+                "originalText": "我們計劃從小就誠實告知孩子收養事實，使用適合年齡的方式說明。如果孩子長大後想了解生父母，我們也會支持。",
+                "editedText": "我們計劃從小就誠實告知孩子收養事實，使用適合年齡的方式說明。如果孩子長大後想了解生父母，我們也會支持。",
+                "isEdited": false,
+                "isEditing": false
+            }
+        ],
+        "markers": [
+            {
+                "id": "m1",
+                "type": "important",
+                "timestamp": "00:02:40",
+                "text": "收養身分認同議題"
+            },
+            {
+                "id": "m2",
+                "type": "note",
+                "timestamp": "00:03:30",
+                "text": "開放式收養態度"
+            }
+        ]
+    }
+}
