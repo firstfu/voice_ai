@@ -22,6 +22,9 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import Animated, { FadeIn } from "react-native-reanimated";
 
+// 導入 chatData.json
+import chatData from "@/app/recording/chatData.json";
+
 // 定義消息類型
 interface Message {
   id: string;
@@ -44,57 +47,53 @@ export default function AIChat() {
   const [isLoading, setIsLoading] = useState(false);
   const flatListRef = useRef<FlatList>(null);
   const [suggestedQuestions, setSuggestedQuestions] = useState<SuggestedQuestion[]>([]);
+  const [recordingType, setRecordingType] = useState<string>("default");
 
-  // 預設推薦問題
-  const defaultSuggestions: SuggestedQuestion[] = [
-    { id: "1", text: "這次會談的主要內容是什麼？" },
-    { id: "2", text: "社工師提出了哪些服務建議？" },
-    { id: "3", text: "個案面臨的主要困境有哪些？" },
-    { id: "4", text: "社工師運用了哪些評估方法？" },
-    { id: "5", text: "會談中連結了哪些社會福利資源？" },
-  ];
+  // 當 id 改變時，確定錄音類型
+  useEffect(() => {
+    if (id && chatData.recordingTypeMap[id as keyof typeof chatData.recordingTypeMap]) {
+      setRecordingType(chatData.recordingTypeMap[id as keyof typeof chatData.recordingTypeMap]);
+    } else {
+      setRecordingType("default");
+    }
+  }, [id]);
 
   // 初始歡迎消息
   useEffect(() => {
+    // 使用 chatData 中的歡迎訊息
     const welcomeMessage: Message = {
       id: "welcome",
-      text: "歡迎使用AI問答功能！我已經分析了您的個案會談錄音內容，您可以向我詢問關於個案評估、服務計畫、資源連結或會談技巧的相關問題，或選擇下方的推薦問題：",
+      text: chatData.welcomeMessages[recordingType as keyof typeof chatData.welcomeMessages] || chatData.welcomeMessages.default,
       isUser: false,
       timestamp: new Date(),
     };
+
     setMessages([welcomeMessage]);
-    setSuggestedQuestions(defaultSuggestions);
-  }, []);
+
+    // 使用 chatData 中的建議問題
+    const questions = chatData.suggestedQuestions[recordingType as keyof typeof chatData.suggestedQuestions] || chatData.suggestedQuestions.default;
+
+    const formattedQuestions: SuggestedQuestion[] = questions.map((text, index) => ({
+      id: `${index + 1}`,
+      text,
+    }));
+
+    setSuggestedQuestions(formattedQuestions);
+  }, [recordingType]);
 
   // 根據對話上下文生成新的推薦問題
   const generateContextualSuggestions = (lastMessage: string) => {
-    // 這裡可以基於最後一條AI訊息來決定下一步可能的問題
-    if (lastMessage.includes("行動不便") || lastMessage.includes("居家安全") || lastMessage.includes("輔具")) {
-      return [
-        { id: "6", text: "李先生在家中面臨哪些主要安全風險？" },
-        { id: "7", text: "社工師建議申請哪些輔具補助？" },
-        { id: "8", text: "輔具補助的申請流程是什麼？" },
-      ];
-    } else if (lastMessage.includes("社區關懷據點") || lastMessage.includes("社交機會") || lastMessage.includes("孤獨感")) {
-      return [
-        { id: "9", text: "李先生目前的社會支持網絡如何？" },
-        { id: "10", text: "社區關懷據點能提供哪些服務？" },
-        { id: "11", text: "如何改善獨居長者的社會參與？" },
-      ];
-    } else if (lastMessage.includes("情感") || lastMessage.includes("情緒") || lastMessage.includes("態度")) {
-      return [
-        { id: "12", text: "李先生對接受服務的意願如何？" },
-        { id: "13", text: "社工師如何建立與個案的信任關係？" },
-        { id: "14", text: "會談結束時李先生的心理狀態有改善嗎？" },
-      ];
-    } else {
-      // 默認問題集
-      return [
-        { id: "15", text: "這個案例中運用了哪些社會福利資源？" },
-        { id: "16", text: "社工師安排了哪些後續追蹤計畫？" },
-        { id: "17", text: "這次會談達成了哪些服務目標？" },
-      ];
-    }
+    // 使用基本問題
+    const baseQuestions = chatData.suggestedQuestions[recordingType as keyof typeof chatData.suggestedQuestions] || chatData.suggestedQuestions.default;
+
+    // 從基本問題中選取3-4個不同的問題
+    const shuffled = [...baseQuestions].sort(() => 0.5 - Math.random());
+    const selected = shuffled.slice(0, Math.min(4, shuffled.length));
+
+    return selected.map((text, index) => ({
+      id: `sugg_${Date.now()}_${index}`,
+      text,
+    }));
   };
 
   // 發送新消息
@@ -118,7 +117,7 @@ export default function AIChat() {
 
     // 模擬 API 請求延遲
     setTimeout(() => {
-      const aiResponseText = generateMockResponse(text, id);
+      const aiResponseText = generateMockResponse(text, id as string);
       const aiResponse: Message = {
         id: (Date.now() + 1).toString(),
         text: aiResponseText,
@@ -148,31 +147,77 @@ export default function AIChat() {
     }
   }, [messages]);
 
-  // 模擬 AI 回應 (實際應用中會使用真實 API)
+  // 從 chatData.json 中獲取回應
   const generateMockResponse = (query: string, recordingId: string): string => {
-    // 這裡只是模擬回應，實際應用中會調用真實的 AI API
-    const possibleResponses = [
-      "根據錄音內容分析，這次會談主要是社工師與獨居長者李先生討論其生活情況和所需支持。社工師評估了李先生的行動不便問題，特別是上下樓梯和廁所安全的風險，並提出申請輔具補助的建議。",
-      "在這段錄音中，社工師提出的主要服務計畫包括：申請居家安全輔具補助、連結社區關懷據點增加社交機會，以及安排定期家訪關懷。這些決定都旨在改善李先生的生活品質和安全。",
-      "錄音中的主要人物是社工師和獨居長者李先生。李先生提到他的子女長期在國外，很少聯絡，因此社會支持不足，感到孤獨。",
-      "根據分析，會談的情感基調起初較為中性，隨著社工師提供具體協助方案後，情緒逐漸轉為正向。李先生對於社工師提出的社區資源連結表現出謹慎但樂觀的態度。",
-      "這次會談的主要目的是評估獨居長者的居家安全和社會支持需求。社工師運用多面向評估，包括身體功能、居家環境安全、社會支持網絡和心理狀態等，並制定了相應的服務計畫。",
-      "根據錄音轉錄，社工師評估了李先生的日常生活能力、居家安全風險和社會支持網絡。建議申請輔具補助改善居家安全，並連結社區關懷據點增加社交機會，以改善因子女長期在國外造成的孤獨感。",
-    ];
+    const type = chatData.recordingTypeMap[recordingId as keyof typeof chatData.recordingTypeMap] || "default";
+    const responses = chatData.responses[type as keyof typeof chatData.responses] || chatData.responses.default;
 
-    // 根據問題類型返回不同回應
-    if (query.toLowerCase().includes("總結") || query.toLowerCase().includes("概述")) {
-      return possibleResponses[0];
-    } else if (query.toLowerCase().includes("決策") || query.toLowerCase().includes("建議") || query.toLowerCase().includes("服務計畫")) {
-      return possibleResponses[1];
-    } else if (query.toLowerCase().includes("誰") || query.toLowerCase().includes("人物") || query.toLowerCase().includes("家庭")) {
-      return possibleResponses[2];
-    } else if (query.toLowerCase().includes("情感") || query.toLowerCase().includes("氛圍") || query.toLowerCase().includes("情緒")) {
-      return possibleResponses[3];
-    } else if (query.toLowerCase().includes("目的") || query.toLowerCase().includes("為什麼") || query.toLowerCase().includes("評估")) {
-      return possibleResponses[4];
+    // 嘗試匹配問題關鍵字
+    const lowercaseQuery = query.toLowerCase();
+    let responseKey: string | null = null;
+
+    // 根據問題類型選擇回應
+    if (lowercaseQuery.includes("主要內容") || lowercaseQuery.includes("內容是什麼") || lowercaseQuery.includes("主題")) {
+      if (type === "elderCare") {
+        responseKey = "mainNeed";
+      } else if (type === "domesticViolence") {
+        responseKey = "childTraumaSymptoms";
+      } else if (type === "youthGroup") {
+        responseKey = "emotionManagementTechniques";
+      } else if (type === "communityWork") {
+        responseKey = "elderlyIssues";
+      } else {
+        responseKey = "mainContent";
+      }
+    } else if (lowercaseQuery.includes("服務建議") || lowercaseQuery.includes("補助") || lowercaseQuery.includes("建議")) {
+      if (type === "elderCare") {
+        responseKey = "equipmentSuggestions";
+      } else if (type === "domesticViolence") {
+        responseKey = "protectionMeasures";
+      } else if (type === "caseConference") {
+        responseKey = "therapeuticRecommendations";
+      } else {
+        responseKey = "serviceRecommendations";
+      }
+    } else if (lowercaseQuery.includes("安全") || lowercaseQuery.includes("風險")) {
+      if (type === "elderCare") {
+        responseKey = "safetyRisks";
+      } else if (type === "domesticViolence") {
+        responseKey = "safetyRisks";
+      } else if (type === "networkMeeting") {
+        responseKey = "safetyPlanEnhancement";
+      } else {
+        responseKey = "assessment";
+      }
+    } else if (lowercaseQuery.includes("照顧") || lowercaseQuery.includes("服務提供")) {
+      if (type === "elderCare") {
+        responseKey = "careServices";
+      } else {
+        responseKey = "clientNeeds";
+      }
+    } else if (lowercaseQuery.includes("評估") || lowercaseQuery.includes("如何評估")) {
+      if (type === "elderCare") {
+        responseKey = "mobilityAssessment";
+      } else if (type === "caseConference") {
+        responseKey = "suicideAssessment";
+      } else if (type === "youthGroup") {
+        responseKey = "effectivenessEvaluation";
+      } else {
+        responseKey = "assessment";
+      }
     } else {
-      return possibleResponses[5];
+      // 找到第一個可用的回應
+      const keys = Object.keys(responses);
+      if (keys.length > 0) {
+        responseKey = keys[0];
+      }
+    }
+
+    // 如果找到對應回應，返回；否則返回預設回應
+    if (responseKey && responses[responseKey as keyof typeof responses]) {
+      return responses[responseKey as keyof typeof responses];
+    } else {
+      return "抱歉，我目前無法回答這個問題。請嘗試詢問關於錄音內容的其他問題，或選擇下方的推薦問題。";
     }
   };
 
