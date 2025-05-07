@@ -50,14 +50,10 @@ export default function AboutScreen() {
         <View style={styles.headerRight} />
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView style={styles.scrollView} contentContainerStyle={[styles.contentContainer, { paddingBottom: insets.bottom + 20 }]} showsVerticalScrollIndicator={false}>
         {/* 應用程式 Logo */}
         <View style={styles.logoContainer}>
-          <Image source={require("../assets/images/icon.png")} style={styles.logoImage} resizeMode="contain" />
+          <Image source={require("../../assets/images/icon.png")} style={styles.logoImage} resizeMode="contain" />
           <ThemedText style={styles.appName}>錄智通</ThemedText>
           <ThemedText style={styles.versionText}>版本 1.0.0 (Build 2)</ThemedText>
         </View>

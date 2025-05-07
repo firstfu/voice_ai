@@ -197,9 +197,7 @@ export default function PremiumScreen() {
                 </View>
 
                 <View style={styles.radioContainer}>
-                  <View style={[styles.radioOuter, selectedPlan === plan.id && styles.radioOuterSelected]}>
-                    {selectedPlan === plan.id && <View style={styles.radioInner} />}
-                  </View>
+                  <View style={[styles.radioOuter, selectedPlan === plan.id && styles.radioOuterSelected]}>{selectedPlan === plan.id && <View style={styles.radioInner} />}</View>
                 </View>
               </View>
             </TouchableOpacity>
