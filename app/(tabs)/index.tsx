@@ -16,6 +16,7 @@ import { useRef } from "react";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Stack } from "expo-router";
 
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -144,6 +145,9 @@ export default function HomeScreen() {
     <ThemedView style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
 
+      {/* 禁用內建標題欄 */}
+      <Stack.Screen options={{ headerShown: false }} />
+
       {/* 頂部漸變背景 */}
       <LinearGradient
         colors={["rgba(58, 123, 255, 0.08)", "rgba(0, 194, 168, 0.03)", "rgba(255, 255, 255, 0)"]}
@@ -152,31 +156,27 @@ export default function HomeScreen() {
         end={{ x: 1, y: 1 }}
       />
 
+      {/* 固定的頂部導航欄 */}
+      <View style={[styles.fixedHeaderContainer, { paddingTop: insets.top }]}>
+        <View style={styles.titleRow}>
+          <View>
+            <ThemedText style={styles.welcomeText}>歡迎回來</ThemedText>
+            <ThemedText type="title" style={styles.titleText}>
+              錄智通
+            </ThemedText>
+          </View>
+          <TouchableOpacity style={styles.profileButton} onPress={() => router.push("/settings")}>
+            <Image source={require("@/assets/images/profile-avatar.png")} style={styles.profileImage} defaultSource={require("@/assets/images/profile-avatar.png")} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
       <ScrollView
         ref={scrollViewRef}
         style={styles.scrollView}
-        contentContainerStyle={[styles.contentContainer, { paddingTop: insets.top + 20 }]}
+        contentContainerStyle={[styles.contentContainer, { paddingTop: insets.top + 90 }]} // 增加頂部空間以避免與導航欄重疊
         showsVerticalScrollIndicator={false}
       >
-        {/* 頂部標題區 */}
-        <View style={styles.headerContainer}>
-          <View style={styles.titleRow}>
-            <View>
-              <ThemedText style={styles.welcomeText}>歡迎回來</ThemedText>
-              <ThemedText type="title" style={styles.titleText}>
-                錄智通
-              </ThemedText>
-            </View>
-            <TouchableOpacity style={styles.profileButton} onPress={() => router.push("/settings")}>
-              <Image
-                source={require("@/assets/images/profile-avatar.png")}
-                style={styles.profileImage}
-                defaultSource={require("@/assets/images/profile-avatar.png")}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {/* 快速錄音按鈕 */}
         <AnimatedTouchable style={[styles.startRecordingButtonContainer, recordButtonStyle]} onPress={handleStartRecording} activeOpacity={0.9}>
           <LinearGradient colors={["#3A7BFF", "#00C2A8"]} style={styles.startRecordingButton} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
@@ -227,6 +227,29 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingBottom: 30,
   },
+  fixedHeaderContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "rgba(0,0,0,0.1)",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
   headerContainer: {
     paddingHorizontal: 20,
     marginBottom: 20,
@@ -235,7 +258,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 8,
+    marginTop: 10,
   },
   welcomeText: {
     fontSize: 16,
