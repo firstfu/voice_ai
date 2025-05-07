@@ -1,3 +1,21 @@
+/**
+ * 錄音內容分析頁面
+ *
+ * 本頁面負責展示錄音內容的AI分析結果，包括：
+ * - 內容摘要：自動生成的錄音內容簡短總結
+ * - 關鍵詞提取：從錄音內容中識別的重要詞彙
+ * - 主題分類：識別錄音內容所屬的主題類別及其置信度
+ * - 情感分析：分析錄音內容的整體情感傾向
+ * - 智能問答：自動生成的基於內容的問答對
+ *
+ * 頁面頂部提供功能按鈕：
+ * - 重新分析：觸發對錄音內容的重新分析
+ * - 匯出報告：將分析結果匯出為可共享的報告
+ * - 分享：分享分析結果
+ *
+ * 頁面使用AnalysisContext獲取和更新分析數據
+ */
+
 import { useState, useEffect, useContext } from "react";
 import { StyleSheet, View, TouchableOpacity, ScrollView, Platform, StatusBar, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
@@ -100,7 +118,7 @@ export default function AnalysisScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const recordingId = typeof id === "string" ? id : "1";
-  const { refreshTrigger } = useContext(AnalysisContext);
+  const { refreshTrigger, triggerRefresh } = useContext(AnalysisContext);
 
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const { isLoading, error, getAnalysisResult, refreshAnalysis } = useAnalysisService();
@@ -125,6 +143,9 @@ export default function AnalysisScreen() {
   };
 
   const handleRefreshAnalysis = async () => {
+    // 直接觸發上下文中的重新分析
+    triggerRefresh(recordingId);
+
     const recording = mockRecordings[recordingId];
     if (!recording) return;
 
@@ -144,16 +165,6 @@ export default function AnalysisScreen() {
   if (isLoading) {
     return (
       <ThemedView style={styles.container}>
-        <Stack.Screen
-          options={{
-            title: "AI 內容分析",
-            headerShown: true,
-            headerShadowVisible: false,
-            headerStyle: {
-              backgroundColor: "#F8F9FA",
-            },
-          }}
-        />
         <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#3A7BFF" />
@@ -166,16 +177,6 @@ export default function AnalysisScreen() {
   if (error) {
     return (
       <ThemedView style={styles.container}>
-        <Stack.Screen
-          options={{
-            title: "AI 內容分析",
-            headerShown: true,
-            headerShadowVisible: false,
-            headerStyle: {
-              backgroundColor: "#F8F9FA",
-            },
-          }}
-        />
         <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={64} color="#FF6B4A" />
@@ -228,6 +229,24 @@ export default function AnalysisScreen() {
       <StatusBar translucent backgroundColor="transparent" barStyle="dark-content" />
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* 頂部工具按鈕區 */}
+        <View style={styles.toolbarContainer}>
+          <TouchableOpacity style={styles.toolButton} onPress={handleRefreshAnalysis}>
+            <Ionicons name="refresh-outline" size={22} color="#3A7BFF" />
+            <ThemedText style={styles.toolButtonText}>重新分析</ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.toolButton}>
+            <Ionicons name="save-outline" size={22} color="#3A7BFF" />
+            <ThemedText style={styles.toolButtonText}>匯出報告</ThemedText>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.toolButton}>
+            <Ionicons name="share-social-outline" size={22} color="#3A7BFF" />
+            <ThemedText style={styles.toolButtonText}>分享</ThemedText>
+          </TouchableOpacity>
+        </View>
+
         {/* 內容容器 */}
         <View style={styles.contentContainer}>
           {/* 摘要部分 */}
@@ -640,5 +659,36 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     fontSize: 16,
     color: "#2C3E50",
+  },
+  toolbarContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: "white",
+    borderRadius: 12,
+    marginHorizontal: 16,
+    marginTop: 16,
+    marginBottom: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  toolButton: {
+    alignItems: "center",
+    paddingHorizontal: 12,
+  },
+  toolButtonText: {
+    fontSize: 12,
+    marginTop: 4,
+    color: "#3A7BFF",
   },
 });

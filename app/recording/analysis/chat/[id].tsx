@@ -1,3 +1,19 @@
+/**
+ * 錄音內容AI問答頁面
+ *
+ * 本頁面提供基於錄音內容的AI對話功能，允許用戶：
+ * - 使用自然語言提問有關錄音內容的問題
+ * - 獲取基於錄音分析結果的AI回答
+ * - 查看並選擇上下文相關的推薦問題
+ *
+ * 主要功能：
+ * - 聊天界面：顯示用戶提問和AI回答的對話流
+ * - 推薦問題：根據對話內容動態生成相關的建議問題
+ * - 訊息輸入：允許用戶自由輸入問題
+ *
+ * 頁面使用動畫效果增強用戶體驗，並根據用戶的提問自動生成相關的後續問題建議
+ */
+
 import { useState, useEffect, useRef } from "react";
 import { StyleSheet, View, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, FlatList, ActivityIndicator, Keyboard, SafeAreaView, ScrollView } from "react-native";
 import { useLocalSearchParams, Stack, useRouter } from "expo-router";
@@ -182,17 +198,6 @@ export default function AIChat() {
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined} keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}>
-      <Stack.Screen
-        options={{
-          title: "AI問答",
-          headerShown: true,
-          headerShadowVisible: false,
-          headerStyle: {
-            backgroundColor: "#F8F9FA",
-          },
-        }}
-      />
-
       <ThemedView style={styles.container}>
         <SafeAreaView style={styles.innerContainer}>
           <FlatList

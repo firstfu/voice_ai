@@ -1,81 +1,58 @@
-import { Stack } from "expo-router";
-import { StyleSheet, View, TouchableOpacity } from "react-native";
+/**
+ * 錄音分析功能佈局文件
+ *
+ * 本文件定義了錄音分析功能的導航結構和UI佈局。
+ * 使用Tabs導航將分析功能分為兩個主要部分：
+ * 1. 分析頁面 - 顯示AI分析的結果，包括摘要、關鍵詞、主題分類等
+ * 2. AI問答頁面 - 提供基於錄音內容的對話式AI問答功能
+ *
+ * 此佈局使用AnalysisProvider包裝，提供分析相關的上下文給所有子組件
+ */
+
+import { Tabs } from "expo-router";
+import { StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { ThemedText } from "@/components/ThemedText";
-import { useEffect, useState, useContext } from "react";
-import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
-import { AnalysisContext, AnalysisProvider } from "@/contexts/AnalysisContext";
+import { AnalysisProvider } from "@/contexts/AnalysisContext";
 
-function AnalysisLayoutContent() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const [isDetailsPage, setIsDetailsPage] = useState(false);
-  const { triggerRefresh } = useContext(AnalysisContext);
-
-  useEffect(() => {
-    // 檢查當前頁面是否為 [id] 頁面
-    setIsDetailsPage(pathname.includes("/recording/analysis/") && !!id);
-  }, [pathname, id]);
-
-  const handleRefreshAnalysis = () => {
-    // 使用 Context API 觸發重新分析
-    if (id) {
-      triggerRefresh(id);
-    }
-  };
-
-  const handleOpenAIChat = () => {
-    // 導航到智能問答頁面，並傳遞錄音ID
-    if (id) {
-      router.push(`/recording/analysis/chat/${id}`);
-    }
-  };
-
+export default function AnalysisLayout() {
   return (
-    <>
-      <Stack
+    <AnalysisProvider>
+      <Tabs
         screenOptions={{
-          headerShown: true, // 顯示系統標題欄
+          headerShown: true,
           headerShadowVisible: false,
           headerStyle: {
             backgroundColor: "#F8F9FA",
           },
+          tabBarActiveTintColor: "#3A7BFF",
+          tabBarInactiveTintColor: "#9CA3AF",
+          tabBarStyle: {
+            borderTopWidth: 1,
+            borderTopColor: "#F0F2F5",
+            backgroundColor: "white",
+          },
+          headerTitleStyle: {
+            fontWeight: "600",
+          },
+          headerTitle: "AI 內容分析",
         }}
-      />
+      >
+        <Tabs.Screen
+          name="[id]"
+          options={{
+            title: "分析",
+            tabBarIcon: ({ color, size }) => <Ionicons name="analytics-outline" size={size} color={color} />,
+          }}
+        />
 
-      {isDetailsPage && (
-        <View style={styles.toolbar}>
-          <TouchableOpacity style={styles.toolbarButton} onPress={handleRefreshAnalysis}>
-            <Ionicons name="refresh-outline" size={24} color="#3A7BFF" />
-            <ThemedText style={styles.toolbarButtonText}>重新分析</ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.toolbarButton}>
-            <Ionicons name="save-outline" size={24} color="#3A7BFF" />
-            <ThemedText style={styles.toolbarButtonText}>匯出報告</ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.toolbarButton}>
-            <Ionicons name="share-social-outline" size={24} color="#3A7BFF" />
-            <ThemedText style={styles.toolbarButtonText}>分享</ThemedText>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.toolbarButton} onPress={handleOpenAIChat}>
-            <Ionicons name="chatbubble-ellipses-outline" size={24} color="#3A7BFF" />
-            <ThemedText style={styles.toolbarButtonText}>AI問答</ThemedText>
-          </TouchableOpacity>
-        </View>
-      )}
-    </>
-  );
-}
-
-// 主要佈局元件，提供 AnalysisContext
-export default function AnalysisLayout() {
-  return (
-    <AnalysisProvider>
-      <AnalysisLayoutContent />
+        <Tabs.Screen
+          name="chat/[id]"
+          options={{
+            title: "AI問答",
+            tabBarIcon: ({ color, size }) => <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />,
+          }}
+        />
+      </Tabs>
     </AnalysisProvider>
   );
 }
