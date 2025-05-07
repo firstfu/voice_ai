@@ -122,9 +122,10 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={DefaultTheme}>
       <InitialLayout />
-      <Stack>
+      <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="recording" options={{ headerShown: false }} />
         <Stack.Screen name="audio-settings" />
         <Stack.Screen name="premium" />
         <Stack.Screen name="+not-found" />

@@ -1,8 +1,8 @@
 /**
  * 錄音詳情頁面佈局
  *
- * 本佈局用於錄音詳情頁面，設定導航結構和標題欄行為
- * 因為詳情頁面有自定義標題欄，所以這裡禁用系統標題欄
+ * 本佈局用於錄音詳情頁面，設定導航結構
+ * 移除預設頂部導航欄，只保留底部導航
  * 底部導航按鈕可供編輯和分析頁面共用
  */
 
@@ -41,15 +41,8 @@ export default function RecordingDetailsLayout() {
 
   return (
     <>
-      <Stack
-        screenOptions={{
-          headerShown: false, // 禁用系統標題欄，避免與自定義標題欄重複
-          headerShadowVisible: false,
-          headerStyle: {
-            backgroundColor: "#F8F9FA",
-          },
-        }}
-      />
+      {/* 移除頂部Stack導航頭，保留Stack容器結構 */}
+      <Stack screenOptions={{ headerShown: false }} />
 
       {/* 底部導航按鈕 */}
       {id && (
