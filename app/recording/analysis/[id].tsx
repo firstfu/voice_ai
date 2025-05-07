@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { StyleSheet, View, TouchableOpacity, ScrollView, Platform, StatusBar, ActivityIndicator } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,6 +8,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import useAnalysisService, { AnalysisResult } from "@/hooks/useAnalysisService";
+import { AnalysisContext } from "@/contexts/AnalysisContext";
 
 // 定義轉錄項目的類型
 interface TranscriptionItem {
@@ -99,6 +100,7 @@ export default function AnalysisScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
   const recordingId = typeof id === "string" ? id : "1";
+  const { refreshTrigger } = useContext(AnalysisContext);
 
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const { isLoading, error, getAnalysisResult, refreshAnalysis } = useAnalysisService();
@@ -106,23 +108,14 @@ export default function AnalysisScreen() {
   useEffect(() => {
     // 頁面加載時獲取分析結果
     loadAnalysisResult();
-
-    // 添加事件監聽器來處理來自 _layout.tsx 的重新分析請求
-    const handleRefreshEvent = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      if (customEvent.detail && customEvent.detail.id === recordingId) {
-        handleRefreshAnalysis();
-      }
-    };
-
-    // 添加事件監聽器
-    document.addEventListener("refreshAnalysis", handleRefreshEvent);
-
-    // 清理事件監聽器
-    return () => {
-      document.removeEventListener("refreshAnalysis", handleRefreshEvent);
-    };
   }, [recordingId]);
+
+  // 當 refreshTrigger 變化時，檢查是否需要重新分析
+  useEffect(() => {
+    if (refreshTrigger && refreshTrigger === recordingId) {
+      handleRefreshAnalysis();
+    }
+  }, [refreshTrigger]);
 
   const loadAnalysisResult = async () => {
     const result = await getAnalysisResult(recordingId);
@@ -314,8 +307,7 @@ export default function AnalysisScreen() {
                   <View style={[styles.sentimentIndicator, { left: `${analysisResult.sentiment.overall * 100}%` }]} />
                 </View>
                 <ThemedText style={styles.sentimentValue}>
-                  {analysisResult.sentiment.overall < 0.3 ? "負面" : analysisResult.sentiment.overall < 0.7 ? "中性" : "正面"}(
-                  {Math.round(analysisResult.sentiment.overall * 100)}
+                  {analysisResult.sentiment.overall < 0.3 ? "負面" : analysisResult.sentiment.overall < 0.7 ? "中性" : "正面"}({Math.round(analysisResult.sentiment.overall * 100)}
                   %)
                 </ThemedText>
               </View>
@@ -334,10 +326,7 @@ export default function AnalysisScreen() {
             </View>
             <View style={styles.card}>
               {analysisResult.questions.map((qa, index) => (
-                <View
-                  key={index}
-                  style={[styles.qaItem, index === analysisResult.questions.length - 1 && { borderBottomWidth: 0, marginBottom: 0, paddingBottom: 0 }]}
-                >
+                <View key={index} style={[styles.qaItem, index === analysisResult.questions.length - 1 && { borderBottomWidth: 0, marginBottom: 0, paddingBottom: 0 }]}>
                   <View style={styles.questionContainer}>
                     <Ionicons name="help-circle" size={20} color="#3A7BFF" />
                     <ThemedText style={styles.questionText}>{qa.question}</ThemedText>

@@ -2,14 +2,16 @@ import { Stack } from "expo-router";
 import { StyleSheet, View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
+import { AnalysisContext, AnalysisProvider } from "@/contexts/AnalysisContext";
 
-export default function AnalysisLayout() {
+function AnalysisLayoutContent() {
   const pathname = usePathname();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [isDetailsPage, setIsDetailsPage] = useState(false);
+  const { triggerRefresh } = useContext(AnalysisContext);
 
   useEffect(() => {
     // 檢查當前頁面是否為 [id] 頁面
@@ -17,10 +19,10 @@ export default function AnalysisLayout() {
   }, [pathname, id]);
 
   const handleRefreshAnalysis = () => {
-    // 重新分析，這裡需要透過 [id].tsx 元件中的處理邏輯來實現
-    // 可以透過全局狀態管理或事件系統來實現跨元件通信
-    const event = new CustomEvent("refreshAnalysis", { detail: { id } });
-    document.dispatchEvent(event);
+    // 使用 Context API 觸發重新分析
+    if (id) {
+      triggerRefresh(id);
+    }
   };
 
   return (
@@ -54,6 +56,15 @@ export default function AnalysisLayout() {
         </View>
       )}
     </>
+  );
+}
+
+// 主要佈局元件，提供 AnalysisContext
+export default function AnalysisLayout() {
+  return (
+    <AnalysisProvider>
+      <AnalysisLayoutContent />
+    </AnalysisProvider>
   );
 }
 
