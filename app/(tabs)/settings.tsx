@@ -172,7 +172,7 @@ export default function SettingsScreen() {
       data: [
         {
           id: "about",
-          title: "關於錄智AI",
+          title: "關於智錄AI",
           subtitle: "了解我們的故事與使命",
           icon: "information-circle",
           type: "arrow",

@@ -162,7 +162,7 @@ export default function HomeScreen() {
           <View>
             <ThemedText style={styles.welcomeText}>歡迎回來</ThemedText>
             <ThemedText type="title" style={styles.titleText}>
-              錄智通
+              智錄AI
             </ThemedText>
           </View>
           <TouchableOpacity style={styles.profileButton} onPress={() => router.push("/settings")}>

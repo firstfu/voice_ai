@@ -64,7 +64,7 @@ export default function HelpScreen() {
     {
       id: "7",
       question: "應用程式支援哪些錄音格式？",
-      answer: "錄智AI支援多種常見的音訊格式，包括但不限於MP3、WAV、AAC、FLAC等。在進階音訊設定中，您可以選擇不同的編碼格式和質量等級。",
+      answer: "智錄AI支援多種常見的音訊格式，包括但不限於MP3、WAV、AAC、FLAC等。在進階音訊設定中，您可以選擇不同的編碼格式和質量等級。",
     },
     {
       id: "8",

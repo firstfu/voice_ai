@@ -28,7 +28,7 @@ const { width } = Dimensions.get("window");
 const onboardingData = [
   {
     id: "1",
-    title: "歡迎使用錄智AI",
+    title: "歡迎使用智錄AI",
     description: "結合 LLM AI 技術的高級錄音應用，為您提供專業的語音處理體驗",
     image: require("../assets/images/logo_3d_elegant.webp"),
     bgColor: "transparent",
